@@ -1,0 +1,345 @@
+= PASLINK
+Dietmar Uhlig
+v1, 14.1.2023
+:toc:
+:homepage: https://github.com/duhlig/KC85_software/paslink
+
+
+== Zweck
+
+PASLINK unterstützt das manuelle Linken eines mehrteiligen
+Pascal-Programms, das mit KC-Pascal 5.1 übersetzt wurde.
+
+== Motivation
+
+KC-Pascal ist eine vollständige Entwicklungsumgebung, die Editor,
+Compiler, Runtime, Quelltext und Kompilat gleichzeitig im Speicher
+halten muss. Der Programmgröße sind dadurch gewisse Grenzen
+gesetzt. Einerseits kann beim Kompilieren die Symboltabelle
+volllaufen. Dann gibt es diese Möglichkeiten:
+
+* Bezeichner kürzen
+* Prozeduren und Funktionen, die entweder nur einmal aufgerufen werden
+  oder die sehr kurz sind, an der Stelle des Aufrufs einbetten
+* Routinen,footnote:[Routine bedeutet sowohl Prozedur als auch
+  Funktion. Das Wort wird aus Gründen der Lesbarkeit des Satzes
+  verwendet.] die zwar mehrmals, aber nur von einer Routine aus
+  aufgerufen werden, als Unterroutine deklarieren und die gesamte
+  Routine möglichst weit vorn im Quelltext platzieren
+
+Wenn der Speicherplatz für Quelltext und Kompilat ausgeht, dann kann
+man:
+
+* Bezeichner kürzen
+* Kommentare zu Routinen in eine Dokumentationsdatei auslagern
+* kurze Zeilen zusammenfassen zu einer Zeile, leere Zeilen löschen
+
+Alle genannten Möglichkeiten beeinflussen die Lesbarkeit des
+Quelltextes (meist negativ) und bringen nur wenig Besserung. Eine
+Verdopplung der Code-Länge ist so nicht zu schaffen.
+
+KC-Pascal kennt weder die Compiler-Option `F`, die es in HiSoft-Pascal
+für MSX512 gibt, um während der Kompilierung eine weitere Datei
+einzulesen, noch Units, die mit Turbo Pascal eingeführt wurden. Der
+KC-Pascal-Compiler optimiert aber nicht, so dass sich außer
+Kommentaren und Leerzeichen jeder Art alle Elemente des Quelltextes im
+Kompilat wiederfinden. Deshalb kann man den Pascal-Quelltext an
+geeigneten Stellen teilen und die Kompilate nachträglich durch
+Verschiebung und Adressersetzung zum Gesamtprogramm zusammenfügen.
+
+== Gestaltung des Quelltextes
+
+Das Programm teilt man nach zwei Gesichtspunkten:
+
+. Möglichst wenige Übergänge zwischen den Teilen
+  ** Die Anzahl der Aufrufe einer Prozedur oder Funktion spielt keine
+     Rolle. Es gibt keinen Geschwindigkeitsnachteil durch den Aufruf
+     einer Routine aus einem anderen Teilprogramm.
+  ** Jeder Übergang produziert auf der Absprungseite toten Code und
+     auf der Einsprungseite eine Konstante von 7 Byte.
+. Die Teilprogramme müssen mit wenig Zusatzaufwand testbar sein.
+
+KC-Pascal platziert globale Variablen am Ende des zugewiesenen
+Speichers (einstellbar mit dem Befehl `Z`). Die Reihenfolge ist fest
+und ergibt sich aus dem Quelltext. Wenn mehrere Programmteile auf die
+gleiche globale Variable zugreifen, muss die an der gleichen Stelle
+(Zählung der reservierten Bytes ab Programmanfang) im Teilprogramm
+deklariert werden. Es empfiehlt sich daher, die einleitende Zeile
+`PROGRAM...` und alle globalen Konstanten und Variablen in einer
+separaten Datei zu halten. Alle Teile des Programms beginnen nach den
+globalen Variablen, also mit `PROCEDURE` oder `FUNCTION`. Zum
+Übersetzen lädt man zuerst die `pas`-Datei mit den globalen
+Definitionen und dann den zu übersetzenden Teil. Wenn gewünscht, lässt
+man nach dem Laden die Zeilen neu nummerieren.
+
+Der erste Teil des Progamms enthält das Hauptprogramm. Alle anderen
+Teile brauchen für die syntaktische Korrektheit auch ein
+Hauptprogramm. Das enthält aber nur Code für den Modultest, der vor
+dem Zusammenführen der Teile am besten auskommentiert wird.
+
+Ein Übergang zwischen zwei Teilen wird so realisiert, dass im rufenden
+Teil eine leere Prozedur oder Funktion (ggf. mit Testcode) definiert
+wird, die für den Absprung eine Zeichenkettenkonstante mit einer Marke
+enthält. Im anderen Teil, in der gerufenen Prozedur oder Funktion
+steht wiederum eine Konstante, die eine Einsprungmarke
+definiert. Beispiel:
+
+.Teil A
+----
+PROCEDURE Irgendwas(param:INTEGER);
+CONST L='<A:0.0>';
+BEGIN
+ (*<T*)
+  (* Testcode *)
+ (*T>*)
+END;
+----
+
+.Teil B
+----
+PROCEDURE Irgendwas(param:INTEGER);
+CONST L='<E:0.0>';
+BEGIN
+ (* letztendlich gewünschter Code *)
+END;
+----
+
+Die Konstanten (hier: `L`) _müssen_ an erster Stelle in der Prozedur
+oder Funktion stehen. Direkt vor der ersten Konstante steht im
+Kompilat ein Call-Befehl zum eigentlichen Eintritt in die Routine.
+
+Die Konstanten sind so aufgebaut, dass jedes Zeichen an ungerader
+Position fest ist. Die Zeichen `<`, `:`, `.` und `>` müssen also an
+1., 3., 5. und 7. Stelle erscheinen. An zweiter Stelle steht ein `A`
+für Absprung oder ein `E` für Einsprung.
+
+Die 4. und 6. Stelle sind frei wählbar, aber jeweils nur ein Zeichen
+lang. Zum Beispiel könnten die Stellen für die Nummer des
+Programmteils und die Nummer des Einsprungs im jeweiligen Teil
+verwendet werden. Wenn die Ziffern nicht reichen oder nicht
+aussagekräftig genug sind, kann man auf einzelne Buchstaben
+ausweichen.
+
+Einsprungmarken müssen im ganzen Programm eindeutig sein. Zu
+Absprungmarken muss es immer eine korrespondierende Einsprungmarke
+geben.
+
+== Compilieren und Linken
+
+Mit dem Kommando `T` übersetzt KC-Pascal den Quelltext, verschiebt ihn
+auf Adresse 1800H und speichert das Programm zusammen mit der Runtime
+ab. Für den ersten Teil ist das das gewünschte Verhalten.
+
+Die Startadresse 1800H steht im Pascal-Compilier auf Adresse
+2BF5H. Ändert man die Startadresse, dann wird das Programm für die
+neue Startadresse compiliert, aber trotzdem nach 1800H verschoben und
+zusammen mit der Runtime abgespeichert. Als Startadresse wählt man die
+Endadresse des vorhergehenden Teils, wenn gewünscht, aufgerundet.
+
+Teil 2 und folgende müssen nach dem Kompilieren und Speichern jeweils
+mit Offset geladen und ohne Runtime wieder abgespeichert werden. Der
+Offset berechnet sich aus der Differenz der Startadresse des aktuellen
+Teils und 1800H. Wurden alle Teile größer 1 auf diese Weise von der
+Runtime gelöst, werden sie in aufsteigender Folge wieder geladen.
+
+PASLINK sucht die Marken im Speicher und die davor liegenden
+Sprungadressen. Vor jedem Prozedur- und Funktionsaufruf steht im
+Kompilat die charakteristische Befehlsfolge
+
+----
+CD B1 09
+D5
+CD <Prozeduradresse>
+----
+
+Die so lokalisierte Prozeduradresse wird in den gesammelten
+Absprungadressen gesucht und mit der passenden Einsprungadresse
+getauscht. Danach muss nur noch das Gesamtprogramm gespeichert werden.
+
+== Ausgaben von PASLINK
+
+.Beispiel
+----
+Zeile   Text
+------+-------------------------------------------
+    1 | KC-Pascal-5.1-Linker Version 1
+    2 | Doku lesen!
+    3 | Abbruch mit E
+    4 | Anfangsadresse = 1800
+    5 | Endadresse:
+    6 | 4F64
+    7 | A:++++
+    8 | E:++++
+    9 | T:......................................
+   10 | .............t....tt....................
+   11 | ........................................
+   12 | ......tttt
+   13 | Mrk Ab -> Ein Ers
+   14 | --- ---- ---- ---
+   15 | 2.1 30D0 4D01 01
+   16 | 1.3 3437 2411 02
+   17 | 1.1 3460 22AB 02
+   18 | 1.2 348C 2316 02
+   19 | wenn Tabelle plausibel, dann weiter mit
+   20 | %FSAVE 0200 4F64
+----
+
+* Zeilen 1-5: Begrüßung, fester Text und Frage
+* Zeile 6: Beispiel für eine Adresse
+* Zeile 7: Sammlung der Absprungmarken und -adressen
+  ** `+`: Marke und Call-Adresse davor wurden gefunden und in eine
+     interne Tabelle eingetragen.
+  ** `?`: Marke wurde gefunden, aber kein vorgelagerter
+     Call-Befehl. Eventuell steht die Konstante nicht an erster Stelle
+     in der Prozedur oder Funktion.
+* Zeile 8: Sammlung der Einsprungmarken und -adressen
+  ** `+`: Marke und Call-Adresse davor wurden gefunden sowie passende
+     Absprungmarke in der internen Tabelle.
+  ** `-`: Marke und Call-Adresse davor wurden gefunden aber keine
+     passende Absprungmarke in der internen Tabelle.
+  ** `?`: Marke wurde gefunden, aber kein vorgelagerter
+     Call-Befehl. Eventuell steht die Konstante nicht an erster Stelle
+     in der Prozedur oder Funktion.
+* Zeile 9f.: Adresstausch
+  ** `.`: Prozedur- oder Funktionsaufruf gefunden, der nicht in der
+     internen Tabelle steht
+  ** `t`: Adresse erfolgreich getauscht
+* Zeilen 13-18: Zusammenfassung der Ersetzungen, Ausgabe der internen
+  Tabelle. Die Bedeutung der Spaltenüberschriften:
+  ** Mrk: Marke
+  ** Ab: Adresse der "Absprung"-Routine, wird im Programm ersetzt
+  ** Ein: Einsprungadresse
+  ** Ers: Anzahl der Ersetzungen
+* Zeilen 19-20: Hinweis auf den nächsten manuellen Schritt
+
+== Fehlermeldungen
+
+Adr. zu klein::
+Die Endadresse kann nicht kleiner als 1800H, der Start des Kompilats
+in KC-Pascal 5.1, sein.
+
+Adr. zu gross::
+Die Endadresse darf nicht in dem Bereich sein, in dem PASLINK
+liegt. Ist die Endadresse korrekt, dann muss PASLINK für einen anderen
+RAM-Bereich assembliert werden, oder das Pascal-Programm ist zu groß.
+
+Adresstabelle voll::
+Die interne Tabelle ist auf 10 Marken und ihre Adressen begrenzt. Wenn
+mehr benötigt wird, dann muss PASLINK angepasst und neu assembliert
+werden.
+
+Einsprungmarke doppelt::
+Während eine Absprungmarke mehrfach vorkommen darf, muss jede
+Einsprungmarke eindeutig im gesamten Programm sein.  Bitte Quelltext
+prüfen und Fehler beseitigen.
+
+Einsprungmarke fehlt::
+Zu einer Absprungmarke wurde keine passende Einsprungmarke
+gefunden. Bitte Quelltext prüfen und Fehler beseitigen.
+
+
+== Beispielhafter Ablauf
+
+Hier wird ein KC 85/4 mit CAOS 4.2 und D004 vorausgesetzt.
+
+Die Teilprogramme heißen `SORT_T1.PAS` und `SORT_T2.PAS`,. Die
+globalen Definitionen stehen in `SORTGDEF.PAS`. Das Gesamtprogramm
+soll `SORTIERE.PAS` heißen.
+
+Der Ablauf des Übersetzens und Linkens für zwei Teile lautet:
+
+.Teil 1 übersetzen
+[cols="1,3"]
+|===
+|*_Eingabe_* | *_Bemerkung_*
+
+|`J FC` +
+ `FL` +
+ `PASCAL51` +
+ `PASE`
+|Pascal 5.1 laden und starten
+
+|`G,,SORTGDEF` +
+ `G,,SORT_T1`
+|globale Definitionenen und Teil 1 laden
+
+|`N10,10`
+|optional Zeilennummern korrigieren
+
+| |Testcode auskommentieren
+
+|`F1,1,SORTIERE`
+|Dateiname und Menüeintrag des Zielprogramms festlegen
+
+|`T`
+|übersetzen, *Endadresse merken* +
+ Endadresse evtl. aufrunden, ist Startadr. für Teil 2 +
+ -> `AnfAd2`
+|===
+
+
+.Teil 2 übersetzen
+[cols="1,3"]
+|===
+|*_Eingabe_* | *_Bemerkung_*
+
+|`J FC` +
+ `FL` +
+ `PASCAL51` +
+ `PASE`
+|Pascal 5.1 laden und starten
+
+|`G,,SORTGDEF` +
+ `G,,SORT_T2`
+|globale Definitionenen und Teil 2 laden
+
+|`N10,10`
+|optional Zeilennummern korrigieren
+
+| |Testcode auskommentieren
+
+|`B` +
+ `MO 2BF5` +
+ ... +
+ `.` +
+ `PASRE`
+|Zieladresse (Startadr., `AnfAd2`) extern umsetzen +
+ 2 Byte ändern, ist original `00 18`
+
+|`T`
+|übersetzen und speichern, *Endadresse merken* +
+ -> `EndAd2`
+|===
+
+
+.beide Teile zusammenfügen
+[cols="1,3"]
+|===
+|*_Eingabe_* | *_Bemerkung_*
+
+|`<RESET>` +
+ `J FC` +
+ `FL` +
+ `SERVICE` +
+ `FL <Offset>` +
+ `SORT_T2` +
+ `FS <AnfAd2> <EndAd2+1>` +
+ `SORT_T2L`
+|Kompilat von Teil 2 mit Offset von `AnfAd2` zu 1800H laden und ohne
+ Runtime speichern
+
+|`FL` +
+ `PASLINK` +
+ `FL` +
+ `SORTIERE` +
+ `FL` +
+ `SORT_T2L`
+|PASLINK, Teil 1 und 2 laden
+
+|`PASL` +
+`<EndAd2+1>`
+|Adressen durch PASLINK korrigieren lassen
+
+|`FS 0200 <EndAd2+1>`
+|gesamtes Programm speichern
+|===
