@@ -268,11 +268,9 @@ Der Ablauf des Übersetzens und Linkens für zwei Teile lautet:
 
 | |Testcode auskommentieren
 
-|`F1,1,SORTIERE`
-|Dateiname und Menüeintrag des Zielprogramms festlegen
-
-|`T`
-|übersetzen, *Endadresse merken* +
+|`T,,SORTIERE`
+|übersetzen, dabei Dateiname und Menüeintrag des Zielprogramms festlegen +
+ *Endadresse merken* +
  Endadresse evtl. aufrunden, ist Startadr. für Teil 2 +
  -> `AnfAd2`
 |===
