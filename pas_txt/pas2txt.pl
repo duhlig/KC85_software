@@ -23,7 +23,7 @@ my $z;                # Zustand der Auswerteschleife
 my ($znr, $znr_vor);  # aktuelle und vorherige Zeilennummer
 
 
-($pas = shift @ARGV) or die "ERROR: Parameter Pacal-Datei fehlt.\n";
+($pas = shift @ARGV) or die "ERROR: Parameter Pascal-Datei fehlt.\n";
 die "ERROR: Datei $pas nicht gefunden.\n" if not -r $pas;
 
 open PAS, '<:raw :bytes', $pas or die;

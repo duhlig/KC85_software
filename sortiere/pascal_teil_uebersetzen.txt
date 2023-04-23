@@ -1,0 +1,80 @@
+Annahme: Pascal 51
+------------------
+
+# --- Teil 1 übersetzen
+
+# globale Definitionenen und Teil 1 laden
+G,,SORTGDEF
+G,,SORT_T1
+
+# optional Zeilennummern korrigieren
+N10,10
+
+# Testcode auskommentieren
+
+# Dateiname und Menüeintrag des Zielprogramms festlegen,
+# übersetzen, Endadresse merken
+T,,SORTIERE
+  # Endadresse evtl. aufrunden, ist Startadr. für Teil 2
+B
+PASE
+
+# --- Teil 2 übersetzen
+
+# globale Definitionenen und Teil 2 laden
+G,,SORTGDEF
+G,,SORT_T2
+
+# optional Zeilennummern korrigieren
+N10,10
+
+# Testcode auskommentieren
+
+# Zieladresse (Startadr.) extern umsetzen
+B
+MO 2BF5
+# 2 Byte aendern, ist original 00 18
+.
+MO 2EF0
+# 2 Byte aendern, ist original 00 18
+.
+MO 2F0A
+# 2 Byte aendern, ist original 00 18
+.
+
+PASRE
+
+# uebersetzen und speichern, Adressen aufschreiben!
+E10
+  # L-  --> P+
+# ggf. Dateiname für T setzen
+T,,SORT_T2
+J  # Anfangs- und Endadresse merken
+
+# Kompilat ohne Runtime speichern
+J FC
+FL
+SERVICE
+FS <AnfAdr> <EndAdr+1>
+SORT_T2L
+
+# --- Teil 3 übersetzen wie Teil 2
+# Startadresse von Teil 3 ist aufgerundete Endadresse von Teil 2
+
+# PasLink, Teil 1, 2 und 3 laden
+FL
+PASLINK
+FL
+SORTIERE
+FL
+SORT_T2L
+FL
+SORT_T3L
+
+# Adressen durch PASLINK korrigieren lassen
+PASL
+
+# gesamtes Programm speichern
+FS 0200 <EndAdr+1>
+
+# -------------------------------------
