@@ -1,4 +1,13 @@
-Wie arbeiten Sortieralgorithmen?
+# Wie arbeiten Sortieralgorithmen?
 
-Eine Visualisierung nach: 
+Eine Visualisierung nach:
+
 Sedgewick, R.: Algorithmen in C.
+
+## Programmbeschreibung
+
+...wird nachgereicht
+
+## Quelltextkommentare
+
+...werden nachgereicht
