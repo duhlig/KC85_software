@@ -1,0 +1,151 @@
+;header: start 0x0180 unlabeled end 0x01ff type bytedata
+MenuPRec: start 0x020e unlabeled end 0x0216 type bytedata
+MenuPEnt: start 0x021a unlabeled end 0x0224 type bytedata
+ptr: unlabeled start 0x06b0 unlabeled end 0x06bc type pointers
+fNameExt: unlabeled start 0x06f8 unlabeled last 0x0703 type bytedata
+ptr: unlabeled start 0x0704 unlabeled end 0x0712 type pointers
+printFlag: unlabeled start 0x0712 unlabeled last 0x0712 type bytedata
+HexDezTab: start 0x0870 unlabeled end 0x0879 type bytedata
+TFalse: start 0x08d4 unlabeled end 0x08d9 type bytedata
+TTrue: start 0x08da unlabeled end 0x08de type bytedata
+TErrMsg: start 0x0934 unlabeled end 0x09b1 type bytedata
+realTab1__: start 0x0f24 end 0x0f2f type bytedata
+xxTab__: start 0x1597 end 0x15a7 type bytedata
+LineBuf: start 0x1801 unlabeled end 0x1851 type bytedata
+HeapEndAddr: start 0x1856 unlabeled last 0x1857 type pointers
+PrcFncTab: start 0x1858 unlabeled end 0x1b35 type bytedata
+CmdTab: start 0x2a9d unlabeled end 0x2ad6 type bytedata
+TPdNL: start 0x2b00 unlabeled end 0x2b0b type bytedata
+CompVar: unlabeled start 0x2b50 unlabeled end 0x2b7e type bytedata
+TBanner: start 0x2c86 unlabeled end 0x2cd1 type bytedata
+CoVarInitData: start 0x2cd2 unlabeled end 0x2ce0 type bytedata
+TOk: start 0x2f24 unlabeled end 0x2f27 type bytedata
+TLauf: start 0x2f28 unlabeled end 0x2f2d type bytedata
+compOptTab: start 0x3165 unlabeled last 0x3170 type bytedata
+resWords: start 0x3171 unlabeled end 0x326f type bytedata
+TEadr: start 0x3270 unlabeled end 0x327c type bytedata
+TFeh1: start 0x327d unlabeled end 0x3284 type bytedata
+TFeh2: start 0x3285 unlabeled end 0x328d type bytedata
+TKeTx: start 0x328e unlabeled end 0x329e type bytedata
+TTabU: start 0x329f unlabeled end 0x32b1 type bytedata
+ExtCOM: start 0x079f unlabeled end 0x07a1 type bytedata
+ExtPAS: start 0x07a2 unlabeled end 0x07a4 type bytedata
+
+MC: unlabeled first 0x2ed9 unlabeled last 0x2ed9 type bytedata
+MC: unlabeled first 0x2edd unlabeled last 0x2edd type bytedata
+MC: unlabeled first 0x2ee1 unlabeled last 0x2ee1 type bytedata
+MC: unlabeled first 0x33af unlabeled last 0x33af type bytedata
+MC: unlabeled first 0x33ba unlabeled last 0x33ba type bytedata
+MC: unlabeled first 0x33fe unlabeled last 0x33fe type bytedata
+MC: unlabeled first 0x3404 unlabeled last 0x3404 type bytedata
+MC: unlabeled first 0x340b unlabeled last 0x340b type bytedata
+MC: unlabeled first 0x3444 unlabeled last 0x3444 type bytedata
+MC: unlabeled first 0x350c unlabeled last 0x350c type bytedata
+MC: unlabeled first 0x3524 unlabeled last 0x3524 type bytedata
+MC: unlabeled first 0x37d1 unlabeled last 0x37d1 type bytedata
+MC: unlabeled first 0x37d5 unlabeled last 0x37d5 type bytedata
+MC: unlabeled first 0x37de unlabeled last 0x37de type bytedata
+MC: unlabeled first 0x37ee unlabeled last 0x37ee type bytedata
+MC: unlabeled first 0x37fa unlabeled last 0x37fa type bytedata
+MC: unlabeled first 0x3807 unlabeled last 0x3807 type bytedata
+MC: unlabeled first 0x380d unlabeled last 0x380d type bytedata
+MC: unlabeled first 0x3814 unlabeled last 0x3814 type bytedata
+MC: unlabeled first 0x3824 unlabeled last 0x3824 type bytedata
+MC: unlabeled first 0x386f unlabeled last 0x386f type bytedata
+MC: unlabeled first 0x3906 unlabeled last 0x3906 type bytedata
+MC: unlabeled first 0x392b unlabeled last 0x392b type bytedata
+MC: unlabeled first 0x394c unlabeled last 0x394c type bytedata
+MC: unlabeled first 0x3986 unlabeled last 0x3986 type bytedata
+MC: unlabeled first 0x3a82 unlabeled last 0x3a82 type bytedata
+MC: unlabeled first 0x3a87 unlabeled last 0x3a87 type bytedata
+MC: unlabeled first 0x3aa5 unlabeled last 0x3aa5 type bytedata
+MC: unlabeled first 0x3ab2 unlabeled last 0x3ab2 type bytedata
+MC: unlabeled first 0x3b6d unlabeled last 0x3b6d type bytedata
+MC: unlabeled first 0x3b92 unlabeled last 0x3b92 type bytedata
+MC: unlabeled first 0x3bb2 unlabeled last 0x3bb2 type bytedata
+MC: unlabeled first 0x3bb9 unlabeled last 0x3bb9 type bytedata
+MC: unlabeled first 0x3bc1 unlabeled last 0x3bc1 type bytedata
+MC: unlabeled first 0x3bce unlabeled last 0x3bce type bytedata
+MC: unlabeled first 0x3bdf unlabeled last 0x3bdf type bytedata
+MC: unlabeled first 0x3c0b unlabeled last 0x3c0b type bytedata
+MC: unlabeled first 0x3c0f unlabeled last 0x3c0f type bytedata
+MC: unlabeled first 0x3c17 unlabeled last 0x3c17 type bytedata
+MC: unlabeled first 0x3c41 unlabeled last 0x3c41 type bytedata
+MC: unlabeled first 0x3cf5 unlabeled last 0x3cf5 type bytedata
+MC: unlabeled first 0x3d01 unlabeled last 0x3d01 type bytedata
+MC: unlabeled first 0x3d67 unlabeled last 0x3d67 type bytedata
+MC: unlabeled first 0x3e29 unlabeled last 0x3e29 type bytedata
+MC: unlabeled first 0x3ff6 unlabeled last 0x3ff6 type bytedata
+MC: unlabeled first 0x4019 unlabeled last 0x4019 type bytedata
+MC: unlabeled first 0x4047 unlabeled last 0x4047 type bytedata
+MC: unlabeled first 0x404d unlabeled last 0x404d type bytedata
+MC: unlabeled first 0x4057 unlabeled last 0x4057 type bytedata
+MC: unlabeled first 0x405b unlabeled last 0x405b type bytedata
+MC: unlabeled first 0x40f8 unlabeled last 0x40f8 type bytedata
+MC: unlabeled first 0x41b9 unlabeled last 0x41b9 type bytedata
+MC: unlabeled first 0x420f unlabeled last 0x420f type bytedata
+MC: unlabeled first 0x4224 unlabeled last 0x4224 type bytedata
+MC: unlabeled first 0x42b8 unlabeled last 0x42b8 type bytedata
+MC: unlabeled first 0x42bc unlabeled last 0x42bc type bytedata
+MC: unlabeled first 0x42c0 unlabeled last 0x42c0 type bytedata
+MC: unlabeled first 0x42d4 unlabeled last 0x42d4 type bytedata
+MC: unlabeled first 0x4435 unlabeled last 0x4435 type bytedata
+MC: unlabeled first 0x443c unlabeled last 0x443c type bytedata
+MC: unlabeled first 0x4442 unlabeled last 0x4442 type bytedata
+MC: unlabeled first 0x4478 unlabeled last 0x4478 type bytedata
+MC: unlabeled first 0x44ee unlabeled last 0x44ee type bytedata
+MC: unlabeled first 0x458d unlabeled last 0x458d type bytedata
+MC: unlabeled first 0x4595 unlabeled last 0x4595 type bytedata
+MC: unlabeled first 0x459e unlabeled last 0x459e type bytedata
+MC: unlabeled first 0x45af unlabeled last 0x45af type bytedata
+MC: unlabeled first 0x45b3 unlabeled last 0x45b3 type bytedata
+MC: unlabeled first 0x45c5 unlabeled last 0x45c5 type bytedata
+MC: unlabeled first 0x45c9 unlabeled last 0x45c9 type bytedata
+MC: unlabeled first 0x45d0 unlabeled last 0x45d0 type bytedata
+MC: unlabeled first 0x45da unlabeled last 0x45da type bytedata
+MC: unlabeled first 0x45e3 unlabeled last 0x45e3 type bytedata
+MC: unlabeled first 0x45eb unlabeled last 0x45eb type bytedata
+MC: unlabeled first 0x45f4 unlabeled last 0x45f4 type bytedata
+MC: unlabeled first 0x45fc unlabeled last 0x45fc type bytedata
+MC: unlabeled first 0x4604 unlabeled last 0x4604 type bytedata
+MC: unlabeled first 0x460c unlabeled last 0x460c type bytedata
+MC: unlabeled first 0x4684 unlabeled last 0x4684 type bytedata
+MC: unlabeled first 0x470e unlabeled last 0x470e type bytedata
+MC: unlabeled first 0x473b unlabeled last 0x473b type bytedata
+MC: unlabeled first 0x4748 unlabeled last 0x4748 type bytedata
+MC: unlabeled first 0x49b3 unlabeled last 0x49b3 type bytedata
+MC: unlabeled first 0x49b7 unlabeled last 0x49b7 type bytedata
+MC: unlabeled first 0x49bb unlabeled last 0x49bb type bytedata
+MC: unlabeled first 0x49cb unlabeled last 0x49cb type bytedata
+MC: unlabeled first 0x49cf unlabeled last 0x49cf type bytedata
+MC: unlabeled first 0x4a8d unlabeled last 0x4a8d type bytedata
+MC: unlabeled first 0x4a94 unlabeled last 0x4a94 type bytedata
+MC: unlabeled first 0x4a9e unlabeled last 0x4a9e type bytedata
+MC: unlabeled first 0x4aa2 unlabeled last 0x4aa2 type bytedata
+MC: unlabeled first 0x4ad2 unlabeled last 0x4ad2 type bytedata
+MC: unlabeled first 0x4ad6 unlabeled last 0x4ad6 type bytedata
+MC: unlabeled first 0x4e0e unlabeled last 0x4e0e type bytedata
+MC: unlabeled first 0x4e55 unlabeled last 0x4e55 type bytedata
+MC: unlabeled first 0x4ec0 unlabeled last 0x4ec0 type bytedata
+MC: unlabeled first 0x4f7e unlabeled last 0x4f7e type bytedata
+MC: unlabeled first 0x4fb7 unlabeled last 0x4fb7 type bytedata
+MC: unlabeled first 0x503e unlabeled last 0x503e type bytedata
+MC: unlabeled first 0x50b5 unlabeled last 0x50b5 type bytedata
+MC: unlabeled first 0x527c unlabeled last 0x527c type bytedata
+
+MC: unlabeled first 0x0c33 unlabeled last 0x0c34 type bytedata
+
+CSq: unlabeled first 0x2e60 unlabeled last 0x2e60 type bytedata
+CSq: unlabeled first 0x2e67 unlabeled last 0x2e67 type bytedata
+CSq: unlabeled first 0x2f2e unlabeled last 0x2f2e type bytedata
+CSq: unlabeled first 0x2f32 unlabeled last 0x2f32 type bytedata
+CSq: unlabeled first 0x3449 unlabeled last 0x3449 type bytedata
+CSq: unlabeled first 0x3547 unlabeled last 0x3547 type bytedata
+CSq: unlabeled first 0x4137 unlabeled last 0x4137 type bytedata
+CSq: unlabeled first 0x4141 unlabeled last 0x4141 type bytedata
+CSq: unlabeled first 0x468e unlabeled last 0x468e type bytedata
+CSq: unlabeled first 0x46b2 unlabeled last 0x46b2 type bytedata
+CSq: unlabeled first 0x46b7 unlabeled last 0x46b7 type bytedata
+CSq: unlabeled first 0x46bb unlabeled last 0x46bb type bytedata
+CSq: unlabeled first 0x4ad9 unlabeled last 0x4ad9 type bytedata
+CSq: unlabeled first 0x4adf unlabeled last 0x4adf type bytedata

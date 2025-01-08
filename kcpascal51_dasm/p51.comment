@@ -1,0 +1,76 @@
+IsNum:
+  Return:
+    C-Flag: 1=True
+
+GetFloat:
+  Return:
+    HL: Zahlenwert
+    A: tatsaechlicher Exponent
+    E: ?Anzahl Nachkommastellen?
+
+GetLexem:
+  Return:
+    A:
+      000h: Bezeichner
+      001h: PROGRAM
+      002h: DIV
+      003h: CONST
+      004h: PROCEDURE
+      005h: FUNCTION
+      006h: NOT
+      007h: OR
+      008h: AND
+      009h: MOD
+      00ah: VAR
+      00bh: OF
+      00ch: TO
+      00dh: DOWNTO
+      00eh: THEN
+      00fh: UNTIL
+      010h: END
+      011h: DO
+      012h: ELSE
+      013h: REPEAT
+      014h: CASE
+      015h: WHILE
+      016h: FOR
+      017h: IF
+      018h: BEGIN
+      019h: WITH
+      01ah: GOTO
+      01bh: SET
+      01ch: ARRAY
+      01dh: FORWARD
+      013h: RECORD
+      01fh: TYPE
+      020h: IN
+      021h: LABEL
+      022h: NIL
+      023h: PACKED
+      075h:?
+      076h:?
+      078h: "="
+      07dh: ":="
+      07eh: unsigned number
+      07fh: pos. Integer
+      0a8h: "("
+      0a9h: ")"
+      0abh: "+"
+      0ach: ","
+      0adh: "-"
+      0aeh: "." oder Quelltextende
+      0bbh: ";"
+      0dbh: "["
+      0ddh: "]"
+
+IX:
+  +0:
+    bit_0: Comp-Opt. L, + -> 1, - -> 0
+    bit_1: Comp-Opt. O
+    bit_2: Comp-Opt. C
+    bit_3: Comp-Opt. S
+    bit_4: Comp-Opt. I
+    bit_5: Comp-Opt. A
+    bit_6: ?EOL im Line Buffer
+  +2:
+    bit_1: bewirkt return(0aeh) in GetLexem --> Quelltextende?
