@@ -16,7 +16,13 @@ HeapEndAddr: start 0x1856 unlabeled last 0x1857 type pointers
 PrcFncTab: start 0x1858 unlabeled end 0x1b35 type bytedata
 CmdTab: start 0x2a9d unlabeled end 0x2ad6 type bytedata
 TPdNL: start 0x2b00 unlabeled end 0x2b0b type bytedata
-CompVar: unlabeled start 0x2b50 unlabeled end 0x2b7e type bytedata
+CompVar1: unlabeled start 0x2b50 unlabeled end 0x2b5d type bytedata
+CompVar2: unlabeled start 0x2b5d unlabeled end 0x2b69 type worddata
+CompVar3: unlabeled start 0x2b69 unlabeled end 0x2b6a type bytedata
+CompVar4: unlabeled start 0x2b6a unlabeled end 0x2b72 type worddata
+CompVar5: unlabeled start 0x2b72 unlabeled end 0x2b76 type bytedata
+CompVar6: unlabeled start 0x2b76 unlabeled end 0x2b80 type worddata
+CompVar7: unlabeled start 0x2b80 unlabeled end 0x2b89 type bytedata
 TBanner: start 0x2c86 unlabeled end 0x2cd1 type bytedata
 CoVarInitData: start 0x2cd2 unlabeled end 0x2ce0 type bytedata
 TOk: start 0x2f24 unlabeled end 0x2f27 type bytedata

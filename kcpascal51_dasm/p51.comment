@@ -47,8 +47,8 @@ GetLexem:
       021h: LABEL
       022h: NIL
       023h: PACKED
-      075h:?
-      076h:?
+      075h: string literal?
+      076h: chr?
       078h: "="
       07dh: ":="
       07eh: unsigned number
@@ -71,6 +71,6 @@ IX:
     bit_3: Comp-Opt. S
     bit_4: Comp-Opt. I
     bit_5: Comp-Opt. A
-    bit_6: ?EOL im Line Buffer
+    bit_6: EOL im Line Buffer gelesen
   +2:
     bit_1: bewirkt return(0aeh) in GetLexem --> Quelltextende?

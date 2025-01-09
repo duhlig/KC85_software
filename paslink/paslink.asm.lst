@@ -1,0 +1,577 @@
+                
+  0200          ;KC-Pascal-Linker
+  0200          VER     EQU     '2'
+  0200          ;
+  0200          PV1     EQU     0F003H
+  0200          CRT     EQU     0
+  0200          INLIN   EQU     17H
+  0200          RHEX    EQU     18H
+  0200          HLHX    EQU     1AH
+  0200          AHEX    EQU     1CH
+  0200          OSTR    EQU     23H
+  0200          SPACE   EQU     2BH
+  0200          CRLF    EQU     2CH
+  0200          ZKOUT   EQU     45H
+  0200          ;
+  0200          NUMNX   EQU     0B796H
+  0200          NUMVX   EQU     0B797H
+  0200          ;
+  0200          MAXA    EQU     10      ;max.Anz.Adre.
+  0200          LAEMK   EQU     7       ;Markenlaenge
+  0200                                  ;Bsp.: <A:1.1>
+  0200          ;
+  0200          ; Prolog
+  0200                  ORG     7B80H
+  7B80 7F7F             DEFW    7F7FH
+  7B82 5041534C         DEFM    'PASLINK'
+  7B89 01               DEFB    1
+  7B8A 00               NOP             ;Einsprung TEMO
+  7B8B          ;
+  7B8B          ; Begruessung
+  7B8B CD03F0           CALL    PV1
+  7B8E 23               DEFB    OSTR
+  7B8F 4B432D50         DEFM    'KC-Pascal-5.1-Linker '
+  7BA4 56657273         DEFM    'Version '
+  7BAC 32               DEFB    VER
+  7BAD 0A0D             DEFW    0D0AH
+  7BAF 446F6B75         DEFM    'Doku lesen!'
+  7BBA 0A0D             DEFW    0D0AH
+  7BBC 41626272         DEFM    'Abbruch mit E'
+  7BC9 0A0D             DEFW    0D0AH
+  7BCB 00               DEFB    0
+  7BCC          ;
+  7BCC          ; Eingabe und Pruefung
+  7BCC                  ; Daten initialisieren
+  7BCC 21A47F           LD      HL,DANF
+  7BCF 3600             LD      (HL),0
+  7BD1 54               LD      D,H
+  7BD2 5D               LD      E,L
+  7BD3 13               INC     DE
+  7BD4 014A00           LD      BC,DEND-DANF-1
+  7BD7 EDB0             LDIR
+  7BD9 21A97F           LD      HL,ADR
+  7BDC 22A77F           LD      (NXTAD),HL
+  7BDF                  ;
+  7BDF CD03F0           CALL    PV1
+  7BE2 23               DEFB    OSTR
+  7BE3 416E6661         DEFM    'Anfangsadresse = 1800'
+  7BF8 0A0D             DEFW    0D0AH
+  7BFA 00               DEFB    0
+  7BFB CD03F0   FRGEND: CALL    PV1
+  7BFE 23               DEFB    OSTR
+  7BFF 456E6461         DEFM    'Endadresse:'
+  7C0A 0A0D             DEFW    0D0AH
+  7C0C 00               DEFB    0
+  7C0D CD03F0           CALL    PV1
+  7C10 17               DEFB    INLIN
+  7C11 CD03F0           CALL    PV1
+  7C14 18               DEFB    RHEX
+  7C15 3008             JR      NC,CHKADR
+  7C17 01797C           LD      BC,EHEX
+  7C1A CD5F7C           CALL    FEHM
+  7C1D 18DC             JR      FRGEND
+  7C1F 2A97B7   CHKADR: LD      HL,(NUMVX)
+  7C22 110E00           LD      DE,000EH ; =Ende, s.o.
+  7C25 B7               OR      A       ; Carry=0
+  7C26 ED52             SBC     HL,DE
+  7C28 19               ADD     HL,DE
+  7C29 200F             JR      NZ,CHKAD1
+  7C2B CD03F0           CALL    PV1
+  7C2E 23               DEFB    OSTR
+  7C2F 41626272         DEFM    'Abbruch'
+  7C36 0A0D             DEFW    0D0AH
+  7C38 00               DEFB    0
+  7C39 C9               RET
+  7C3A 110018   CHKAD1: LD      DE,1800H ; =Prg.Anfang
+  7C3D B7               OR      A
+  7C3E ED52             SBC     HL,DE
+  7C40 19               ADD     HL,DE
+  7C41 3008             JR      NC,CHKAD2
+  7C43 01887C           LD      BC,EAKL
+  7C46 CD5F7C           CALL    FEHM
+  7C49 18B0             JR      FRGEND
+  7C4B 11807B   CHKAD2: LD      DE,7B80H ; =PASLINK
+  7C4E B7               OR      A
+  7C4F ED52             SBC     HL,DE
+  7C51 19               ADD     HL,DE
+  7C52 22A47F           LD      (PEND),HL
+  7C55 384D             JR      C,SAMLA
+  7C57 01967C           LD      BC,EAGR
+  7C5A CD5F7C           CALL    FEHM
+  7C5D 189C             JR      FRGEND
+  7C5F          ;
+  7C5F C5       FEHM:   PUSH    BC  ; Adr.Fehlertext
+  7C60 21717C           LD      HL,ERRM
+  7C63 CD03F0           CALL    PV1
+  7C66 45               DEFB    ZKOUT
+  7C67 E1               POP     HL
+  7C68 CD03F0           CALL    PV1
+  7C6B 45               DEFB    ZKOUT
+  7C6C CD03F0           CALL    PV1
+  7C6F 2C               DEFB    CRLF
+  7C70 C9               RET
+  7C71 4552524F ERRM:   DEFM    'ERROR: '
+  7C78 00               DEFB    0
+  7C79 6B65696E EHEX:   DEFM    'keine Hex-Zahl'
+  7C87 00               DEFB    0
+  7C88 4164722E EAKL:   DEFM    'Adr. zu klein'
+  7C95 00               DEFB    0
+  7C96 4164722E EAGR:   DEFM    'Adr. zu gross'
+  7CA3 00               DEFB    0
+  7CA4          ;
+  7CA4          ; Suche nach Bytefolgen
+  7CA4          ; Sammle A-Marken
+  7CA4 CD03F0   SAMLA:  CALL    PV1
+  7CA7 23               DEFB    OSTR
+  7CA8 413A             DEFM    'A:'
+  7CAA 00               DEFB    0
+  7CAB CDAA7D           CALL    PRGLAE
+  7CAE 119C7D           LD      DE,ABSPR
+  7CB1 CDB97D   SAMLA1: CALL    BFS_SU
+  7CB4 E2E17C           JP      PO,SAMLAE
+  7CB7 D5               PUSH    DE
+  7CB8 CDD17D           CALL    LIESMK
+  7CBB E2E07C           JP      PO,SAMLA9
+  7CBE E5               PUSH    HL
+  7CBF CDE47D           CALL    LIESJA
+  7CC2 200D             JR      NZ,SAMLA2 ;JP ni.gefun.
+  7CC4                  ; DE=Mk.-Inhalt, HL=JP-Adr.
+  7CC4 CDF77D           CALL    A_TAB
+  7CC7 2816             JR      Z,SAMLA8 ;Ende bei
+  7CC9                                   ;Tab-Ueberlauf
+  7CC9 3E2B             LD      A,'+'
+  7CCB CD03F0           CALL    PV1
+  7CCE 00               DEFB    CRT
+  7CCF 180A             JR      SAMLA3
+  7CD1          SAMLA2: ;JP vor der Marke nicht gefunden
+  7CD1 CD03F0           CALL    PV1
+  7CD4 1C               DEFB    AHEX
+  7CD5 3E3F             LD      A,'?'
+  7CD7 CD03F0           CALL    PV1
+  7CDA 00               DEFB    CRT
+  7CDB E1       SAMLA3: POP     HL
+  7CDC D1               POP     DE
+  7CDD 18D2             JR      SAMLA1
+  7CDF E1       SAMLA8: POP     HL
+  7CE0 D1       SAMLA9: POP     DE
+  7CE1 CD03F0   SAMLAE: CALL    PV1
+  7CE4 2C               DEFB    CRLF
+  7CE5          ;
+  7CE5          ; Sammle E-Marken
+  7CE5 CD03F0   SAMLE:  CALL    PV1
+  7CE8 23               DEFB    OSTR
+  7CE9 453A             DEFM    'E:'
+  7CEB 00               DEFB    0
+  7CEC CDAA7D           CALL    PRGLAE
+  7CEF 11A07D           LD      DE,EINSPR
+  7CF2 CDB97D   SAMLE1: CALL    BFS_SU
+  7CF5 E22A7D           JP      PO,SAMLEE
+  7CF8 D5               PUSH    DE
+  7CF9 CDD17D           CALL    LIESMK
+  7CFC E2297D           JP      PO,SAMLE9
+  7CFF E5               PUSH    HL
+  7D00 CDE47D           CALL    LIESJA
+  7D03 2013             JR      NZ,SAMLE3 ;JP ni.gefun.
+  7D05 C5               PUSH    BC
+  7D06 CD307E           CALL    E_TAB
+  7D09 C1               POP     BC
+  7D0A 381A             JR      C,SAMLEX
+  7D0C 3E2D             LD      A,'-'
+  7D0E 2802             JR      Z,SAMLE2 ;keine Abspr-
+  7D10                                   ;marke gefun.
+  7D10 3E2B             LD      A,'+'
+  7D12 CD03F0   SAMLE2: CALL    PV1
+  7D15 00               DEFB    CRT
+  7D16 180A             JR      SAMLE4
+  7D18          SAMLE3: ;JP vor der Marke nicht gefun.
+  7D18 CD03F0           CALL    PV1
+  7D1B 1C               DEFB    AHEX
+  7D1C 3E3F             LD      A,'?'
+  7D1E CD03F0           CALL    PV1
+  7D21 00               DEFB    CRT
+  7D22 E1       SAMLE4: POP     HL
+  7D23 D1               POP     DE
+  7D24 18CC             JR      SAMLE1
+  7D26 D1       SAMLEX: POP     DE ; Fehler -> Abbruch
+  7D27 E1               POP     HL
+  7D28 C9               RET
+  7D29 D1       SAMLE9: POP     DE
+  7D2A CD03F0   SAMLEE: CALL    PV1
+  7D2D 2C               DEFB    CRLF
+  7D2E          ;
+  7D2E          ; Pruefe auf Vollstaendigkeit
+  7D2E CD5E7F           CALL    TSTAE
+  7D31          ;
+  7D31          ; Adressersetzungen
+  7D31 CD03F0   AERS:   CALL    PV1
+  7D34 23               DEFB    OSTR
+  7D35 543A             DEFM    'T:'
+  7D37 00               DEFB    0
+  7D38 CDAA7D           CALL    PRGLAE
+  7D3B 11A47D           LD      DE,ACODE
+  7D3E CDB97D   AERS1:  CALL    BFS_SU
+  7D41 E24F7D           JP      PO,AERS_E
+  7D44 E5               PUSH    HL
+  7D45 D5               PUSH    DE
+  7D46 C5               PUSH    BC
+  7D47 CD977E           CALL    ERS
+  7D4A                  ;... ohne Fehlerbehandlung
+  7D4A C1               POP     BC
+  7D4B D1               POP     DE
+  7D4C E1               POP     HL
+  7D4D 18EF             JR      AERS1
+  7D4F CD03F0   AERS_E: CALL    PV1
+  7D52 2C               DEFB    CRLF
+  7D53          ;
+  7D53 CDD87E           CALL    ZEIADR
+  7D56 CD03F0   ENDE:   CALL    PV1
+  7D59 23               DEFB    OSTR
+  7D5A 77656E6E         DEFM    'wenn Tabelle plausibel'
+  7D70 2C206461         DEFM    ', dann weiter mit'
+  7D81 0A0D             DEFW    0D0AH
+  7D83 25465341         DEFM    '%FSAVE 0200 '
+  7D8F 00               DEFB    0
+  7D90 2AA47F           LD      HL,(PEND)
+  7D93 CD03F0           CALL    PV1
+  7D96 1A               DEFB    HLHX
+  7D97 CD03F0           CALL    PV1
+  7D9A 2C               DEFB    CRLF
+  7D9B C9               RET
+  7D9C          ;
+  7D9C 3C413A   ABSPR:  DEFM    '<A:'
+  7D9F 00               DEFB    0
+  7DA0 3C453A   EINSPR: DEFM    '<E:'
+  7DA3 00               DEFB    0
+  7DA4 CDB109D5 ACODE:  DB      0CDH,0B1H,09H,0D5H,0CDH
+  7DA9 00               DEFB    0
+  7DAA          ;
+  7DAA          ; Laenge d.Suchbereichs berech.
+  7DAA          ; Parameter (OUT)
+  7DAA          ; HL=Programmanfang
+  7DAA          ; BC=Programmlaenge
+  7DAA          ; DE wird ueberschrieben
+  7DAA 2AA47F   PRGLAE: LD      HL,(PEND)
+  7DAD ED5BA27F         LD      DE,(PANF)
+  7DB1 B7               OR      A
+  7DB2 ED52             SBC     HL,DE
+  7DB4 23               INC     HL
+  7DB5 44               LD      B,H
+  7DB6 4D               LD      C,L     ; Laenge in BC
+  7DB7 EB               EX      DE,HL   ; Start in HL
+  7DB8 C9               RET
+  7DB9                  ;
+  7DB9          ;
+  7DB9          ; Bytefolge suchen
+  7DB9          ; Parameter (IN/OUT!)
+  7DB9          ; HL=Start zu durchsuchender Bereich
+  7DB9          ; DE=zu suchende Bytefolge, 0-termini.
+  7DB9          ; BC=Laenge des zu durchsu. Bereichs
+  7DB9 D5       BFS_SU: PUSH    DE
+  7DBA 1A               LD      A,(DE)
+  7DBB EDB1             CPIR
+  7DBD E2CF7D           JP      PO,BFS_EN
+  7DC0 13       BFS_ZV: INC     DE
+  7DC1 1A               LD      A,(DE)
+  7DC2 B7               OR      A
+  7DC3 280A             JR      Z,BFS_EN ; gefunden!
+  7DC5 EDA1             CPI
+  7DC7 E2CF7D           JP      PO,BFS_EN ;End.Suchber.
+  7DCA 28F4             JR      Z,BFS_ZV ; passt,weiter
+  7DCC D1               POP     DE ; neu anfangen
+  7DCD 18EA             JR      BFS_SU
+  7DCF D1       BFS_EN: POP     DE
+  7DD0 C9               RET
+  7DD1          ;
+  7DD1          ; Marke einlesen
+  7DD1          ; Parameter (IN/OUT!)
+  7DD1          ; HL=zu durchsuchender Speicher
+  7DD1          ; BC=Laenge des zu durchsu. Speichers
+  7DD1          ; DE(out)=gelesene Marke (=2 Zeichen)
+  7DD1 56       LIESMK: LD      D,(HL)
+  7DD2 EDA1             CPI
+  7DD4 E0               RET     PO
+  7DD5 3E2E             LD      A,'.'
+  7DD7 EDA1             CPI
+  7DD9 E0               RET     PO
+  7DDA C0               RET     NZ
+  7DDB 5E               LD      E,(HL)
+  7DDC EDA1             CPI
+  7DDE E0               RET     PO
+  7DDF 3E3E             LD      A,'>'
+  7DE1 EDA1             CPI
+  7DE3 C9               RET
+  7DE4          ;
+  7DE4          ; Nachdem eine Marke gefunden wurde:
+  7DE4          ; Vor der Marke steht ein JP. Pruefe
+  7DE4          ; (->Z=1) und lies die Zieladr.d.JP.
+  7DE4          ; HL(in)=Adr.am Ende der Marke
+  7DE4          ; HL(out)=JP-Ziel
+  7DE4 D5       LIESJA: PUSH    DE
+  7DE5 110A00           LD      DE,LAEMK+3
+  7DE8 B7               OR      A
+  7DE9 ED52             SBC     HL,DE
+  7DEB 7E               LD      A,(HL)
+  7DEC FEC3             CP      0C3H ;Ist es ein JP?
+  7DEE 2005             JR      NZ,LIESJE
+  7DF0 23               INC     HL
+  7DF1 5E               LD      E,(HL)
+  7DF2 23               INC     HL
+  7DF3 56               LD      D,(HL)
+  7DF4 EB               EX      DE,HL
+  7DF5 D1       LIESJE: POP     DE
+  7DF6 C9               RET
+  7DF7          ;
+  7DF7          ; Absprungmarke u. -adresse in Tabelle
+  7DF7          ; Parameter:
+  7DF7          ; DE=Marke, HL=JP-Adresse
+  7DF7 3AA67F   A_TAB:  LD      A,(ANZA)
+  7DFA FE0A             CP      MAXA
+  7DFC 2818             JR      Z,A_TAB9
+  7DFE E5               PUSH    HL
+  7DFF 2AA77F           LD      HL,(NXTAD)
+  7E02 72               LD      (HL),D
+  7E03 23               INC     HL
+  7E04 73               LD      (HL),E
+  7E05 D1               POP     DE
+  7E06 23               INC     HL
+  7E07 73               LD      (HL),E
+  7E08 23               INC     HL
+  7E09 72               LD      (HL),D
+  7E0A 23               INC     HL
+  7E0B 23               INC     HL
+  7E0C 23               INC     HL
+  7E0D 23               INC     HL
+  7E0E 22A77F           LD      (NXTAD),HL
+  7E11 21A67F           LD      HL,ANZA
+  7E14 34               INC     (HL)
+  7E15 C9               RET
+  7E16 011D7E   A_TAB9: LD      BC,EADRTV
+  7E19 CD5F7C           CALL    FEHM
+  7E1C C9               RET
+  7E1D 41647265 EADRTV: DEFM    'Adresstabelle voll'
+  7E2F 00               DEFB    0
+  7E30          ;
+  7E30          ; Einsprungadressen in die Adr-Tabelle
+  7E30          ; eintragen an alle gleichen Marken
+  7E30          ; Parameter
+  7E30          ; DE=Marke, HL=JP-Adresse
+  7E30 227C7E   E_TAB:  LD      (ETJADR),HL
+  7E33 7A               LD      A,D
+  7E34 327E7E           LD      (ETMRK),A
+  7E37 7B               LD      A,E
+  7E38 327F7E           LD      (ETMRK+1),A
+  7E3B 21A97F           LD      HL,ADR
+  7E3E 3AA67F           LD      A,(ANZA)
+  7E41 FE00             CP      0
+  7E43 C8               RET     Z
+  7E44 47               LD      B,A
+  7E45 7E       E_TAB1: LD      A,(HL)
+  7E46 23               INC     HL
+  7E47 BA               CP      D
+  7E48 201A             JR      NZ,E_TAB2
+  7E4A 7E               LD      A,(HL)
+  7E4B 23               INC     HL
+  7E4C BB               CP      E
+  7E4D 2016             JR      NZ,E_TAB3
+  7E4F 23               INC     HL ; Absprungadresse..
+  7E50 23               INC     HL ;    uebergehen
+  7E51 7E               LD      A,(HL) ; zur Kontrolle
+  7E52 23               INC     HL ; bei OK wieder DEC!
+  7E53 86               ADD     A,(HL)
+  7E54 2018             JR      NZ,E_TABF
+  7E56 3816             JR      C,E_TABF
+  7E58 2B               DEC     HL
+  7E59 3A7C7E           LD      A,(ETJADR)
+  7E5C 77               LD      (HL),A
+  7E5D 23               INC     HL
+  7E5E 3A7D7E           LD      A,(ETJADR+1)
+  7E61 77               LD      (HL),A
+  7E62 1804             JR      E_TAB4
+  7E64 23       E_TAB2: INC     HL
+  7E65 23       E_TAB3: INC     HL
+  7E66 23               INC     HL
+  7E67 23               INC     HL
+  7E68 23       E_TAB4: INC     HL
+  7E69 23               INC     HL ; Zaehlfeld
+  7E6A 10D9             DJNZ    E_TAB1
+  7E6C B7               OR      A ; Cy=0 -> kein Fehler
+  7E6D C9               RET
+  7E6E 217E7E   E_TABF: LD      HL,ETMRK
+  7E71 CD247F           CALL    ZEIMRK
+  7E74 01807E           LD      BC,ETFDOP
+  7E77 CD5F7C           CALL    FEHM
+  7E7A 37               SCF       ; Fehler anzeigen
+  7E7B C9               RET
+  7E7C 0000     ETJADR  DEFW    0 ; Hilfsvariablen
+  7E7E 0000     ETMRK   DEFW    0
+  7E80 45696E73 ETFDOP  DEFM    'Einsprungmarke doppelt'
+  7E96 00               DEFB    0
+  7E97          ;
+  7E97          ; Ersetzung einer Adresse, falls in
+  7E97          ; ADR gefunden
+  7E97          ; Parameter:
+  7E97          ; HL=Stelle im Programm
+  7E97 22D67E   ERS:    LD      (ERS_AD),HL
+  7E9A 5E               LD      E,(HL)
+  7E9B 23               INC     HL
+  7E9C 56               LD      D,(HL)
+  7E9D 21A97F           LD      HL,ADR
+  7EA0 3AA67F           LD      A,(ANZA)
+  7EA3 FE00             CP      0
+  7EA5 C8               RET     Z
+  7EA6 47               LD      B,A
+  7EA7 23       ERS1:   INC     HL ; Marke
+  7EA8 23               INC     HL
+  7EA9 7E               LD      A,(HL)
+  7EAA 23               INC     HL
+  7EAB BB               CP      E
+  7EAC 201B             JR      NZ,ERS2
+  7EAE 7E               LD      A,(HL)
+  7EAF 23               INC     HL
+  7EB0 BA               CP      D
+  7EB1 2017             JR      NZ,ERS3
+  7EB3                  ; Adresse gefunden
+  7EB3 ED5BD67E         LD      DE,(ERS_AD)
+  7EB7 7E               LD      A,(HL)
+  7EB8 23               INC     HL
+  7EB9 12               LD      (DE),A
+  7EBA 13               INC     DE
+  7EBB 7E               LD      A,(HL)
+  7EBC 23               INC     HL
+  7EBD 12               LD      (DE),A
+  7EBE                  ;INC    (HL) ;Ersetzgn. zaehlen
+  7EBE 7E               LD      A,(HL)
+  7EBF 3C               INC     A
+  7EC0 27               DAA
+  7EC1 77               LD      (HL),A
+  7EC2 3E74             LD      A,'t'
+  7EC4 CD03F0           CALL    PV1
+  7EC7 00               DEFB    CRT
+  7EC8 C9               RET
+  7EC9 23       ERS2:   INC     HL
+  7ECA 23       ERS3:   INC     HL
+  7ECB 23               INC     HL
+  7ECC 23               INC     HL
+  7ECD 10D8             DJNZ    ERS1
+  7ECF 3E2E             LD      A,'.'
+  7ED1 CD03F0           CALL    PV1
+  7ED4 00               DEFB    CRT
+  7ED5 C9               RET
+  7ED6 0000     ERS_AD  DEFW    0 ;Stelle im Prg., wo
+  7ED8                          ; die Adr. ersetzt wird
+  7ED8          ;
+  7ED8          ; Auswertung
+  7ED8 CD03F0   ZEIADR: CALL    PV1
+  7EDB 2C               DEFB    CRLF
+  7EDC CD03F0           CALL    PV1
+  7EDF 23               DEFB    OSTR
+  7EE0 4D726B20         DEFM    'Mrk Ab -> Ein Ers'
+  7EF1 0A0D             DEFW    0D0AH
+  7EF3 2D2D2D20         DEFM    '--- ---- ---- ---'
+  7F04 0A0D             DEFW    0D0AH
+  7F06 00               DEFB    0
+  7F07 21A97F           LD      HL,ADR
+  7F0A 3AA67F           LD      A,(ANZA)
+  7F0D FE00             CP      0
+  7F0F C8               RET     Z
+  7F10 47               LD      B,A
+  7F11 CD247F   ZEIAD1: CALL    ZEIMRK
+  7F14 CD3B7F           CALL    ZEI1AD
+  7F17 CD3B7F           CALL    ZEI1AD
+  7F1A CD467F           CALL    ZEIANZ
+  7F1D CD03F0           CALL    PV1
+  7F20 2C               DEFB    CRLF
+  7F21 10EE             DJNZ    ZEIAD1
+  7F23 C9               RET
+  7F24 7E       ZEIMRK: LD      A,(HL)
+  7F25 23               INC     HL
+  7F26 CD03F0           CALL    PV1
+  7F29 00               DEFB    CRT
+  7F2A 3E2E             LD      A,'.'
+  7F2C CD03F0           CALL    PV1
+  7F2F 00               DEFB    CRT
+  7F30 7E               LD      A,(HL)
+  7F31 23               INC     HL
+  7F32 CD03F0           CALL    PV1
+  7F35 00               DEFB    CRT
+  7F36 CD03F0           CALL    PV1
+  7F39 2B               DEFB    SPACE
+  7F3A C9               RET
+  7F3B 5E       ZEI1AD: LD      E,(HL)
+  7F3C 23               INC     HL
+  7F3D 56               LD      D,(HL)
+  7F3E 23               INC     HL
+  7F3F EB               EX      DE,HL
+  7F40 CD03F0           CALL    PV1
+  7F43 1A               DEFB    HLHX
+  7F44 EB               EX      DE,HL
+  7F45 C9               RET
+  7F46 7E       ZEIANZ: LD      A,(HL)
+  7F47 0F               RRCA
+  7F48 0F               RRCA
+  7F49 0F               RRCA
+  7F4A 0F               RRCA
+  7F4B E60F             AND     0FH
+  7F4D C630             ADD     A,'0'
+  7F4F CD03F0           CALL    PV1
+  7F52 00               DEFB    CRT
+  7F53 7E               LD      A,(HL)
+  7F54 23               INC     HL
+  7F55 E60F             AND     0FH
+  7F57 C630             ADD     A,'0'
+  7F59 CD03F0           CALL    PV1
+  7F5C 00               DEFB    CRT
+  7F5D C9               RET
+  7F5E          ; Test, ob zu jedem Absprung ein
+  7F5E          ; Einsprung gefunden wurde
+  7F5E          TSTAE:
+  7F5E 21A97F           LD      HL,ADR
+  7F61 3AA67F           LD      A,(ANZA)
+  7F64 FE00             CP      0
+  7F66 C8               RET     Z
+  7F67 47               LD      B,A
+  7F68 228A7F   TSTAE1: LD      (TSMKAD),HL
+  7F6B 23               INC     HL
+  7F6C 23               INC     HL
+  7F6D 23               INC     HL
+  7F6E 23               INC     HL
+  7F6F 7E               LD      A,(HL)
+  7F70 23               INC     HL
+  7F71 86               ADD     A,(HL)
+  7F72 2010             JR      NZ,TSTAE2
+  7F74 380E             JR      C,TSTAE2
+  7F76 2A8A7F           LD      HL,(TSMKAD)
+  7F79 CD247F           CALL    ZEIMRK
+  7F7C 018C7F           LD      BC,TSFADR
+  7F7F CD5F7C           CALL    FEHM
+  7F82 37               SCF
+  7F83 C9               RET
+  7F84 23       TSTAE2: INC     HL
+  7F85 23               INC     HL
+  7F86 10E0             DJNZ    TSTAE1
+  7F88 B7               OR      A
+  7F89 C9               RET
+  7F8A 0000     TSMKAD  DEFW    0
+  7F8C 45696E73 TSFADR  DEFM    'Einsprungmarke fehlt'
+  7FA0 00               DEFB    0
+  7FA1          ;
+  7FA1          ; Ende
+  7FA1 C9               RET
+  7FA2          ; ----------
+  7FA2          ;       Daten
+  7FA2 0018     PANF    DEFW    1800H ;Prog.anfang
+  7FA4          DANF:
+  7FA4 0000     PEND    DEFW    0 ;Programmendeadr.
+  7FA6 00       ANZA    DEFB    0 ;Anz.gefuellt.Felder
+  7FA7                            ;in ADR
+  7FA7 0000     NXTAD   DEFW    0 ;nae.frei.Feld in ADR
+  7FA9                            ;erspart Adr.-rechng.
+  7FA9 00000000 ADR     DEFS    7*MAXA
+  7FEF                  ; Struktur:
+  7FEF                  ; je 2 Byte Marke, Abspr.- u.
+  7FEF                  ; Einspr.-Adresse
+  7FEF                  ; 1 Byte Anz. Ersetzungen i.Prg
+  7FEF          DEND
+
+Errors: 0000 
+End+1 : 7FEF 

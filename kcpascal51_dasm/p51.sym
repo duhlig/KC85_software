@@ -3601,7 +3601,7 @@ l2b80h:	equ 0x2b80
 ; 0x39b7	(byte load pointer)
 ; 0x3979	(immediate value)
 
-l2b87h:	equ 0x2b87
+Merker1:	equ 0x2b87
 ; Used at following locations:
 ; 0x50d5	(word load pointer)
 ; 0x504f	(word load pointer)
@@ -4270,19 +4270,19 @@ l30d9h:	equ 0x30d9
 ; Used at following locations:
 ; 0x3048	(jp destination)
 
-l30e1h:	equ 0x30e1
+ChkEOLInStr:	equ 0x30e1
 ; Used at following locations:
 ; 0x30f2	(jr destination)
 
-l30eeh:	equ 0x30ee
+WStrChrToTarget:	equ 0x30ee
 ; Used at following locations:
 ; 0x30f9	(jr destination)
 
-l30f4h:	equ 0x30f4
+ChkDblApos:	equ 0x30f4
 ; Used at following locations:
 ; 0x30ec	(jr destination)
 
-l30fbh:	equ 0x30fb
+OnEndOfStr__:	equ 0x30fb
 ; Used at following locations:
 ; 0x3136	(jr destination)
 
@@ -4290,11 +4290,11 @@ l3104h:	equ 0x3104
 ; Used at following locations:
 ; 0x311c	(jr destination)
 
-l3112h:	equ 0x3112
+ChkEmptyStr:	equ 0x3112
 ; Used at following locations:
 ; 0x30ff	(jr destination)
 
-l311eh:	equ 0x311e
+WStrLit__:	equ 0x311e
 ; Used at following locations:
 ; 0x3113	(jr destination)
 
@@ -4303,7 +4303,7 @@ JGetLexEnd:	equ 0x312e
 ; 0x3198	(jr destination)
 ; 0x3110	(jr destination)
 
-l3131h:	equ 0x3131
+CErrStrLiEnd:	equ 0x3131
 ; Used at following locations:
 ; 0x30e8	(jr destination)
 
@@ -4751,7 +4751,7 @@ sub_3407h:	equ 0x3407
 ; 0x4a98	(call destination)
 ; 0x4051	(call destination)
 
-sub_3408h:	equ 0x3408
+WLdHLnnIsDE:	equ 0x3408
 ; Used at following locations:
 ; 0x5276	(call destination)
 ; 0x5040	(call destination)
@@ -4818,11 +4818,11 @@ l3454h:	equ 0x3454
 ; Used at following locations:
 ; 0x344f	(jr destination)
 
-l3459h:	equ 0x3459
+PCVNegNum:	equ 0x3459
 ; Used at following locations:
 ; 0x3482	(jr destination)
 
-l3470h:	equ 0x3470
+PCVNegInt:	equ 0x3470
 ; Used at following locations:
 ; 0x3463	(jr destination)
 
@@ -4862,11 +4862,11 @@ l34d8h:	equ 0x34d8
 ; Used at following locations:
 ; 0x3489	(jr destination)
 
-l34e0h:	equ 0x34e0
+PCVPosNum:	equ 0x34e0
 ; Used at following locations:
 ; 0x347e	(jr destination)
 
-sub_34e6h:	equ 0x34e6
+PCVChkNum:	equ 0x34e6
 ; Used at following locations:
 ; 0x450e	(call destination)
 ; 0x4255	(call destination)
@@ -4880,7 +4880,7 @@ sub_34e6h:	equ 0x34e6
 ; 0x3f68	(call destination)
 ; 0x345f	(call destination)
 
-l34f2h:	equ 0x34f2
+PCVNumOk:	equ 0x34f2
 ; Used at following locations:
 ; 0x34ed	(jr destination)
 
@@ -6238,7 +6238,7 @@ sub_43b8h:	equ 0x43b8
 ; Used at following locations:
 ; 0x41d5	(call destination)
 
-l43f4h:	equ 0x43f4
+WLdChr:	equ 0x43f4
 ; Used at following locations:
 ; 0x43c1	(jr destination)
 
@@ -6254,15 +6254,15 @@ l440fh:	equ 0x440f
 ; Used at following locations:
 ; 0x43bd	(jr destination)
 
-l442fh:	equ 0x442f
+WLdChrInA:	equ 0x442f
 ; Used at following locations:
 ; 0x43fa	(jr destination)
 
-l4439h:	equ 0x4439
+WPushAF:	equ 0x4439
 ; Used at following locations:
 ; 0x4443	(jr destination)
 
-l443fh:	equ 0x443f
+WLd0:	equ 0x443f
 ; Used at following locations:
 ; 0x4430	(jr destination)
 
@@ -6295,7 +6295,7 @@ l446eh:	equ 0x446e
 ; Used at following locations:
 ; 0x444a	(jr destination)
 
-l4472h:	equ 0x4472
+WLdStrAddr:	equ 0x4472
 ; Used at following locations:
 ; 0x446c	(jr destination)
 ; 0x440c	(jp destination)

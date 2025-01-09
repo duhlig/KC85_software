@@ -8023,36 +8023,26 @@ SP_safe:
 	defb 07fh		;2b5b	7f 	 
 	defb 060h		;2b5c	60 	` 
 curNum:
-	defb 000h		;2b5d	00 	. 
-	defb 000h		;2b5e	00 	. 
+	defw 00000h		;2b5d	00 00 	. . 
 curRealHWord:
-	defb 000h		;2b5f	00 	. 
-	defb 000h		;2b60	00 	. 
+	defw 00000h		;2b5f	00 00 	. . 
 l2b61h:
-	defb 000h		;2b61	00 	. 
-	defb 000h		;2b62	00 	. 
+	defw 00000h		;2b61	00 00 	. . 
 l2b63h:
-	defb 000h		;2b63	00 	. 
-	defb 000h		;2b64	00 	. 
+	defw 00000h		;2b63	00 00 	. . 
 memEnd:
-	defb 000h		;2b65	00 	. 
-	defb 000h		;2b66	00 	. 
+	defw 00000h		;2b65	00 00 	. . 
 l2b67h:
-	defb 000h		;2b67	00 	. 
-	defb 000h		;2b68	00 	. 
+	defw 00000h		;2b67	00 00 	. . 
 lastChrRead__:
 	defb 020h		;2b69	20 	  
 labelListAddr:
-	defb 000h		;2b6a	00 	. 
-	defb 000h		;2b6b	00 	. 
+	defw 00000h		;2b6a	00 00 	. . 
 SymTabAddr__:
-	defb 000h		;2b6c	00 	. 
-	defb 000h		;2b6d	00 	. 
+	defw 00000h		;2b6c	00 00 	. . 
 TopOfHeapAddr__:
-	defb 000h		;2b6e	00 	. 
-	defb 000h		;2b6f	00 	. 
-	defb 000h		;2b70	00 	. 
-	defb 000h		;2b71	00 	. 
+	defw 00000h		;2b6e	00 00 	. . 
+	defw 00000h		;2b70	00 00 	. . 
 BlockLevel__:
 	defb 000h		;2b72	00 	. 
 lastError__:
@@ -8062,30 +8052,25 @@ l2b74h:
 l2b75h:
 	defb 000h		;2b75	00 	. 
 l2b76h:
-	defb 000h		;2b76	00 	. 
-	defb 000h		;2b77	00 	. 
+	defw 00000h		;2b76	00 00 	. . 
 lineBufPtr:
-	defb 000h		;2b78	00 	. 
-	defb 000h		;2b79	00 	. 
-	defb 000h		;2b7a	00 	. 
-	defb 000h		;2b7b	00 	. 
+	defw 00000h		;2b78	00 00 	. . 
+	defw 00000h		;2b7a	00 00 	. . 
 compiBinStart__:
-	defb 000h		;2b7c	00 	. 
-	defb 000h		;2b7d	00 	. 
+	defw 00000h		;2b7c	00 00 	. . 
 l2b7eh:
-	nop			;2b7e	00 	. 
-	nop			;2b7f	00 	. 
+	defw 00000h		;2b7e	00 00 	. . 
 l2b80h:
-	nop			;2b80	00 	. 
-	nop			;2b81	00 	. 
-	nop			;2b82	00 	. 
-	nop			;2b83	00 	. 
-	nop			;2b84	00 	. 
-	nop			;2b85	00 	. 
-	nop			;2b86	00 	. 
-l2b87h:
-	nop			;2b87	00 	. 
-	nop			;2b88	00 	. 
+	defb 000h		;2b80	00 	. 
+	defb 000h		;2b81	00 	. 
+	defb 000h		;2b82	00 	. 
+	defb 000h		;2b83	00 	. 
+	defb 000h		;2b84	00 	. 
+	defb 000h		;2b85	00 	. 
+	defb 000h		;2b86	00 	. 
+Merker1:
+	defb 000h		;2b87	00 	. 
+	defb 000h		;2b88	00 	. 
 l2b89h:
 	nop			;2b89	00 	. 
 	nop			;2b8a	00 	. 
@@ -8941,24 +8926,24 @@ l30d9h:
 	call WrJump		;30d9	cd c9 33 	. . 3 
 	ld (curRealHWord),hl		;30dc	22 5f 2b 	" _ + 
 	ld c,000h		;30df	0e 00 	. . 
-l30e1h:
+ChkEOLInStr:
 	call GetSrcChr		;30e1	cd 4d 2b 	. M + 
 	bit 6,(ix+000h)		;30e4	dd cb 00 76 	. . . v 
-	jr nz,l3131h		;30e8	20 47 	  G 
+	jr nz,CErrStrLiEnd		;30e8	20 47 	  G 
 	cp 027h		;30ea	fe 27 	. ' 
-	jr z,l30f4h		;30ec	28 06 	( . 
-l30eeh:
+	jr z,ChkDblApos		;30ec	28 06 	( . 
+WStrChrToTarget:
 	call StoreAToHL2		;30ee	cd e3 33 	. . 3 
 	inc c			;30f1	0c 	. 
-	jr l30e1h		;30f2	18 ed 	. . 
-l30f4h:
+	jr ChkEOLInStr		;30f2	18 ed 	. . 
+ChkDblApos:
 	call GetSrcChr		;30f4	cd 4d 2b 	. M + 
 	cp 027h		;30f7	fe 27 	. ' 
-	jr z,l30eeh		;30f9	28 f3 	( . 
-l30fbh:
+	jr z,WStrChrToTarget		;30f9	28 f3 	( . 
+OnEndOfStr__:
 	ld (lastChrRead__),a		;30fb	32 69 2b 	2 i + 
 	dec c			;30fe	0d 	. 
-	jr nz,l3112h		;30ff	20 11 	  . 
+	jr nz,ChkEmptyStr		;30ff	20 11 	  . 
 	exx			;3101	d9 	. 
 	dec hl			;3102	2b 	+ 
 	ld a,(hl)			;3103	7e 	~ 
@@ -8972,15 +8957,15 @@ l3104h:
 	ld (curRealHWord),hl		;310b	22 5f 2b 	" _ + 
 	ld a,076h		;310e	3e 76 	> v 
 	jr JGetLexEnd		;3110	18 1c 	. . 
-l3112h:
+ChkEmptyStr:
 	inc c			;3112	0c 	. 
-	jr nz,l311eh		;3113	20 09 	  . 
+	jr nz,WStrLit__		;3113	20 09 	  . 
 	ld e,021h		;3115	1e 21 	. ! 
 	call CompileErr		;3117	cd 3a 2f 	. : / 
 	xor a			;311a	af 	. 
 	exx			;311b	d9 	. 
 	jr l3104h		;311c	18 e6 	. . 
-l311eh:
+WStrLit__:
 	ld a,c			;311e	79 	y 
 	ld (curNum),a		;311f	32 5d 2b 	2 ] + 
 	call GetTargetAddrInHL__		;3122	cd d8 33 	. . 3 
@@ -8990,10 +8975,10 @@ l311eh:
 	ld a,075h		;312c	3e 75 	> u 
 JGetLexEnd:
 	jp GetLexEnd		;312e	c3 3e 30 	. > 0 
-l3131h:
+CErrStrLiEnd:
 	ld e,044h		;3131	1e 44 	. D 
 	call CompileErr		;3133	cd 3a 2f 	. : / 
-	jr l30fbh		;3136	18 c3 	. . 
+	jr OnEndOfStr__		;3136	18 c3 	. . 
 LxIdentifier:
 	ld hl,curIdentifier		;3138	21 50 2b 	! P + 
 	ld b,00ah		;313b	06 0a 	. . 
@@ -9629,7 +9614,7 @@ sub_3401h:
 	jr StoreDE		;3405	18 05 	. . 
 sub_3407h:
 	ex de,hl			;3407	eb 	. 
-sub_3408h:
+WLdHLnnIsDE:
 	call JCodeNextByte		;3408	cd d1 06 	. . . 
 	defb 021h		;340b	21 	! 
 StoreDE:
@@ -9694,12 +9679,12 @@ CSq_JP:
 l3454h:
 	call GetLexem		;3454	cd c3 2f 	. . / 
 	jr $-12		;3457	18 f2 	. . 
-l3459h:
+PCVNegNum:
 	call GetLexem		;3459	cd c3 2f 	. . / 
 	call ParseConstVal		;345c	cd 79 34 	. y 4 
-	call sub_34e6h		;345f	cd e6 34 	. . 4 
+	call PCVChkNum		;345f	cd e6 34 	. . 4 
 	dec c			;3462	0d 	. 
-	jr z,l3470h		;3463	28 0b 	( . 
+	jr z,PCVNegInt		;3463	28 0b 	( . 
 	inc c			;3465	0c 	. 
 	bit 6,h		;3466	cb 74 	. t 
 	ret z			;3468	c8 	. 
@@ -9709,7 +9694,7 @@ l3459h:
 	ld h,a			;346d	67 	g 
 	pop af			;346e	f1 	. 
 	ret			;346f	c9 	. 
-l3470h:
+PCVNegInt:
 	inc c			;3470	0c 	. 
 	ex de,hl			;3471	eb 	. 
 	ld hl,00000h		;3472	21 00 00 	! . . 
@@ -9720,9 +9705,9 @@ ParseConstVal:
 	or a			;3479	b7 	. 
 	jr z,PCVIdent		;347a	28 29 	( ) 
 	cp 0abh		;347c	fe ab 	. . 
-	jr z,l34e0h		;347e	28 60 	( ` 
+	jr z,PCVPosNum		;347e	28 60 	( ` 
 	cp 0adh		;3480	fe ad 	. . 
-	jr z,l3459h		;3482	28 d5 	( . 
+	jr z,PCVNegNum		;3482	28 d5 	( . 
 	ld hl,(curRealHWord)		;3484	2a 5f 2b 	* _ + 
 	cp 075h		;3487	fe 75 	. u 
 	jr z,l34d8h		;3489	28 4d 	( M 
@@ -9773,20 +9758,20 @@ l34d8h:
 	ld c,a			;34db	4f 	O 
 	ld b,002h		;34dc	06 02 	. . 
 	jr PCVEnds__		;34de	18 f5 	. . 
-l34e0h:
+PCVPosNum:
 	call GetLexem		;34e0	cd c3 2f 	. . / 
 	call ParseConstVal		;34e3	cd 79 34 	. y 4 
-sub_34e6h:
+PCVChkNum:
 	push af			;34e6	f5 	. 
 	xor a			;34e7	af 	. 
 	cp b			;34e8	b8 	. 
 	jr nz,CErrIntOrRealExpected		;34e9	20 09 	  . 
 	ld a,c			;34eb	79 	y 
 	dec a			;34ec	3d 	= 
-	jr z,l34f2h		;34ed	28 03 	( . 
+	jr z,PCVNumOk		;34ed	28 03 	( . 
 	dec a			;34ef	3d 	= 
 	jr nz,CErrIntOrRealExpected		;34f0	20 02 	  . 
-l34f2h:
+PCVNumOk:
 	pop af			;34f2	f1 	. 
 	ret			;34f3	c9 	. 
 CErrIntOrRealExpected:
@@ -9816,7 +9801,7 @@ sub_3518h:
 	ld hl,l3538h		;3518	21 38 35 	! 8 5 
 	call WCode		;351b	cd cc 33 	. . 3 
 l351eh:
-	call sub_3408h		;351e	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;351e	cd 08 34 	. . 4 
 	call JCodeNextByte		;3521	cd d1 06 	. . . 
 	defb 019h		;3524	19 	. 
 	ret			;3525	c9 	. 
@@ -10392,7 +10377,7 @@ l383eh:
 	jr z,l387dh		;3854	28 27 	( ' 
 	dec b			;3856	05 	. 
 	jr nz,l385fh		;3857	20 06 	  . 
-	ld (l2b87h),bc		;3859	ed 43 87 2b 	. C . + 
+	ld (Merker1),bc		;3859	ed 43 87 2b 	. C . + 
 	jr l3865h		;385d	18 06 	. . 
 l385fh:
 	inc b			;385f	04 	. 
@@ -10407,7 +10392,7 @@ l3865h:
 	exx			;386b	d9 	. 
 	call JCodeNextByte		;386c	cd d1 06 	. . . 
 	defb 001h		;386f	01 	. 
-	ld de,(l2b87h)		;3870	ed 5b 87 2b 	. [ . + 
+	ld de,(Merker1)		;3870	ed 5b 87 2b 	. [ . + 
 	call StoreDE		;3874	cd 0c 34 	. . 4 
 	ld hl,l38a5h		;3877	21 a5 38 	! . 8 
 	jp WCode		;387a	c3 cc 33 	. . 3 
@@ -10513,7 +10498,7 @@ l38f3h:
 	exx			;3902	d9 	. 
 	call JCodeNextByte		;3903	cd d1 06 	. . . 
 	defb 001h		;3906	01 	. 
-	ld de,(l2b87h)		;3907	ed 5b 87 2b 	. [ . + 
+	ld de,(Merker1)		;3907	ed 5b 87 2b 	. [ . + 
 	call StoreDE		;390b	cd 0c 34 	. . 4 
 	ld hl,l395fh		;390e	21 5f 39 	! _ 9 
 	call WCode		;3911	cd cc 33 	. . 3 
@@ -10808,7 +10793,7 @@ l3abch:
 	call ChkColEq_GetLex		;3ade	cd ee 32 	. . 2 
 	call sub_3f13h		;3ae1	cd 13 3f 	. . ? 
 	exx			;3ae4	d9 	. 
-	ld (l2b87h),hl		;3ae5	22 87 2b 	" . + 
+	ld (Merker1),hl		;3ae5	22 87 2b 	" . + 
 	exx			;3ae8	d9 	. 
 	call sub_3a68h		;3ae9	cd 68 3a 	. h : 
 	cp 00dh		;3aec	fe 0d 	. . 
@@ -10841,7 +10826,7 @@ l3af7h:
 	sbc hl,bc		;3b18	ed 42 	. B 
 	add hl,bc			;3b1a	09 	. 
 	jr nz,l3b37h		;3b1b	20 1a 	  . 
-	ld de,(l2b87h)		;3b1d	ed 5b 87 2b 	. [ . + 
+	ld de,(Merker1)		;3b1d	ed 5b 87 2b 	. [ . + 
 	sbc hl,de		;3b21	ed 52 	. R 
 	ld b,h			;3b23	44 	D 
 	ld c,l			;3b24	4d 	M 
@@ -11491,7 +11476,7 @@ l3f43h:
 	ld a,e			;3f64	7b 	{ 
 	jr nz,l3f82h		;3f65	20 1b 	  . 
 	pop bc			;3f67	c1 	. 
-	call sub_34e6h		;3f68	cd e6 34 	. . 4 
+	call PCVChkNum		;3f68	cd e6 34 	. . 4 
 	exx			;3f6b	d9 	. 
 	dec hl			;3f6c	2b 	+ 
 	exx			;3f6d	d9 	. 
@@ -11642,7 +11627,7 @@ l4051h:
 	ret			;405c	c9 	. 
 l405dh:
 	call sub_41d2h		;405d	cd d2 41 	. . A 
-	call sub_34e6h		;4060	cd e6 34 	. . 4 
+	call PCVChkNum		;4060	cd e6 34 	. . 4 
 	bit 0,c		;4063	cb 41 	. A 
 	ld hl,l414bh		;4065	21 4b 41 	! K A 
 	jr nz,l40a0h		;4068	20 36 	  6 
@@ -11657,7 +11642,7 @@ sub_4075h:
 	cp 0abh		;407a	fe ab 	. . 
 	jr nz,l4086h		;407c	20 08 	  . 
 	call sub_41d2h		;407e	cd d2 41 	. . A 
-	call sub_34e6h		;4081	cd e6 34 	. . 4 
+	call PCVChkNum		;4081	cd e6 34 	. . 4 
 	jr l4089h		;4084	18 03 	. . 
 l4086h:
 	call sub_41d5h		;4086	cd d5 41 	. . A 
@@ -11679,11 +11664,11 @@ l40a5h:
 	dec b			;40a5	05 	. 
 	jp z,l411ch		;40a6	ca 1c 41 	. . A 
 	inc b			;40a9	04 	. 
-	call sub_34e6h		;40aa	cd e6 34 	. . 4 
+	call PCVChkNum		;40aa	cd e6 34 	. . 4 
 	ld b,a			;40ad	47 	G 
 	push bc			;40ae	c5 	. 
 	call sub_41d2h		;40af	cd d2 41 	. . A 
-	call sub_34e6h		;40b2	cd e6 34 	. . 4 
+	call PCVChkNum		;40b2	cd e6 34 	. . 4 
 	bit 0,c		;40b5	cb 41 	. A 
 	pop bc			;40b7	c1 	. 
 	jr nz,l40ddh		;40b8	20 23 	  # 
@@ -11908,7 +11893,7 @@ l41fch:
 	ex de,hl			;420b	eb 	. 
 	call JCodeNextByte		;420c	cd d1 06 	. . . 
 	defb 0ebh		;420f	eb 	. 
-	call sub_3408h		;4210	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;4210	cd 08 34 	. . 4 
 l4213h:
 	pop de			;4213	d1 	. 
 	bit 0,d		;4214	cb 42 	. B 
@@ -11923,7 +11908,7 @@ l4221h:
 	res 3,(ix+002h)		;4225	dd cb 02 9e 	. . . . 
 	jr l41d8h		;4229	18 ad 	. . 
 l422bh:
-	call sub_34e6h		;422b	cd e6 34 	. . 4 
+	call PCVChkNum		;422b	cd e6 34 	. . 4 
 	bit 0,c		;422e	cb 41 	. A 
 	jr z,l423ch		;4230	28 0a 	( . 
 	ld hl,l4178h		;4232	21 78 41 	! x A 
@@ -11931,7 +11916,7 @@ l422bh:
 	set 0,(ix+001h)		;4238	dd cb 01 c6 	. . . . 
 l423ch:
 	call sub_43b5h		;423c	cd b5 43 	. . C 
-	call sub_34e6h		;423f	cd e6 34 	. . 4 
+	call PCVChkNum		;423f	cd e6 34 	. . 4 
 	ld hl,l42f1h		;4242	21 f1 42 	! . B 
 	call l33beh		;4245	cd be 33 	. . 3 
 	jr l41d8h		;4248	18 8e 	. . 
@@ -11940,9 +11925,9 @@ l424ah:
 	dec b			;424b	05 	. 
 	jr z,l4274h		;424c	28 26 	( & 
 	inc b			;424e	04 	. 
-	call sub_34e6h		;424f	cd e6 34 	. . 4 
+	call PCVChkNum		;424f	cd e6 34 	. . 4 
 	call sub_43b5h		;4252	cd b5 43 	. . C 
-	call sub_34e6h		;4255	cd e6 34 	. . 4 
+	call PCVChkNum		;4255	cd e6 34 	. . 4 
 	bit 0,c		;4258	cb 41 	. A 
 	pop de			;425a	d1 	. 
 	jr nz,l4283h		;425b	20 26 	  & 
@@ -12175,7 +12160,7 @@ sub_43b8h:
 	or a			;43bc	b7 	. 
 	jr z,l440fh		;43bd	28 50 	( P 
 	cp 076h		;43bf	fe 76 	. v 
-	jr z,l43f4h		;43c1	28 31 	( 1 
+	jr z,WLdChr		;43c1	28 31 	( 1 
 	cp 075h		;43c3	fe 75 	. u 
 	jr z,l43fch		;43c5	28 35 	( 5 
 	cp 0a8h		;43c7	fe a8 	. . 
@@ -12196,10 +12181,10 @@ sub_43b8h:
 	ld e,00ch		;43ec	1e 0c 	. . 
 	call CompileErr		;43ee	cd 3a 2f 	. : / 
 	jp 0344bh		;43f1	c3 4b 34 	. K 4 
-l43f4h:
+WLdChr:
 	ld a,(curRealHWord)		;43f4	3a 5f 2b 	: _ + 
 	ld bc,00003h		;43f7	01 03 00 	. . . 
-	jr l442fh		;43fa	18 33 	. 3 
+	jr WLdChrInA		;43fa	18 33 	. 3 
 l43fch:
 	ld de,(curRealHWord)		;43fc	ed 5b 5f 2b 	. [ _ + 
 	ld a,(curNum)		;4400	3a 5d 2b 	: ] + 
@@ -12208,8 +12193,8 @@ l43fch:
 l4406h:
 	ld l,c			;4406	69 	i 
 	ld h,000h		;4407	26 00 	& . 
-	ld (l2b87h),hl		;4409	22 87 2b 	" . + 
-	jp l4472h		;440c	c3 72 44 	. r D 
+	ld (Merker1),hl		;4409	22 87 2b 	" . + 
+	jp WLdStrAddr		;440c	c3 72 44 	. r D 
 l440fh:
 	call GetIdentInfoInABC		;440f	cd 50 33 	. P 3 
 	cp 001h		;4412	fe 01 	. . 
@@ -12230,20 +12215,20 @@ l440fh:
 	ld a,d			;442a	7a 	z 
 	ld (l2b8bh+1),a		;442b	32 8c 2b 	2 . + 
 	ld a,e			;442e	7b 	{ 
-l442fh:
+WLdChrInA:
 	or a			;442f	b7 	. 
-	jr z,l443fh		;4430	28 0d 	( . 
+	jr z,WLd0		;4430	28 0d 	( . 
 	call JCodeNextByte		;4432	cd d1 06 	. . . 
 	defb 03eh		;4435	3e 	> 
 	call StoreAToHL2		;4436	cd e3 33 	. . 3 
-l4439h:
+WPushAF:
 	call JCodeNextByte		;4439	cd d1 06 	. . . 
 	defb 0f5h		;443c	f5 	. 
 	jr l4464h		;443d	18 25 	. % 
-l443fh:
+WLd0:
 	call JCodeNextByte		;443f	cd d1 06 	. . . 
 	defb 0afh		;4442	af 	. 
-	jr l4439h		;4443	18 f4 	. . 
+	jr WPushAF		;4443	18 f4 	. . 
 l4445h:
 	ex de,hl			;4445	eb 	. 
 l4446h:
@@ -12258,7 +12243,7 @@ l4451h:
 	ex (sp),hl			;4452	e3 	. 
 	call sub_33fah		;4453	cd fa 33 	. . 3 
 	pop de			;4456	d1 	. 
-	call sub_3408h		;4457	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;4457	cd 08 34 	. . 4 
 	call sub_45c2h		;445a	cd c2 45 	. . E 
 	ld bc,00002h		;445d	01 02 00 	. . . 
 	set 0,(ix+001h)		;4460	dd cb 01 c6 	. . . . 
@@ -12268,12 +12253,12 @@ l4467h:
 	ld bc,08000h		;4467	01 00 80 	. . . 
 	ld d,c			;446a	51 	Q 
 	ld e,c			;446b	59 	Y 
-	jr l4472h		;446c	18 04 	. . 
+	jr WLdStrAddr		;446c	18 04 	. . 
 l446eh:
 	ld bc,00001h		;446e	01 01 00 	. . . 
 	ex de,hl			;4471	eb 	. 
-l4472h:
-	call sub_3408h		;4472	cd 08 34 	. . 4 
+WLdStrAddr:
+	call WLdHLnnIsDE		;4472	cd 08 34 	. . 4 
 	call JCodeNextByte		;4475	cd d1 06 	. . . 
 	defb 0e5h		;4478	e5 	. 
 	jr l4464h		;4479	18 e9 	. . 
@@ -12361,7 +12346,7 @@ l44f6h:
 sub_4508h:
 	call NextChkOpBra_GetLex		;4508	cd fd 32 	. . 2 
 	call l3f43h		;450b	cd 43 3f 	. C ? 
-	call sub_34e6h		;450e	cd e6 34 	. . 4 
+	call PCVChkNum		;450e	cd e6 34 	. . 4 
 l4511h:
 	res 3,(ix+002h)		;4511	dd cb 02 9e 	. . . . 
 	jp ChkCloBra_GetLex		;4515	c3 05 33 	. . 3 
@@ -13913,7 +13898,7 @@ l4eb1h:
 	call sub_3518h		;4eb1	cd 18 35 	. . 5 
 	jr l4ebdh		;4eb4	18 07 	. . 
 l4eb6h:
-	call sub_3408h		;4eb6	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;4eb6	cd 08 34 	. . 4 
 	set 1,(ix+001h)		;4eb9	dd cb 01 ce 	. . . . 
 l4ebdh:
 	call JCodeNextByte		;4ebd	cd d1 06 	. . . 
@@ -14101,7 +14086,7 @@ l4fd0h:
 	jr z,l4fc5h		;4fd7	28 ec 	( . 
 	jr l4fafh		;4fd9	18 d4 	. . 
 l4fdbh:
-	call sub_3408h		;4fdb	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;4fdb	cd 08 34 	. . 4 
 	pop bc			;4fde	c1 	. 
 	jr l4fb2h		;4fdf	18 d1 	. . 
 l4fe1h:
@@ -14162,7 +14147,7 @@ l503bh:
 	defb 0e5h		;503e	e5 	. 
 	ret			;503f	c9 	. 
 l5040h:
-	call sub_3408h		;5040	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;5040	cd 08 34 	. . 4 
 	jr l503bh		;5043	18 f6 	. . 
 sub_5045h:
 	push bc			;5045	c5 	. 
@@ -14173,7 +14158,7 @@ sub_5045h:
 	dec hl			;504b	2b 	+ 
 	dec b			;504c	05 	. 
 	jr z,l505dh		;504d	28 0e 	( . 
-	ld (l2b87h),de		;504f	ed 53 87 2b 	. S . + 
+	ld (Merker1),de		;504f	ed 53 87 2b 	. S . + 
 	inc b			;5053	04 	. 
 	pop bc			;5054	c1 	. 
 	ret nz			;5055	c0 	. 
@@ -14251,7 +14236,7 @@ sub_50c9h:
 	inc b			;50d1	04 	. 
 	ld a,d			;50d2	7a 	z 
 	jr z,l50e3h		;50d3	28 0e 	( . 
-	ld de,(l2b87h)		;50d5	ed 5b 87 2b 	. [ . + 
+	ld de,(Merker1)		;50d5	ed 5b 87 2b 	. [ . + 
 	ret			;50d9	c9 	. 
 l50dah:
 	ld a,d			;50da	7a 	z 
@@ -14499,7 +14484,7 @@ l525ch:
 	ld e,03fh		;526e	1e 3f 	. ? 
 	call sub_5027h		;5270	cd 27 50 	. ' P 
 	call sub_50c9h		;5273	cd c9 50 	. . P 
-	call sub_3408h		;5276	cd 08 34 	. . 4 
+	call WLdHLnnIsDE		;5276	cd 08 34 	. . 4 
 	call JCodeNextByte		;5279	cd d1 06 	. . . 
 	defb 0e5h		;527c	e5 	. 
 	jr l5287h		;527d	18 08 	. . 
