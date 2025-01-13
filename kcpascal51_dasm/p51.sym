@@ -1,6 +1,24 @@
 ; Symbol file
 ;; Markennamen mit "__" am Ende sind unsicher, ihre Bedeutung also geraten.
 
+; aus PasEx:
+CCTL0: equ 0x0b7a6
+SUTAB: equ 0x0b7b0
+SUBALT: equ 0x0b7fe  ;SUTAB merken
+SUBNEU: equ 0xbcee ; 1. Byte nach PasEx auf 0xbc00
+SUBNEU+2: equ 0xbcf0
+SUBNEU+10: equ 0xbcf8
+SUBNEU+16: equ 0xbcfe
+MBO: equ 0xbc80
+MBI: equ 0xbcD0
+PV1: equ 0x0f003
+ISRO: equ 0x0bc2f
+CSRO: equ 0x0bc96
+ISRI: equ 0x0bc9e
+CSRI: equ 0x0bce9
+
+; -----
+
 l01eeh:	equ 0x01ee
 ; Used at following locations:
 ; 0x1739	(immediate value)
@@ -151,49 +169,49 @@ TestBreak:	equ 0x03c1
 ; 0x045a	(call destination)
 ; 0x03d6	(call destination)
 
-sub_03cfh:	equ 0x03cf
+Load:	equ 0x03cf
 ; Used at following locations:
 ; 0x07c6	(call destination)
 
-l03d2h:	equ 0x03d2
+RetryISRI:	equ 0x03d2
 ; Used at following locations:
 ; 0x0442	(jp destination)
 ; 0x0413	(jp destination)
 ; 0x03fb	(jr destination)
 
-l03d6h:	equ 0x03d6
+C_ISRI:	equ 0x03d6
 ; Used at following locations:
 ; 0x1358	(immediate value)
 
-l0411h:	equ 0x0411
+ChkForBlock1:	equ 0x0411
 ; Used at following locations:
 ; 0x3d01	(jp destination)
 
-l0423h:	equ 0x0423
+CmpFNamChr:	equ 0x0423
 ; Used at following locations:
 ; 0x043b	(djnz destination)
 
-l0435h:	equ 0x0435
+CmpFNamEchoChr:	equ 0x0435
 ; Used at following locations:
 ; 0x0431	(jr destination)
 ; 0x042c	(jr destination)
 
-l0439h:	equ 0x0439
+CmpFNamNxtChr:	equ 0x0439
 ; Used at following locations:
 ; 0x0429	(jr destination)
 ; 0x0425	(jr destination)
 
-l045ah:	equ 0x045a
+C_MBI:	equ 0x045a
 ; Used at following locations:
 ; 0x04b9	(jr destination)
 ; 0x048d	(jr destination)
 ; 0x0462	(jr destination)
 
-l048fh:	equ 0x048f
+BlockRead:	equ 0x048f
 ; Used at following locations:
 ; 0x0480	(jr destination)
 
-l04bbh:	equ 0x04bb
+C_CSRI:	equ 0x04bb
 ; Used at following locations:
 ; 0x04a4	(jr destination)
 ; 0x047d	(jr destination)
@@ -316,7 +334,7 @@ pascal_sp:	equ 0x06b2
 ; 0x0269	(word load pointer)
 ; 0x0237	(word load pointer)
 
-l06b4h:	equ 0x06b4
+srcAddr_LoadSave:	equ 0x06b4
 ; Used at following locations:
 ; 0x04c2	(word load pointer)
 ; 0x04b5	(word load pointer)
@@ -345,7 +363,7 @@ bin_end:	equ 0x06ba
 ; 0x03ab	(word load pointer)
 ; 0x030a	(word load pointer)
 
-l06bch:	equ 0x06bc
+nextBlkNum:	equ 0x06bc
 ; Used at following locations:
 ; 0x0478	(immediate value)
 ; 0x0417	(byte load pointer)
@@ -377,7 +395,7 @@ JEndPascal:	equ 0x06cb
 ; 0x2f37	(jp destination)
 ; 0x07de	(jp destination)
 
-l06ceh:	equ 0x06ce
+JReadEditIBuf__:	equ 0x06ce
 ; Used at following locations:
 ; 0x3eff	(call destination)
 ; 0x122a	(call destination)
@@ -647,19 +665,19 @@ OutChr:	equ 0x0729
 ; 0x03c9	(call destination)
 ; 0x03bb	(call destination)
 
-l0735h:	equ 0x0735
+;l0735h:	equ 0x0735
 ; Used at following locations:
 ; 0x070b	(jr destination)
 
-l073ah:	equ 0x073a
+OCChkNL:	equ 0x073a
 ; Used at following locations:
 ; 0x072e	(jr destination)
 
-l0743h:	equ 0x0743
+OCOther:	equ 0x0743
 ; Used at following locations:
 ; 0x073c	(jr destination)
 
-l0746h:	equ 0x0746
+OCEnd:	equ 0x0746
 ; Used at following locations:
 ; 0x0738	(jr destination)
 
@@ -668,7 +686,7 @@ OutCh1:	equ 0x0749
 ; 0x0743	(call destination)
 ; 0x073e	(call destination)
 
-sub_0757h:	equ 0x0757
+KbdStat:	equ 0x0757
 ; Used at following locations:
 ; 0x52b3	(call destination)
 
@@ -683,15 +701,15 @@ SetFileName:	equ 0x0763
 ; 0x07c2	(call destination)
 ; 0x07af	(call destination)
 
-l076bh:	equ 0x076b
+SetFNClear:	equ 0x076b
 ; Used at following locations:
 ; 0x076e	(djnz destination)
 
-l0773h:	equ 0x0773
+SetFNChr:	equ 0x0773
 ; Used at following locations:
 ; 0x077e	(djnz destination)
 
-l0780h:	equ 0x0780
+SetFNEnd:	equ 0x0780
 ; Used at following locations:
 ; 0x0776	(jr destination)
 
@@ -700,7 +718,7 @@ SetExtPAS:	equ 0x0787
 ; 0x07bf	(call destination)
 ; 0x07ac	(call destination)
 
-l078bh:	equ 0x078b
+SetFileExt:	equ 0x078b
 ; Used at following locations:
 ; 0x079d	(jr destination)
 
@@ -708,26 +726,26 @@ SetExtCOM:	equ 0x0799
 ; Used at following locations:
 ; 0x07d5	(call destination)
 
-l079fh:	equ 0x079f
+fileExtCOM:	equ 0x079f
 ; Used at following locations:
 ; 0x079a	(immediate value)
 
-l07a2h:	equ 0x07a2
+fileExtPAS:	equ 0x07a2
 ; Used at following locations:
 ; 0x0788	(immediate value)
 
-l07a5h:	equ 0x07a5
+SaveSrcFile:	equ 0x07a5
 ; Used at following locations:
 ; 0x523f	(call destination)
 ; 0x27ec	(jp destination)
 
-sub_07b8h:	equ 0x07b8
+LoadSrcFile:	equ 0x07b8
 ; Used at following locations:
 ; 0x5237	(call destination)
 ; 0x284d	(call destination)
 ; 0x27f6	(call destination)
 
-l07cbh:	equ 0x07cb
+SaveLoadEnd:	equ 0x07cb
 ; Used at following locations:
 ; 0x07b6	(jr destination)
 
@@ -1189,19 +1207,19 @@ IsEOL:	equ 0x0a5e
 ; Used at following locations:
 ; 0x52d2	(call destination)
 
-GetCurrChar__:	equ 0x0a68
+GetCurIBufChr:	equ 0x0a68
 ; Used at following locations:
 ; 0x0bd4	(call destination)
 ; 0x0a6f	(call destination)
 ; 0x0a5e	(call destination)
 ; 0x0a54	(call destination)
 
-l0a6fh:	equ 0x0a6f
+ReadEditIBuf__:	equ 0x0a6f
 ; Used at following locations:
 ; 0x07e6	(immediate value)
 ; 0x06ce	(jp destination)
 
-sub_0a72h:	equ 0x0a72
+EditIBuf__:	equ 0x0a72
 ; Used at following locations:
 ; 0x129c	(call destination)
 ; 0x120d	(call destination)
@@ -1212,7 +1230,7 @@ sub_0a72h:	equ 0x0a72
 ; 0x0ba2	(call destination)
 ; 0x0b98	(call destination)
 
-sub_0a7eh:	equ 0x0a7e
+ReadIBufOrEdit:	equ 0x0a7e
 ; Used at following locations:
 ; 0x0a76	(call destination)
 
@@ -1221,7 +1239,7 @@ l0aa2h:	equ 0x0aa2
 ; 0x3ef6	(call destination)
 ; 0x0aa7	(jr destination)
 
-LineEditor__:	equ 0x0aaa
+EditSrcLine__:	equ 0x0aaa
 ; Used at following locations:
 ; 0x2721	(call destination)
 ; 0x24d3	(call destination)
@@ -1231,7 +1249,7 @@ l0aach:	equ 0x0aac
 ; 0x23f4	(call destination)
 ; 0x0b12	(jp destination)
 
-sub_0aafh:	equ 0x0aaf
+EditLine:	equ 0x0aaf
 ; Used at following locations:
 ; 0x0a91	(call destination)
 
@@ -2528,7 +2546,7 @@ l17a7h:	equ 0x17a7
 ; 0x155f	(word load pointer)
 ; 0x14f6	(word load pointer)
 
-InputCurrChr_Addr:	equ 0x17a9
+iBufCurChrAddr:	equ 0x17a9
 ; Used at following locations:
 ; 0x24ba	(word load pointer)
 ; 0x24ad	(word load pointer)
@@ -2538,7 +2556,7 @@ InputCurrChr_Addr:	equ 0x17a9
 ; 0x0a69	(word load pointer)
 ; 0x07f5	(word load pointer)
 
-inputBuf__:	equ 0x17ab
+inputBuf:	equ 0x17ab
 ; Used at following locations:
 ; 0x0a8b	(immediate value)
 ; 0x07fb	(word load pointer)
@@ -3006,7 +3024,7 @@ l27b7h:	equ 0x27b7
 
 DoCmdP:	equ 0x27c0
 
-l27deh:	equ 0x27de
+CmdPGotoEOL:	equ 0x27de
 ; Used at following locations:
 ; 0x27d3	(jr destination)
 ; 0x27d1	(jr destination)
@@ -3223,7 +3241,7 @@ cmdTabRunAddr:	equ 0x2ac5
 
 tPardon:	equ 0x2b00
 
-tNL:	equ 0x2b09
+param3:	equ 0x2b09
 ; Used at following locations:
 ; 0x2a36	(immediate value)
 ; 0x284a	(immediate value)
@@ -3235,15 +3253,7 @@ tNL:	equ 0x2b09
 ; 0x246c	(immediate value)
 ; 0x23e1	(immediate value)
 
-l2b0eh:	equ 0x2b0e
-; Used at following locations:
-; 0x2abd	(jr destination)
-
-l2b12h:	equ 0x2b12
-; Used at following locations:
-; 0x2ac0	(jr destination)
-
-l2b1eh:	equ 0x2b1e
+param4:	equ 0x2b1e
 ; Used at following locations:
 ; 0x2a3f	(immediate value)
 ; 0x26a5	(immediate value)
@@ -7371,7 +7381,7 @@ StartPASSrc:	equ 0x52f3
 
 PasEx:	equ 0x5300
 
-l5305h:	equ 0x5305
+PXSrchProlog:	equ 0x5305
 ; Used at following locations:
 ; 0x530b	(djnz destination)
 
@@ -7379,11 +7389,11 @@ l5309h:	equ 0x5309
 ; Used at following locations:
 ; 0x13ca	(immediate value)
 
-l530fh:	equ 0x530f
+PXKillProlog:	equ 0x530f
 ; Used at following locations:
 ; 0x5309	(jr destination)
 
-l5311h:	equ 0x5311
+PXCpChrMap:	equ 0x5311
 ; Used at following locations:
 ; 0x530d	(jr destination)
 
@@ -7391,63 +7401,69 @@ l531ah:	equ 0x531a
 ; Used at following locations:
 ; 0x1a2e	(immediate value)
 
-l5382h:	equ 0x5382
+PXTAPE: equ 0xbc0f
+PXTAPE+1: equ 0xbc10
+PXDISK: equ 0xbc20
+PXDISK+1: equ 0xbc21
+
+PXSTAB:	equ 0x5382
 ; Used at following locations:
 ; 0x5375	(immediate value)
 
-l538ah:	equ 0x538a
+PXUSASC:	equ 0x538a
 ; Used at following locations:
 ; 0x531c	(immediate value)
 
-l53a2h:	equ 0x53a2
+PXBASCI:	equ 0x53a2
+PXSASCI:	equ 0xbc00
+PXSASCI+1:	equ 0xbc01
+PXASCI:	equ 0xbc08
 ; Used at following locations:
 ; 0x5327	(immediate value)
 
-l53beh:	equ 0x53be
+PXSetSUTAB:	equ 0x53be
 ; Used at following locations:
 ; 0x53cf	(jr destination)
 
-l53e0h:	equ 0x53e0
+ISRO_s: equ 0x53d1
+
+PXSendName:	equ 0x53e0
 ; Used at following locations:
 ; 0x53e5	(jr destination)
 
-l53f7h:	equ 0x53f7
+PXNxtBlock_s: equ 0x53e9
+PXNxtBlock: equ 0xbc47
+
+PXSendBlock:	equ 0x53f7
 ; Used at following locations:
 ; 0x53fc	(jr destination)
 
-l53feh:	equ 0x53fe
+PXSendCtl:	equ 0xbc5c
+PXSendCtl_s:	equ 0x53fe
 ; Used at following locations:
 ; 0x543e	(jr destination)
 
-l5403h:	equ 0x5403
+PXWaitForReady:	equ 0x5403
 ; Used at following locations:
 ; 0x540f	(jr destination)
 
-l544dh:	equ 0x544d
+MBO_s: equ 0x5422
+CSRO_s: equ 0x5438
+ISRI_s: equ 0x5440
+
+PXSendName2:	equ 0x544d
 ; Used at following locations:
 ; 0x5452	(jr destination)
 
-l5465h:	equ 0x5465
+PXRecvBlock: equ 0x5454
+PXRecvBlock_s: equ 0xbcb2
+
+PXRecvByte:	equ 0x5465
 ; Used at following locations:
 ; 0x546a	(jr destination)
 
-l5491h:	equ 0x5491
-; Used at following locations:
-; 0x2b4d	(jp destination)
+MBI_s: equ 0x5472
+CSRI_s: equ 0x548b
+SUBNEU_s: equ 0x5490
 
-l54edh:	equ 0x54ed
-; Used at following locations:
-; 0x54e2	(jr destination)
-
-l54eeh:	equ 0x54ee
-; Used at following locations:
-; 0x54bb	(jr destination)
-
-l54f1h:	equ 0x54f1
-; Used at following locations:
-; 0x549f	(jr destination)
-
-l54fch:	equ 0x54fc
-; Used at following locations:
-; 0x54c8	(jr destination)
 

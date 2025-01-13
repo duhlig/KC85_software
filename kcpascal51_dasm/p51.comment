@@ -63,6 +63,21 @@ GetLexem:
       0dbh: "["
       0ddh: "]"
 
+Save:
+  Parameter:
+    HL: Anfangsadresse
+    BC: Länge
+    
+GotoSrcLineBC:
+  Parameter:
+    BC: gesuchte Zeilennummer
+  Return:
+    HL: Adr. der gesu. oder nächsthöheren Zl.
+    Flags:
+      C=1: gesu. Zeilennummer > letzte Zeile, d.h. nicht gefunden
+      Z=1: Zeilennummer gefunden
+      Z=0 und C=0: gesu. ZlNr liegt zwischen 2 Zeilen
+
 IX:
   +0:
     bit_0: Comp-Opt. L, + -> 1, - -> 0

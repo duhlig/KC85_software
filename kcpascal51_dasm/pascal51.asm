@@ -3,6 +3,30 @@
 
 	org	00200h
 l01eeh:	equ 0x01ee
+CCTL0:	equ 0xb7a6
+SUTAB:	equ 0xb7b0
+SUBALT:	equ 0xb7fe
+PXSASCI:	equ 0xbc00
+PXSASCI+1:	equ 0xbc01
+PXASCI:	equ 0xbc08
+PXTAPE:	equ 0xbc0f
+PXTAPE+1:	equ 0xbc10
+PXDISK:	equ 0xbc20
+PXDISK+1:	equ 0xbc21
+ISRO:	equ 0xbc2f
+PXNxtBlock:	equ 0xbc47
+PXSendCtl:	equ 0xbc5c
+MBO:	equ 0xbc80
+CSRO:	equ 0xbc96
+ISRI:	equ 0xbc9e
+PXRecvBlock_s:	equ 0xbcb2
+MBI:	equ 0xbcd0
+CSRI:	equ 0xbce9
+SUBNEU:	equ 0xbcee
+SUBNEU+2:	equ 0xbcf0
+SUBNEU+10:	equ 0xbcf8
+SUBNEU+16:	equ 0xbcfe
+PV1:	equ 0xf003
 
 l0200h:
 	nop			;0200	00 	. 
@@ -74,9 +98,9 @@ l023bh:
 	ld a,(tmp_reg_a)		;024a	3a bd 06 	: . . 
 	ld sp,(caos_sp)		;024d	ed 7b 06 07 	. { . . 
 	ei			;0251	fb 	. 
-	call 0f003h		;0252	cd 03 f0 	. . . 
+	call PV1		;0252	cd 03 f0 	. . . 
 OSPrc:
-	nop			;0255	00 	. 
+	defb 000h		;0255	00 	. 
 	di			;0256	f3 	. 
 	ld (caos_sp),sp		;0257	ed 73 06 07 	. s . . 
 	ld (tmp_reg_a),a		;025b	32 bd 06 	2 . . 
@@ -266,11 +290,11 @@ TestBreak:
 	ld a,012h		;03c7	3e 12 	> . 
 	call OutChr		;03c9	cd 29 07 	. ) . 
 	jp Reset		;03cc	c3 dd 06 	. . . 
-sub_03cfh:
-	ld (l06b4h),hl		;03cf	22 b4 06 	" . . 
-l03d2h:
+Load:
+	ld (srcAddr_LoadSave),hl		;03cf	22 b4 06 	" . . 
+RetryISRI:
 	ld ix,(caos_ix)		;03d2	dd 2a b0 06 	. * . . 
-l03d6h:
+C_ISRI:
 	call TestBreak		;03d6	cd c1 03 	. . . 
 	ld hl,00080h		;03d9	21 80 00 	! . . 
 	in a,(088h)		;03dc	db 88 	. . 
@@ -286,7 +310,7 @@ l03d6h:
 	out (088h),a		;03f4	d3 88 	. . 
 	ld e,00ah		;03f6	1e 0a 	. . 
 	call CCaos		;03f8	cd 2c 02 	. , . 
-	jr c,l03d2h		;03fb	38 d5 	8 . 
+	jr c,RetryISRI		;03fb	38 d5 	8 . 
 	in a,(088h)		;03fd	db 88 	. . 
 	set 5,a		;03ff	cb ef 	. . 
 	set 2,a		;0401	cb d7 	. . 
@@ -297,50 +321,50 @@ l03d6h:
 	res 2,a		;040c	cb 97 	. . 
 	out (088h),a		;040e	d3 88 	. . 
 	ld a,e			;0410	7b 	{ 
-l0411h:
+ChkForBlock1:
 	cp 001h		;0411	fe 01 	. . 
-	jp nz,l03d2h		;0413	c2 d2 03 	. . . 
+	jp nz,RetryISRI		;0413	c2 d2 03 	. . . 
 	inc a			;0416	3c 	< 
-	ld (l06bch),a		;0417	32 bc 06 	2 . . 
+	ld (nextBlkNum),a		;0417	32 bc 06 	2 . . 
 	ld de,00080h		;041a	11 80 00 	. . . 
 	ld bc,l0b00h		;041d	01 00 0b 	. . . 
 	ld hl,fileName		;0420	21 f8 06 	! . . 
-l0423h:
+CmpFNamChr:
 	ld a,(de)			;0423	1a 	. 
 	or a			;0424	b7 	. 
-	jr z,l0439h		;0425	28 12 	( . 
+	jr z,CmpFNamNxtChr		;0425	28 12 	( . 
 	cp 020h		;0427	fe 20 	.   
-	jr z,l0439h		;0429	28 0e 	( . 
+	jr z,CmpFNamNxtChr		;0429	28 0e 	( . 
 	cp (hl)			;042b	be 	. 
-	jr z,l0435h		;042c	28 07 	( . 
+	jr z,CmpFNamEchoChr		;042c	28 07 	( . 
 	ld a,03fh		;042e	3e 3f 	> ? 
 	cp (hl)			;0430	be 	. 
-	jr z,l0435h		;0431	28 02 	( . 
+	jr z,CmpFNamEchoChr		;0431	28 02 	( . 
 	ld c,001h		;0433	0e 01 	. . 
-l0435h:
+CmpFNamEchoChr:
 	ld a,(de)			;0435	1a 	. 
 	call OutChr		;0436	cd 29 07 	. ) . 
-l0439h:
+CmpFNamNxtChr:
 	inc de			;0439	13 	. 
 	inc hl			;043a	23 	# 
-	djnz l0423h		;043b	10 e6 	. . 
+	djnz CmpFNamChr		;043b	10 e6 	. . 
 	call PrNL		;043d	cd 85 08 	. . . 
 	ld a,c			;0440	79 	y 
 	or a			;0441	b7 	. 
-	jp nz,l03d2h		;0442	c2 d2 03 	. . . 
+	jp nz,RetryISRI		;0442	c2 d2 03 	. . . 
 	ld de,(00091h)		;0445	ed 5b 91 00 	. [ . . 
 	ld hl,(00093h)		;0449	2a 93 00 	* . . 
 	or a			;044c	b7 	. 
 	sbc hl,de		;044d	ed 52 	. R 
 	ld (SaveBlockAdr),hl		;044f	22 b8 06 	" . . 
-	ld de,(l06b4h)		;0452	ed 5b b4 06 	. [ . . 
+	ld de,(srcAddr_LoadSave)		;0452	ed 5b b4 06 	. [ . . 
 	add hl,de			;0456	19 	. 
 	ld (l06b6h),hl		;0457	22 b6 06 	" . . 
-l045ah:
+C_MBI:
 	call TestBreak		;045a	cd c1 03 	. . . 
 	ld e,005h		;045d	1e 05 	. . 
 	call CCaos		;045f	cd 2c 02 	. , . 
-	jr c,l045ah		;0462	38 f6 	8 . 
+	jr c,C_MBI		;0462	38 f6 	8 . 
 	in a,(088h)		;0464	db 88 	. . 
 	set 5,a		;0466	cb ef 	. . 
 	set 2,a		;0468	cb d7 	. . 
@@ -351,17 +375,17 @@ l045ah:
 	res 2,a		;0473	cb 97 	. . 
 	out (088h),a		;0475	d3 88 	. . 
 	ld a,e			;0477	7b 	{ 
-	ld hl,l06bch		;0478	21 bc 06 	! . . 
+	ld hl,nextBlkNum		;0478	21 bc 06 	! . . 
 	cp 0ffh		;047b	fe ff 	. . 
-	jr z,l04bbh		;047d	28 3c 	( < 
+	jr z,C_CSRI		;047d	28 3c 	( < 
 	cp (hl)			;047f	be 	. 
-	jr z,l048fh		;0480	28 0d 	( . 
+	jr z,BlockRead		;0480	28 0d 	( . 
 	call PrByteHex		;0482	cd c0 08 	. . . 
 	ld a,02ah		;0485	3e 2a 	> * 
 	call OutChr		;0487	cd 29 07 	. ) . 
 	call PrSpace		;048a	cd 89 08 	. . . 
-	jr l045ah		;048d	18 cb 	. . 
-l048fh:
+	jr C_MBI		;048d	18 cb 	. . 
+BlockRead:
 	inc (hl)			;048f	34 	4 
 	call PrByteHex		;0490	cd c0 08 	. . . 
 	ld a,03eh		;0493	3e 3e 	> > 
@@ -371,18 +395,18 @@ l048fh:
 	ld de,00080h		;049e	11 80 00 	. . . 
 	or a			;04a1	b7 	. 
 	sbc hl,de		;04a2	ed 52 	. R 
-	jr c,l04bbh		;04a4	38 15 	8 . 
+	jr c,C_CSRI		;04a4	38 15 	8 . 
 	ld (SaveBlockAdr),hl		;04a6	22 b8 06 	" . . 
 	ld bc,00080h		;04a9	01 80 00 	. . . 
 	ld hl,00080h		;04ac	21 80 00 	! . . 
-	ld de,(l06b4h)		;04af	ed 5b b4 06 	. [ . . 
+	ld de,(srcAddr_LoadSave)		;04af	ed 5b b4 06 	. [ . . 
 	ldir		;04b3	ed b0 	. . 
-	ld (l06b4h),de		;04b5	ed 53 b4 06 	. S . . 
-	jr l045ah		;04b9	18 9f 	. . 
-l04bbh:
+	ld (srcAddr_LoadSave),de		;04b5	ed 53 b4 06 	. S . . 
+	jr C_MBI		;04b9	18 9f 	. . 
+C_CSRI:
 	ld bc,(SaveBlockAdr)		;04bb	ed 4b b8 06 	. K . . 
 	ld hl,00080h		;04bf	21 80 00 	! . . 
-	ld de,(l06b4h)		;04c2	ed 5b b4 06 	. [ . . 
+	ld de,(srcAddr_LoadSave)		;04c2	ed 5b b4 06 	. [ . . 
 	ldir		;04c6	ed b0 	. . 
 	ld e,00bh		;04c8	1e 0b 	. . 
 	call CCaos		;04ca	cd 2c 02 	. , . 
@@ -652,7 +676,7 @@ caos_ix:
 	defw 00000h		;06b0	00 00 	. . 
 pascal_sp:
 	defw 00000h		;06b2	00 00 	. . 
-l06b4h:
+srcAddr_LoadSave:
 	defw 00000h		;06b4	00 00 	. . 
 l06b6h:
 	defw 00000h		;06b6	00 00 	. . 
@@ -660,8 +684,8 @@ SaveBlockAdr:
 	defw 00000h		;06b8	00 00 	. . 
 bin_end:
 	defw 00000h		;06ba	00 00 	. . 
-l06bch:
-	nop			;06bc	00 	. 
+nextBlkNum:
+	defb 000h		;06bc	00 	. 
 tmp_reg_a:
 	nop			;06bd	00 	. 
 Init1:
@@ -674,8 +698,8 @@ PasPrgStart:
 	jp 07cd5h		;06c8	c3 d5 7c 	. . | 
 JEndPascal:
 	jp END_PASCAL		;06cb	c3 1b 07 	. . . 
-l06ceh:
-	jp l0a6fh		;06ce	c3 6f 0a 	. o . 
+JReadEditIBuf__:
+	jp ReadEditIBuf__		;06ce	c3 6f 0a 	. o . 
 JCodeNextByte:
 	jp CodeNextByte		;06d1	c3 ee 33 	. . 3 
 JPrError:
@@ -744,20 +768,19 @@ OutChr:
 	push af			;072a	f5 	. 
 	ld c,a			;072b	4f 	O 
 	cp 010h		;072c	fe 10 	. . 
-	jr nz,l073ah		;072e	20 0a 	  . 
+	jr nz,OCChkNL		;072e	20 0a 	  . 
 	ld a,(printFlag)		;0730	3a 12 07 	: . . 
 	xor 001h		;0733	ee 01 	. . 
-l0735h:
 	ld (printFlag),a		;0735	32 12 07 	2 . . 
-	jr l0746h		;0738	18 0c 	. . 
-l073ah:
+	jr OCEnd		;0738	18 0c 	. . 
+OCChkNL:
 	cp 00dh		;073a	fe 0d 	. . 
-	jr nz,l0743h		;073c	20 05 	  . 
+	jr nz,OCOther		;073c	20 05 	  . 
 	call OutCh1		;073e	cd 49 07 	. I . 
 	ld c,00ah		;0741	0e 0a 	. . 
-l0743h:
+OCOther:
 	call OutCh1		;0743	cd 49 07 	. I . 
-l0746h:
+OCEnd:
 	pop af			;0746	f1 	. 
 	pop bc			;0747	c1 	. 
 	ret			;0748	c9 	. 
@@ -769,7 +792,7 @@ OutCh1:
 	pop bc			;0752	c1 	. 
 	ret z			;0753	c8 	. 
 	jp CAOS_UOT1		;0754	c3 db 04 	. . . 
-sub_0757h:
+KbdStat:
 	jp CAOS_KBDS		;0757	c3 75 02 	. u . 
 Upper:
 	cp 07eh		;075a	fe 7e 	. ~ 
@@ -784,22 +807,22 @@ SetFileName:
 	ld b,008h		;0765	06 08 	. . 
 	ld hl,fileName		;0767	21 f8 06 	! . . 
 	push hl			;076a	e5 	. 
-l076bh:
+SetFNClear:
 	ld (hl),000h		;076b	36 00 	6 . 
 	inc hl			;076d	23 	# 
-	djnz l076bh		;076e	10 fb 	. . 
+	djnz SetFNClear		;076e	10 fb 	. . 
 	pop hl			;0770	e1 	. 
 	ld b,008h		;0771	06 08 	. . 
-l0773h:
+SetFNChr:
 	ld a,(de)			;0773	1a 	. 
 	cp 00dh		;0774	fe 0d 	. . 
-	jr z,l0780h		;0776	28 08 	( . 
+	jr z,SetFNEnd		;0776	28 08 	( . 
 	call Upper		;0778	cd 5a 07 	. Z . 
 	ld (hl),a			;077b	77 	w 
 	inc de			;077c	13 	. 
 	inc hl			;077d	23 	# 
-	djnz l0773h		;077e	10 f3 	. . 
-l0780h:
+	djnz SetFNChr		;077e	10 f3 	. . 
+SetFNEnd:
 	pop bc			;0780	c1 	. 
 	pop hl			;0781	e1 	. 
 	push hl			;0782	e5 	. 
@@ -809,8 +832,8 @@ l0780h:
 	ret			;0786	c9 	. 
 SetExtPAS:
 	push hl			;0787	e5 	. 
-	ld hl,l07a2h		;0788	21 a2 07 	! . . 
-l078bh:
+	ld hl,fileExtPAS		;0788	21 a2 07 	! . . 
+SetFileExt:
 	push bc			;078b	c5 	. 
 	push de			;078c	d5 	. 
 	ld bc,00003h		;078d	01 03 00 	. . . 
@@ -822,23 +845,17 @@ l078bh:
 	ret			;0798	c9 	. 
 SetExtCOM:
 	push hl			;0799	e5 	. 
-	ld hl,l079fh		;079a	21 9f 07 	! . . 
-	jr l078bh		;079d	18 ec 	. . 
-l079fh:
-
-; BLOCK 'ExtCOM' (start 0x079f end 0x07a1)
-ExtCOM_start:
+	ld hl,fileExtCOM		;079a	21 9f 07 	! . . 
+	jr SetFileExt		;079d	18 ec 	. . 
+fileExtCOM:
 	defb 043h		;079f	43 	C 
 	defb 04fh		;07a0	4f 	O 
-	ld c,l			;07a1	4d 	M 
-l07a2h:
-
-; BLOCK 'ExtPAS' (start 0x07a2 end 0x07a4)
-ExtPAS_start:
+	defb 04dh		;07a1	4d 	M 
+fileExtPAS:
 	defb 050h		;07a2	50 	P 
 	defb 041h		;07a3	41 	A 
-	ld d,e			;07a4	53 	S 
-l07a5h:
+	defb 053h		;07a4	53 	S 
+SaveSrcFile:
 	push ix		;07a5	dd e5 	. . 
 	push iy		;07a7	fd e5 	. . 
 	push hl			;07a9	e5 	. 
@@ -848,8 +865,8 @@ l07a5h:
 	call SetFileName		;07af	cd 63 07 	. c . 
 	call Save		;07b2	cd f5 02 	. . . 
 	pop de			;07b5	d1 	. 
-	jr l07cbh		;07b6	18 13 	. . 
-sub_07b8h:
+	jr SaveLoadEnd		;07b6	18 13 	. . 
+LoadSrcFile:
 	push ix		;07b8	dd e5 	. . 
 	push iy		;07ba	fd e5 	. . 
 	push hl			;07bc	e5 	. 
@@ -858,10 +875,10 @@ sub_07b8h:
 	call SetExtPAS		;07bf	cd 87 07 	. . . 
 	call SetFileName		;07c2	cd 63 07 	. c . 
 	pop hl			;07c5	e1 	. 
-	call sub_03cfh		;07c6	cd cf 03 	. . . 
+	call Load		;07c6	cd cf 03 	. . . 
 	ex de,hl			;07c9	eb 	. 
 	dec de			;07ca	1b 	. 
-l07cbh:
+SaveLoadEnd:
 	pop bc			;07cb	c1 	. 
 	pop hl			;07cc	e1 	. 
 	pop iy		;07cd	fd e1 	. . 
@@ -875,15 +892,15 @@ SaveCom:
 	jp JEndPascal		;07de	c3 cb 06 	. . . 
 InitRuntimeErr__:
 	ld a,0c3h		;07e1	3e c3 	> . 
-	ld (l06ceh),a		;07e3	32 ce 06 	2 . . 
-	ld hl,l0a6fh		;07e6	21 6f 0a 	! o . 
-	ld (l06ceh+1),hl		;07e9	22 cf 06 	" . . 
+	ld (JReadEditIBuf__),a		;07e3	32 ce 06 	2 . . 
+	ld hl,ReadEditIBuf__		;07e6	21 6f 0a 	! o . 
+	ld (JReadEditIBuf__+1),hl		;07e9	22 cf 06 	" . . 
 	ld hl,PrRuntimeErr		;07ec	21 f8 08 	! . . 
 	ld (JPrError+1),hl		;07ef	22 d5 06 	" . . 
-	ld hl,inputBuf__		;07f2	21 ab 17 	! . . 
-	ld (InputCurrChr_Addr),hl		;07f5	22 a9 17 	" . . 
+	ld hl,inputBuf		;07f2	21 ab 17 	! . . 
+	ld (iBufCurChrAddr),hl		;07f5	22 a9 17 	" . . 
 	ld hl,0000dh		;07f8	21 0d 00 	! . . 
-	ld (inputBuf__),hl		;07fb	22 ab 17 	" . . 
+	ld (inputBuf),hl		;07fb	22 ab 17 	" . . 
 	ret			;07fe	c9 	. 
 PrGetKey:
 	call GetKey		;07ff	cd 81 02 	. . . 
@@ -1389,7 +1406,7 @@ l0a49h:
 	ret p			;0a51	f0 	. 
 	jr NegHL		;0a52	18 bd 	. . 
 CurrCharIsNum:
-	call GetCurrChar__		;0a54	cd 68 0a 	. h . 
+	call GetCurIBufChr		;0a54	cd 68 0a 	. h . 
 IsNum:
 	cp 030h		;0a57	fe 30 	. 0 
 	ccf			;0a59	3f 	? 
@@ -1397,61 +1414,61 @@ IsNum:
 	cp 03ah		;0a5b	fe 3a 	. : 
 	ret			;0a5d	c9 	. 
 IsEOL:
-	call GetCurrChar__		;0a5e	cd 68 0a 	. h . 
+	call GetCurIBufChr		;0a5e	cd 68 0a 	. h . 
 	cp 00dh		;0a61	fe 0d 	. . 
 	ld a,000h		;0a63	3e 00 	> . 
 	ret nz			;0a65	c0 	. 
 	inc a			;0a66	3c 	< 
 	ret			;0a67	c9 	. 
-GetCurrChar__:
+GetCurIBufChr:
 	push hl			;0a68	e5 	. 
-	ld hl,(InputCurrChr_Addr)		;0a69	2a a9 17 	* . . 
+	ld hl,(iBufCurChrAddr)		;0a69	2a a9 17 	* . . 
 	ld a,(hl)			;0a6c	7e 	~ 
 	pop hl			;0a6d	e1 	. 
 	ret			;0a6e	c9 	. 
-l0a6fh:
-	call GetCurrChar__		;0a6f	cd 68 0a 	. h . 
-sub_0a72h:
+ReadEditIBuf__:
+	call GetCurIBufChr		;0a6f	cd 68 0a 	. h . 
+EditIBuf__:
 	push hl			;0a72	e5 	. 
 	push de			;0a73	d5 	. 
 	push bc			;0a74	c5 	. 
 	push af			;0a75	f5 	. 
-	call sub_0a7eh		;0a76	cd 7e 0a 	. ~ . 
+	call ReadIBufOrEdit		;0a76	cd 7e 0a 	. ~ . 
 	pop af			;0a79	f1 	. 
 	pop bc			;0a7a	c1 	. 
 	pop de			;0a7b	d1 	. 
 	pop hl			;0a7c	e1 	. 
 	ret			;0a7d	c9 	. 
-sub_0a7eh:
-	ld hl,(InputCurrChr_Addr)		;0a7e	2a a9 17 	* . . 
+ReadIBufOrEdit:
+	ld hl,(iBufCurChrAddr)		;0a7e	2a a9 17 	* . . 
 	inc hl			;0a81	23 	# 
 	ld a,(hl)			;0a82	7e 	~ 
-	ld (InputCurrChr_Addr),hl		;0a83	22 a9 17 	" . . 
+	ld (iBufCurChrAddr),hl		;0a83	22 a9 17 	" . . 
 	or a			;0a86	b7 	. 
 	ret nz			;0a87	c0 	. 
 	ld d,000h		;0a88	16 00 	. . 
 	exx			;0a8a	d9 	. 
-	ld hl,inputBuf__		;0a8b	21 ab 17 	! . . 
+	ld hl,inputBuf		;0a8b	21 ab 17 	! . . 
 	ld d,000h		;0a8e	16 00 	. . 
 	push hl			;0a90	e5 	. 
-	call sub_0aafh		;0a91	cd af 0a 	. . . 
+	call EditLine		;0a91	cd af 0a 	. . . 
 	pop hl			;0a94	e1 	. 
 	jp nc,Reset		;0a95	d2 dd 06 	. . . 
-	ld (InputCurrChr_Addr),hl		;0a98	22 a9 17 	" . . 
+	ld (iBufCurChrAddr),hl		;0a98	22 a9 17 	" . . 
 	ld c,000h		;0a9b	0e 00 	. . 
 	cpir		;0a9d	ed b1 	. . 
 	ld (hl),000h		;0a9f	36 00 	6 . 
 	ret			;0aa1	c9 	. 
 l0aa2h:
-	call l06ceh		;0aa2	cd ce 06 	. . . 
+	call JReadEditIBuf__		;0aa2	cd ce 06 	. . . 
 	cp 00dh		;0aa5	fe 0d 	. . 
 	jr nz,l0aa2h		;0aa7	20 f9 	  . 
 	ret			;0aa9	c9 	. 
-LineEditor__:
+EditSrcLine__:
 	ld d,006h		;0aaa	16 06 	. . 
 l0aach:
 	ld hl,lineBuf		;0aac	21 01 18 	! . . 
-sub_0aafh:
+EditLine:
 	ld c,051h		;0aaf	0e 51 	. Q 
 	ld e,000h		;0ab1	1e 00 	. . 
 l0ab3h:
@@ -1619,16 +1636,16 @@ l0b92h:
 	pop bc			;0b95	c1 	. 
 	dec b			;0b96	05 	. 
 	ret nc			;0b97	d0 	. 
-	call sub_0a72h		;0b98	cd 72 0a 	. r . 
+	call EditIBuf__		;0b98	cd 72 0a 	. r . 
 	jr nz,l0b86h		;0b9b	20 e9 	  . 
 l0b9dh:
 	inc d			;0b9d	14 	. 
 	call CurrCharIsNum		;0b9e	cd 54 0a 	. T . 
 	ret nc			;0ba1	d0 	. 
-	call sub_0a72h		;0ba2	cd 72 0a 	. r . 
+	call EditIBuf__		;0ba2	cd 72 0a 	. r . 
 	jr l0b9dh		;0ba5	18 f6 	. . 
 l0ba7h:
-	call l06ceh		;0ba7	cd ce 06 	. . . 
+	call JReadEditIBuf__		;0ba7	cd ce 06 	. . . 
 	cp 020h		;0baa	fe 20 	.   
 	jr z,l0ba7h		;0bac	28 f9 	( . 
 	cp 00dh		;0bae	fe 0d 	. . 
@@ -1640,7 +1657,7 @@ sub_0bb3h:
 	jr z,l0bcch		;0bb8	28 12 	( . 
 	cp 02bh		;0bba	fe 2b 	. + 
 sub_0bbch:
-	call z,l06ceh		;0bbc	cc ce 06 	. . . 
+	call z,JReadEditIBuf__		;0bbc	cc ce 06 	. . . 
 	call sub_0b76h		;0bbf	cd 76 0b 	. v . 
 	ld a,d			;0bc2	7a 	z 
 	or e			;0bc3	b3 	. 
@@ -1656,12 +1673,12 @@ l0bcch:
 	sbc hl,de		;0bd1	ed 52 	. R 
 	ret			;0bd3	c9 	. 
 l0bd4h:
-	call GetCurrChar__		;0bd4	cd 68 0a 	. h . 
+	call GetCurIBufChr		;0bd4	cd 68 0a 	. h . 
 	cp 00dh		;0bd7	fe 0d 	. . 
 	jr z,l0be3h		;0bd9	28 08 	( . 
 	ld (hl),a			;0bdb	77 	w 
 	inc hl			;0bdc	23 	# 
-	call sub_0a72h		;0bdd	cd 72 0a 	. r . 
+	call EditIBuf__		;0bdd	cd 72 0a 	. r . 
 	djnz l0bd4h		;0be0	10 f2 	. . 
 	ret			;0be2	c9 	. 
 l0be3h:
@@ -2679,11 +2696,11 @@ sub_11b1h:
 	cp 02dh		;11b4	fe 2d 	. - 
 	jr z,l11c1h		;11b6	28 09 	( . 
 	cp 02bh		;11b8	fe 2b 	. + 
-	call z,l06ceh		;11ba	cc ce 06 	. . . 
+	call z,JReadEditIBuf__		;11ba	cc ce 06 	. . . 
 	call sub_11cch		;11bd	cd cc 11 	. . . 
 	ret			;11c0	c9 	. 
 l11c1h:
-	call l06ceh		;11c1	cd ce 06 	. . . 
+	call JReadEditIBuf__		;11c1	cd ce 06 	. . . 
 	call sub_11cch		;11c4	cd cc 11 	. . . 
 	ld a,080h		;11c7	3e 80 	> . 
 	xor h			;11c9	ac 	. 
@@ -2693,8 +2710,8 @@ sub_11cch:
 	call sub_0b76h		;11cc	cd 76 0b 	. v . 
 	cp 02eh		;11cf	fe 2e 	. . 
 	jp nz,l1221h		;11d1	c2 21 12 	. ! . 
-	call sub_0a72h		;11d4	cd 72 0a 	. r . 
-	call l06ceh		;11d7	cd ce 06 	. . . 
+	call EditIBuf__		;11d4	cd 72 0a 	. r . 
+	call JReadEditIBuf__		;11d7	cd ce 06 	. . . 
 	call IsNum		;11da	cd 57 0a 	. W . 
 	jp nc,ErrNumExpected		;11dd	d2 e5 08 	. . . 
 	dec b			;11e0	05 	. 
@@ -2715,12 +2732,12 @@ l11f1h:
 	dec c			;11f2	0d 	. 
 	call CurrCharIsNum		;11f3	cd 54 0a 	. T . 
 	jr nc,l1207h		;11f6	30 0f 	0 . 
-	call sub_0a72h		;11f8	cd 72 0a 	. r . 
+	call EditIBuf__		;11f8	cd 72 0a 	. r . 
 	djnz l11e5h		;11fb	10 e8 	. . 
 l11fdh:
 	call CurrCharIsNum		;11fd	cd 54 0a 	. T . 
 	jr nc,l1207h		;1200	30 05 	0 . 
-	call sub_0a72h		;1202	cd 72 0a 	. r . 
+	call EditIBuf__		;1202	cd 72 0a 	. r . 
 	jr l11fdh		;1205	18 f6 	. . 
 l1207h:
 	ld d,c			;1207	51 	Q 
@@ -2728,11 +2745,11 @@ l1207h:
 	jr nz,l1225h		;120a	20 19 	  . 
 l120ch:
 	push de			;120c	d5 	. 
-	call sub_0a72h		;120d	cd 72 0a 	. r . 
-	call l06ceh		;1210	cd ce 06 	. . . 
+	call EditIBuf__		;120d	cd 72 0a 	. r . 
+	call JReadEditIBuf__		;1210	cd ce 06 	. . . 
 	cp 02dh		;1213	fe 2d 	. - 
 	jr nz,l1228h		;1215	20 11 	  . 
-	call l06ceh		;1217	cd ce 06 	. . . 
+	call JReadEditIBuf__		;1217	cd ce 06 	. . . 
 	call sub_1290h		;121a	cd 90 12 	. . . 
 	pop af			;121d	f1 	. 
 	sub b			;121e	90 	. 
@@ -2745,7 +2762,7 @@ l1225h:
 	jr NumToFloat__		;1226	18 0a 	. . 
 l1228h:
 	cp 02bh		;1228	fe 2b 	. + 
-	call z,l06ceh		;122a	cc ce 06 	. . . 
+	call z,JReadEditIBuf__		;122a	cc ce 06 	. . . 
 	call sub_1290h		;122d	cd 90 12 	. . . 
 	pop af			;1230	f1 	. 
 	add a,b			;1231	80 	. 
@@ -2819,7 +2836,7 @@ sub_1290h:
 	ld b,a			;1297	47 	G 
 	call CurrCharIsNum		;1298	cd 54 0a 	. T . 
 	ret nc			;129b	d0 	. 
-	call sub_0a72h		;129c	cd 72 0a 	. r . 
+	call EditIBuf__		;129c	cd 72 0a 	. r . 
 	sub 030h		;129f	d6 30 	. 0 
 	ld c,a			;12a1	4f 	O 
 	ld a,b			;12a2	78 	x 
@@ -2952,7 +2969,7 @@ l1331h:
 	push de			;1353	d5 	. 
 	ld bc,0c53fh		;1354	01 3f c5 	. ? . 
 	push bc			;1357	c5 	. 
-	ld bc,l03d6h		;1358	01 d6 03 	. . . 
+	ld bc,C_ISRI		;1358	01 d6 03 	. . . 
 	push bc			;135b	c5 	. 
 	ld bc,063e7h		;135c	01 e7 63 	. . c 
 	push bc			;135f	c5 	. 
@@ -3648,10 +3665,10 @@ l17a5h:
 l17a7h:
 	nop			;17a7	00 	. 
 	nop			;17a8	00 	. 
-InputCurrChr_Addr:
+iBufCurChrAddr:
 	nop			;17a9	00 	. 
 	nop			;17aa	00 	. 
-inputBuf__:
+inputBuf:
 	nop			;17ab	00 	. 
 	nop			;17ac	00 	. 
 	nop			;17ad	00 	. 
@@ -6732,7 +6749,7 @@ LdHLSrcEnd:
 	ld hl,(endPASSrc_adr)		;23dd	2a 44 2b 	* D + 
 	ret			;23e0	c9 	. 
 l23e1h:
-	ld hl,tNL		;23e1	21 09 2b 	! . + 
+	ld hl,param3		;23e1	21 09 2b 	! . + 
 	ret			;23e4	c9 	. 
 l23e5h:
 	ld hl,tPardon		;23e5	21 00 2b 	! . + 
@@ -6812,7 +6829,7 @@ l2463h:
 	ld a,(hl)			;2468	7e 	~ 
 	cp c			;2469	b9 	. 
 	jr z,l247dh		;246a	28 11 	( . 
-	ld de,tNL		;246c	11 09 2b 	. . + 
+	ld de,param3		;246c	11 09 2b 	. . + 
 	call sub_2481h		;246f	cd 81 24 	. . $ 
 	jr c,l247eh		;2472	38 0a 	8 . 
 	ret z			;2474	c8 	. 
@@ -6825,7 +6842,7 @@ l2476h:
 l247dh:
 	inc hl			;247d	23 	# 
 l247eh:
-	ld de,l2b1eh		;247e	11 1e 2b 	. . + 
+	ld de,param4		;247e	11 1e 2b 	. . + 
 sub_2481h:
 	ld b,014h		;2481	06 14 	. . 
 	ld a,00dh		;2483	3e 0d 	> . 
@@ -6867,14 +6884,14 @@ l24a1h:
 sub_24abh:
 	ld a,(hl)			;24ab	7e 	~ 
 	inc hl			;24ac	23 	# 
-	ld (InputCurrChr_Addr),hl		;24ad	22 a9 17 	" . . 
+	ld (iBufCurChrAddr),hl		;24ad	22 a9 17 	" . . 
 	call IsNum		;24b0	cd 57 0a 	. W . 
 	jr nc,l24c7h		;24b3	30 12 	0 . 
 	call sub_0b76h		;24b5	cd 76 0b 	. v . 
 l24b8h:
 	ld a,d			;24b8	7a 	z 
 	or e			;24b9	b3 	. 
-	ld de,(InputCurrChr_Addr)		;24ba	ed 5b a9 17 	. [ . . 
+	ld de,(iBufCurChrAddr)		;24ba	ed 5b a9 17 	. [ . . 
 	dec de			;24be	1b 	. 
 	ret nz			;24bf	c0 	. 
 	ld a,h			;24c0	7c 	| 
@@ -6892,7 +6909,7 @@ InsNextLine:
 	ld (curLineNum_safe__),hl		;24cc	22 3c 2b 	" < + 
 	push hl			;24cf	e5 	. 
 	call PrSrcLiNum		;24d0	cd ed 29 	. . ) 
-	call LineEditor__		;24d3	cd aa 0a 	. . . 
+	call EditSrcLine__		;24d3	cd aa 0a 	. . . 
 	pop hl			;24d6	e1 	. 
 	ret nc			;24d7	d0 	. 
 	push hl			;24d8	e5 	. 
@@ -6962,7 +6979,7 @@ MoveSrcLinesUp:
 	dec de			;2534	1b 	. 
 	ret			;2535	c9 	. 
 DoCmdS:
-	ld a,(tNL)		;2536	3a 09 2b 	: . + 
+	ld a,(param3)		;2536	3a 09 2b 	: . + 
 	cp 020h		;2539	fe 20 	.   
 	ret z			;253b	c8 	. 
 	ld (separator__),a		;253c	32 3e 2b 	2 > + 
@@ -7181,11 +7198,11 @@ l268dh:
 	pop hl			;269b	e1 	. 
 	ret			;269c	c9 	. 
 l269dh:
-	ld hl,tNL		;269d	21 09 2b 	! . + 
+	ld hl,param3		;269d	21 09 2b 	! . + 
 	call FindEOL_SetDistInA		;26a0	cd 8f 29 	. . ) 
 	dec a			;26a3	3d 	= 
 	ld e,a			;26a4	5f 	_ 
-	ld hl,l2b1eh		;26a5	21 1e 2b 	! . + 
+	ld hl,param4		;26a5	21 1e 2b 	! . + 
 	push hl			;26a8	e5 	. 
 	call FindEOL_SetDistInA		;26a9	cd 8f 29 	. . ) 
 	dec a			;26ac	3d 	= 
@@ -7266,7 +7283,7 @@ l2712h:
 	push hl			;271c	e5 	. 
 	inc hl			;271d	23 	# 
 	call ExpSrcToLineBuf		;271e	cd b9 2b 	. . + 
-	call LineEditor__		;2721	cd aa 0a 	. . . 
+	call EditSrcLine__		;2721	cd aa 0a 	. . . 
 	pop hl			;2724	e1 	. 
 	dec hl			;2725	2b 	+ 
 	call INC_HL_toEOL		;2726	cd b6 29 	. . ) 
@@ -7344,7 +7361,7 @@ l2782h:
 	ld de,lineBuf		;2798	11 01 18 	. . . 
 l279bh:
 	ld (l2b48h),de		;279b	ed 53 48 2b 	. S H + 
-	ld hl,tNL		;279f	21 09 2b 	! . + 
+	ld hl,param3		;279f	21 09 2b 	! . + 
 	ld a,(hl)			;27a2	7e 	~ 
 	cp 00dh		;27a3	fe 0d 	. . 
 	scf			;27a5	37 	7 
@@ -7376,14 +7393,14 @@ DoCmdP:
 	ld bc,(lineNumInc__)		;27c9	ed 4b 36 2b 	. K 6 + 
 	call GotoSrcLineBC		;27cd	cd 9c 29 	. . ) 
 	pop de			;27d0	d1 	. 
-	jr z,l27deh		;27d1	28 0b 	( . 
-	jr nc,l27deh		;27d3	30 09 	0 . 
+	jr z,CmdPGotoEOL		;27d1	28 0b 	( . 
+	jr nc,CmdPGotoEOL		;27d3	30 09 	0 . 
 	ld hl,(endPASSrc_adr)		;27d5	2a 44 2b 	* D + 
 	ld (hl),000h		;27d8	36 00 	6 . 
 	inc hl			;27da	23 	# 
 	ld (hl),000h		;27db	36 00 	6 . 
 	inc hl			;27dd	23 	# 
-l27deh:
+CmdPGotoEOL:
 	call z,INC_HL_toEOL		;27de	cc b6 29 	. . ) 
 	or a			;27e1	b7 	. 
 	sbc hl,de		;27e2	ed 52 	. R 
@@ -7392,13 +7409,13 @@ l27deh:
 	ld b,h			;27e6	44 	D 
 	ld c,l			;27e7	4d 	M 
 	ex de,hl			;27e8	eb 	. 
-	ld de,tNL		;27e9	11 09 2b 	. . + 
-	jp l07a5h		;27ec	c3 a5 07 	. . . 
+	ld de,param3		;27e9	11 09 2b 	. . + 
+	jp SaveSrcFile		;27ec	c3 a5 07 	. . . 
 DoCmdG:
 	ld hl,(endPASSrc_adr)		;27ef	2a 44 2b 	* D + 
 	push hl			;27f2	e5 	. 
-	ld de,tNL		;27f3	11 09 2b 	. . + 
-	call sub_07b8h		;27f6	cd b8 07 	. . . 
+	ld de,param3		;27f3	11 09 2b 	. . + 
+	call LoadSrcFile		;27f6	cd b8 07 	. . . 
 l27f9h:
 	dec de			;27f9	1b 	. 
 	ld a,(de)			;27fa	1a 	. 
@@ -7447,8 +7464,8 @@ l2836h:
 DoCmdO:
 	ld hl,(endPASSrc_adr)		;2846	2a 44 2b 	* D + 
 	push hl			;2849	e5 	. 
-	ld de,tNL		;284a	11 09 2b 	. . + 
-	call sub_07b8h		;284d	cd b8 07 	. . . 
+	ld de,param3		;284a	11 09 2b 	. . + 
+	call LoadSrcFile		;284d	cd b8 07 	. . . 
 	ld (endPASSrc_adr),de		;2850	ed 53 44 2b 	. S D + 
 	ld hl,(lineNumStart__)		;2854	2a 34 2b 	* 4 + 
 	ld a,l			;2857	7d 	} 
@@ -7761,10 +7778,10 @@ DoCmdV:
 	ld hl,(lineNumInc__)		;2a2d	2a 36 2b 	* 6 + 
 	call PrDez		;2a30	cd 0a 08 	. . . 
 	call sub_2a6eh		;2a33	cd 6e 2a 	. n * 
-	ld hl,tNL		;2a36	21 09 2b 	! . + 
+	ld hl,param3		;2a36	21 09 2b 	! . + 
 	call sub_2a64h		;2a39	cd 64 2a 	. d * 
 	call sub_2a6eh		;2a3c	cd 6e 2a 	. n * 
-	ld hl,l2b1eh		;2a3f	21 1e 2b 	! . + 
+	ld hl,param4		;2a3f	21 1e 2b 	! . + 
 	call sub_2a64h		;2a42	cd 64 2a 	. d * 
 	jp PrNL		;2a45	c3 85 08 	. . . 
 DoCmdZ:
@@ -7906,9 +7923,6 @@ l2ad6h:
 	add a,c			;2afe	81 	. 
 	defb 026h		;2aff	26 	& 
 tPardon:
-
-; BLOCK 'TPdNL' (start 0x2b00 end 0x2b0b)
-TPdNL_start:
 	defb 050h		;2b00	50 	P 
 	defb 061h		;2b01	61 	a 
 	defb 072h		;2b02	72 	r 
@@ -7918,53 +7932,51 @@ TPdNL_start:
 	defb 03fh		;2b06	3f 	? 
 	defb 00dh		;2b07	0d 	. 
 	defb 000h		;2b08	00 	. 
-tNL:
+param3:
 	defb 00dh		;2b09	0d 	. 
 	defb 000h		;2b0a	00 	. 
-	nop			;2b0b	00 	. 
-	nop			;2b0c	00 	. 
-	nop			;2b0d	00 	. 
-l2b0eh:
-	nop			;2b0e	00 	. 
-	nop			;2b0f	00 	. 
-	nop			;2b10	00 	. 
-	nop			;2b11	00 	. 
-l2b12h:
-	nop			;2b12	00 	. 
-	nop			;2b13	00 	. 
-	nop			;2b14	00 	. 
-	nop			;2b15	00 	. 
-	nop			;2b16	00 	. 
-	nop			;2b17	00 	. 
-	nop			;2b18	00 	. 
-	nop			;2b19	00 	. 
-	nop			;2b1a	00 	. 
-	nop			;2b1b	00 	. 
-	nop			;2b1c	00 	. 
-	nop			;2b1d	00 	. 
-l2b1eh:
-	dec c			;2b1e	0d 	. 
-	nop			;2b1f	00 	. 
-	nop			;2b20	00 	. 
-	nop			;2b21	00 	. 
-	nop			;2b22	00 	. 
-	nop			;2b23	00 	. 
-	nop			;2b24	00 	. 
-	nop			;2b25	00 	. 
-	nop			;2b26	00 	. 
-	nop			;2b27	00 	. 
-	nop			;2b28	00 	. 
-	nop			;2b29	00 	. 
-	nop			;2b2a	00 	. 
-	nop			;2b2b	00 	. 
+	defb 000h		;2b0b	00 	. 
+	defb 000h		;2b0c	00 	. 
+	defb 000h		;2b0d	00 	. 
+	defb 000h		;2b0e	00 	. 
+	defb 000h		;2b0f	00 	. 
+	defb 000h		;2b10	00 	. 
+	defb 000h		;2b11	00 	. 
+	defb 000h		;2b12	00 	. 
+	defb 000h		;2b13	00 	. 
+	defb 000h		;2b14	00 	. 
+	defb 000h		;2b15	00 	. 
+	defb 000h		;2b16	00 	. 
+	defb 000h		;2b17	00 	. 
+	defb 000h		;2b18	00 	. 
+	defb 000h		;2b19	00 	. 
+	defb 000h		;2b1a	00 	. 
+	defb 000h		;2b1b	00 	. 
+	defb 000h		;2b1c	00 	. 
+	defb 000h		;2b1d	00 	. 
+param4:
+	defb 00dh		;2b1e	0d 	. 
+	defb 000h		;2b1f	00 	. 
+	defb 000h		;2b20	00 	. 
+	defb 000h		;2b21	00 	. 
+	defb 000h		;2b22	00 	. 
+	defb 000h		;2b23	00 	. 
+	defb 000h		;2b24	00 	. 
+	defb 000h		;2b25	00 	. 
+	defb 000h		;2b26	00 	. 
+	defb 000h		;2b27	00 	. 
+	defb 000h		;2b28	00 	. 
+	defb 000h		;2b29	00 	. 
+	defb 000h		;2b2a	00 	. 
+	defb 000h		;2b2b	00 	. 
 l2b2ch:
-	nop			;2b2c	00 	. 
-	nop			;2b2d	00 	. 
-	nop			;2b2e	00 	. 
-	nop			;2b2f	00 	. 
-	nop			;2b30	00 	. 
-	nop			;2b31	00 	. 
-	nop			;2b32	00 	. 
+	defb 000h		;2b2c	00 	. 
+	defb 000h		;2b2d	00 	. 
+	defb 000h		;2b2e	00 	. 
+	defb 000h		;2b2f	00 	. 
+	defb 000h		;2b30	00 	. 
+	defb 000h		;2b31	00 	. 
+	defb 000h		;2b32	00 	. 
 l2b33h:
 	nop			;2b33	00 	. 
 lineNumStart__:
@@ -11405,7 +11417,7 @@ l3ef9h:
 	push hl			;3efd	e5 	. 
 l3efeh:
 	inc b			;3efe	04 	. 
-	call l06ceh		;3eff	cd ce 06 	. . . 
+	call JReadEditIBuf__		;3eff	cd ce 06 	. . . 
 	push af			;3f02	f5 	. 
 l3f03h:
 	inc bc			;3f03	03 	. 
@@ -14442,14 +14454,14 @@ l5234h:
 l5235h:
 	inc b			;5235	04 	. 
 	pop de			;5236	d1 	. 
-	call sub_07b8h		;5237	cd b8 07 	. . . 
+	call LoadSrcFile		;5237	cd b8 07 	. . . 
 l523ah:
 	rlca			;523a	07 	. 
 	ld c,l			;523b	4d 	M 
 	ld b,h			;523c	44 	D 
 	pop hl			;523d	e1 	. 
 	pop de			;523e	d1 	. 
-	call l07a5h		;523f	cd a5 07 	. . . 
+	call SaveSrcFile		;523f	cd a5 07 	. . . 
 l5242h:
 	inc bc			;5242	03 	. 
 	call sub_0c87h		;5243	cd 87 0c 	. . . 
@@ -14514,7 +14526,7 @@ l52aeh:
 	in a,(c)		;52af	ed 78 	. x 
 	push af			;52b1	f5 	. 
 	add hl,bc			;52b2	09 	. 
-	call sub_0757h		;52b3	cd 57 07 	. W . 
+	call KbdStat		;52b3	cd 57 07 	. W . 
 	or a			;52b6	b7 	. 
 	jr z,l52bbh		;52b7	28 02 	( . 
 	ld a,001h		;52b9	3e 01 	> . 
@@ -14573,204 +14585,217 @@ StartPASSrc:
 PasEx:
 	ld hl,00000h		;5300	21 00 00 	! . . 
 	ld b,080h		;5303	06 80 	. . 
-l5305h:
+PXSrchProlog:
 	ld a,(hl)			;5305	7e 	~ 
 	cp 07fh		;5306	fe 7f 	.  
 	inc hl			;5308	23 	# 
 l5309h:
-	jr z,l530fh		;5309	28 04 	( . 
-	djnz l5305h		;530b	10 f8 	. . 
-	jr l5311h		;530d	18 02 	. . 
-l530fh:
+	jr z,PXKillProlog		;5309	28 04 	( . 
+	djnz PXSrchProlog		;530b	10 f8 	. . 
+	jr PXCpChrMap		;530d	18 02 	. . 
+PXKillProlog:
 	ld (hl),000h		;530f	36 00 	6 . 
-l5311h:
-	ld hl,(0b7a6h)		;5311	2a a6 b7 	* . . 
+PXCpChrMap:
+	ld hl,(CCTL0)		;5311	2a a6 b7 	* . . 
 	ld de,0ba00h		;5314	11 00 ba 	. . . 
 	ld bc,l0200h		;5317	01 00 02 	. . . 
 l531ah:
 	ldir		;531a	ed b0 	. . 
-	ld hl,l538ah		;531c	21 8a 53 	! . S 
+	ld hl,PXUSASC		;531c	21 8a 53 	! . S 
 	ld de,0bbd8h		;531f	11 d8 bb 	. . . 
 	ld bc,00018h		;5322	01 18 00 	. . . 
 	ldir		;5325	ed b0 	. . 
-	ld hl,l53a2h		;5327	21 a2 53 	! . S 
-	ld de,0bc00h		;532a	11 00 bc 	. . . 
+	ld hl,PXBASCI		;5327	21 a2 53 	! . S 
+	ld de,PXSASCI		;532a	11 00 bc 	. . . 
 	ld bc,0000fh		;532d	01 0f 00 	. . . 
 	ldir		;5330	ed b0 	. . 
 	ld a,07fh		;5332	3e 7f 	>  
-	ld (0bc00h),a		;5334	32 00 bc 	2 . . 
-	ld (0bc01h),a		;5337	32 01 bc 	2 . . 
+	ld (PXSASCI),a		;5334	32 00 bc 	2 . . 
+	ld (PXSASCI+1),a		;5337	32 01 bc 	2 . . 
 	ld bc,0fc80h		;533a	01 80 fc 	. . . 
 	in a,(c)		;533d	ed 78 	. x 
 	cp 0a7h		;533f	fe a7 	. . 
-	jp nz,0bc08h		;5341	c2 08 bc 	. . . 
+	jp nz,PXASCI		;5341	c2 08 bc 	. . . 
 	ld bc,000dfh		;5344	01 df 00 	. . . 
 	ldir		;5347	ed b0 	. . 
 	ld a,07fh		;5349	3e 7f 	>  
-	ld (0bc0fh),a		;534b	32 0f bc 	2 . . 
-	ld (0bc10h),a		;534e	32 10 bc 	2 . . 
-	ld (0bc20h),a		;5351	32 20 bc 	2   . 
-	ld (0bc21h),a		;5354	32 21 bc 	2 ! . 
-	ld hl,(0b7b0h)		;5357	2a b0 b7 	* . . 
-	ld (0b7feh),hl		;535a	22 fe b7 	" . . 
-	ld de,0bceeh		;535d	11 ee bc 	. . . 
-	ld (0b7b0h),de		;5360	ed 53 b0 b7 	. S . . 
+	ld (PXTAPE),a		;534b	32 0f bc 	2 . . 
+	ld (PXTAPE+1),a		;534e	32 10 bc 	2 . . 
+	ld (PXDISK),a		;5351	32 20 bc 	2   . 
+	ld (PXDISK+1),a		;5354	32 21 bc 	2 ! . 
+	ld hl,(SUTAB)		;5357	2a b0 b7 	* . . 
+	ld (SUBALT),hl		;535a	22 fe b7 	" . . 
+	ld de,SUBNEU		;535d	11 ee bc 	. . . 
+	ld (SUTAB),de		;5360	ed 53 b0 b7 	. S . . 
 	ld bc,00092h		;5364	01 92 00 	. . . 
 	ldir		;5367	ed b0 	. . 
-	ld hl,0bc80h		;5369	21 80 bc 	! . . 
-	ld (0bcf0h),hl		;536c	22 f0 bc 	" . . 
-	ld hl,0bcd0h		;536f	21 d0 bc 	! . . 
-	ld (0bcf8h),hl		;5372	22 f8 bc 	" . . 
-	ld hl,l5382h		;5375	21 82 53 	! . S 
-	ld de,0bcfeh		;5378	11 fe bc 	. . . 
+	ld hl,MBO		;5369	21 80 bc 	! . . 
+	ld (SUBNEU+2),hl		;536c	22 f0 bc 	" . . 
+	ld hl,MBI		;536f	21 d0 bc 	! . . 
+	ld (SUBNEU+10),hl		;5372	22 f8 bc 	" . . 
+	ld hl,PXSTAB		;5375	21 82 53 	! . S 
+	ld de,SUBNEU+16		;5378	11 fe bc 	. . . 
 	ld c,008h		;537b	0e 08 	. . 
 	ldir		;537d	ed b0 	. . 
-	jp 0bc08h		;537f	c3 08 bc 	. . . 
-l5382h:
-	cpl			;5382	2f 	/ 
-	cp h			;5383	bc 	. 
-	sub (hl)			;5384	96 	. 
-	cp h			;5385	bc 	. 
-	sbc a,(hl)			;5386	9e 	. 
-	cp h			;5387	bc 	. 
-	jp (hl)			;5388	e9 	. 
-	cp h			;5389	bc 	. 
-l538ah:
-	ld a,h			;538a	7c 	| 
-	ld h,b			;538b	60 	` 
-	ld h,b			;538c	60 	` 
-	ld h,b			;538d	60 	` 
-	ld h,b			;538e	60 	` 
-	ld h,b			;538f	60 	` 
-	ld a,h			;5390	7c 	| 
-	nop			;5391	00 	. 
-	ret nz			;5392	c0 	. 
-	ld h,b			;5393	60 	` 
-	jr nc,$+26		;5394	30 18 	0 . 
-	inc c			;5396	0c 	. 
-	ld b,002h		;5397	06 02 	. . 
-	nop			;5399	00 	. 
-	ld a,h			;539a	7c 	| 
-	inc c			;539b	0c 	. 
-	inc c			;539c	0c 	. 
-	inc c			;539d	0c 	. 
-	inc c			;539e	0c 	. 
-	inc c			;539f	0c 	. 
-	ld a,h			;53a0	7c 	| 
-	nop			;53a1	00 	. 
-l53a2h:
-	nop			;53a2	00 	. 
-	nop			;53a3	00 	. 
-	ld b,c			;53a4	41 	A 
-	ld d,e			;53a5	53 	S 
-	ld b,e			;53a6	43 	C 
-	ld c,c			;53a7	49 	I 
-	ld c,c			;53a8	49 	I 
-	ld bc,00021h		;53a9	01 21 00 	. ! . 
-	cp d			;53ac	ba 	. 
-	ld (0b7a6h),hl		;53ad	22 a6 b7 	" . . 
+	jp PXASCI		;537f	c3 08 bc 	. . . 
+PXSTAB:
+
+; BLOCK 'PXSTAB' (start 0x5382 end 0x538a)
+PXSTAB_first:
+	defw ISRO		;5382	2f bc 	/ . 
+	defw CSRO		;5384	96 bc 	. . 
+	defw ISRI		;5386	9e bc 	. . 
+	defw CSRI		;5388	e9 bc 	. . 
+PXUSASC:
+	defb 07ch		;538a	7c 	| 
+	defb 060h		;538b	60 	` 
+	defb 060h		;538c	60 	` 
+	defb 060h		;538d	60 	` 
+	defb 060h		;538e	60 	` 
+	defb 060h		;538f	60 	` 
+	defb 07ch		;5390	7c 	| 
+	defb 000h		;5391	00 	. 
+	defb 0c0h		;5392	c0 	. 
+	defb 060h		;5393	60 	` 
+	defb 030h		;5394	30 	0 
+	defb 018h		;5395	18 	. 
+	defb 00ch		;5396	0c 	. 
+	defb 006h		;5397	06 	. 
+	defb 002h		;5398	02 	. 
+	defb 000h		;5399	00 	. 
+	defb 07ch		;539a	7c 	| 
+	defb 00ch		;539b	0c 	. 
+	defb 00ch		;539c	0c 	. 
+	defb 00ch		;539d	0c 	. 
+	defb 00ch		;539e	0c 	. 
+	defb 00ch		;539f	0c 	. 
+	defb 07ch		;53a0	7c 	| 
+	defb 000h		;53a1	00 	. 
+PXBASCI:
+
+; BLOCK 'PXSASCI_PR' (start 0x53a2 end 0x53a4)
+PXSASCI_PR_first:
+	defw 00000h		;53a2	00 00 	. . 
+	defb 041h		;53a4	41 	A 
+	defb 053h		;53a5	53 	S 
+	defb 043h		;53a6	43 	C 
+	defb 049h		;53a7	49 	I 
+	defb 049h		;53a8	49 	I 
+	defb 001h		;53a9	01 	. 
+	ld hl,0ba00h		;53aa	21 00 ba 	! . . 
+	ld (CCTL0),hl		;53ad	22 a6 b7 	" . . 
 	ret			;53b0	c9 	. 
-	nop			;53b1	00 	. 
-	nop			;53b2	00 	. 
-	ld d,b			;53b3	50 	P 
-	ld b,c			;53b4	41 	A 
-	ld d,e			;53b5	53 	S 
-	ld d,h			;53b6	54 	T 
-	ld b,c			;53b7	41 	A 
-	ld d,b			;53b8	50 	P 
-	ld b,l			;53b9	45 	E 
-	ld bc,0fe2ah		;53ba	01 2a fe 	. * . 
-	or a			;53bd	b7 	. 
-l53beh:
-	ld (0b7b0h),hl		;53be	22 b0 b7 	" . . 
+
+; BLOCK 'PXTAPE_PR' (start 0x53b1 end 0x53b3)
+PXTAPE_PR_first:
+	defw 00000h		;53b1	00 00 	. . 
+	defb 050h		;53b3	50 	P 
+	defb 041h		;53b4	41 	A 
+	defb 053h		;53b5	53 	S 
+	defb 054h		;53b6	54 	T 
+	defb 041h		;53b7	41 	A 
+	defb 050h		;53b8	50 	P 
+	defb 045h		;53b9	45 	E 
+	defb 001h		;53ba	01 	. 
+	ld hl,(SUBALT)		;53bb	2a fe b7 	* . . 
+PXSetSUTAB:
+	ld (SUTAB),hl		;53be	22 b0 b7 	" . . 
 	ret			;53c1	c9 	. 
-	nop			;53c2	00 	. 
-	nop			;53c3	00 	. 
-	ld d,b			;53c4	50 	P 
-	ld b,c			;53c5	41 	A 
-	ld d,e			;53c6	53 	S 
-	ld b,h			;53c7	44 	D 
-	ld c,c			;53c8	49 	I 
-	ld d,e			;53c9	53 	S 
-	ld c,e			;53ca	4b 	K 
-	ld bc,0ee21h		;53cb	01 21 ee 	. ! . 
-	cp h			;53ce	bc 	. 
-	jr l53beh		;53cf	18 ed 	. . 
+
+; BLOCK 'PXDISK_PR' (start 0x53c2 end 0x53c4)
+PXDISK_PR_first:
+	defw 00000h		;53c2	00 00 	. . 
+	defb 050h		;53c4	50 	P 
+	defb 041h		;53c5	41 	A 
+	defb 053h		;53c6	53 	S 
+	defb 044h		;53c7	44 	D 
+	defb 049h		;53c8	49 	I 
+	defb 053h		;53c9	53 	S 
+	defb 04bh		;53ca	4b 	K 
+	defb 001h		;53cb	01 	. 
+	ld hl,SUBNEU		;53cc	21 ee bc 	! . . 
+	jr PXSetSUTAB		;53cf	18 ed 	. . 
+ISRO_s:
 	ld (ix+002h),000h		;53d1	dd 36 02 00 	. 6 . . 
 	ld l,(ix+005h)		;53d5	dd 6e 05 	. n . 
 	ld h,(ix+006h)		;53d8	dd 66 06 	. f . 
 	ld bc,083f3h		;53db	01 f3 83 	. . . 
 	ld e,00bh		;53de	1e 0b 	. . 
-l53e0h:
+PXSendName:
 	outi		;53e0	ed a3 	. . 
 	inc b			;53e2	04 	. 
 	inc b			;53e3	04 	. 
 	dec e			;53e4	1d 	. 
-	jr nz,l53e0h		;53e5	20 f9 	  . 
+	jr nz,PXSendName		;53e5	20 f9 	  . 
 	ld d,00bh		;53e7	16 0b 	. . 
+PXNxtBlock_s:
 	inc (ix+002h)		;53e9	dd 34 02 	. 4 . 
 	ld h,(ix+006h)		;53ec	dd 66 06 	. f . 
 	ld l,(ix+005h)		;53ef	dd 6e 05 	. n . 
 	ld bc,081f2h		;53f2	01 f2 81 	. . . 
 	ld e,080h		;53f5	1e 80 	. . 
-l53f7h:
+PXSendBlock:
 	outi		;53f7	ed a3 	. . 
 	inc b			;53f9	04 	. 
 	inc b			;53fa	04 	. 
 	dec e			;53fb	1d 	. 
-	jr nz,l53f7h		;53fc	20 f9 	  . 
-l53feh:
+	jr nz,PXSendBlock		;53fc	20 f9 	  . 
+PXSendCtl_s:
 	ld bc,080f3h		;53fe	01 f3 80 	. . . 
 	out (c),d		;5401	ed 51 	. Q 
-l5403h:
+PXWaitForReady:
 	push bc			;5403	c5 	. 
 	ld a,001h		;5404	3e 01 	> . 
-	call 0f003h		;5406	cd 03 f0 	. . . 
-	inc d			;5409	14 	. 
+	call PV1		;5406	cd 03 f0 	. . . 
+	defb 014h		;5409	14 	. 
 	pop bc			;540a	c1 	. 
 	in a,(c)		;540b	ed 78 	. x 
 	bit 0,a		;540d	cb 47 	. G 
-	jr nz,l5403h		;540f	20 f2 	  . 
+	jr nz,PXWaitForReady		;540f	20 f2 	  . 
 	and a			;5411	a7 	. 
 	bit 7,a		;5412	cb 7f 	.  
 	ret z			;5414	c8 	. 
 	inc b			;5415	04 	. 
 	in a,(c)		;5416	ed 78 	. x 
-	call 0f003h		;5418	cd 03 f0 	. . . 
-	inc e			;541b	1c 	. 
-	call 0f003h		;541c	cd 03 f0 	. . . 
-	add hl,de			;541f	19 	. 
+	call PV1		;5418	cd 03 f0 	. . . 
+	defb 01ch		;541b	1c 	. 
+	call PV1		;541c	cd 03 f0 	. . . 
+	defb 019h		;541f	19 	. 
 	scf			;5420	37 	7 
 	ret			;5421	c9 	. 
+MBO_s:
 	ld d,003h		;5422	16 03 	. . 
-	call 0bc47h		;5424	cd 47 bc 	. G . 
+	call PXNxtBlock		;5424	cd 47 bc 	. G . 
 	ret c			;5427	d8 	. 
 	ld a,002h		;5428	3e 02 	> . 
 	cp (ix+002h)		;542a	dd be 02 	. . . 
 	ret nc			;542d	d0 	. 
-	call 0f003h		;542e	cd 03 f0 	. . . 
-	inc hl			;5431	23 	# 
-	ex af,af'			;5432	08 	. 
-	ex af,af'			;5433	08 	. 
-	ex af,af'			;5434	08 	. 
-	nop			;5435	00 	. 
+	call PV1		;542e	cd 03 f0 	. . . 
+	defb 023h		;5431	23 	# 
+	defb 008h		;5432	08 	. 
+	defb 008h		;5433	08 	. 
+	defb 008h		;5434	08 	. 
+	defb 000h		;5435	00 	. 
 	and a			;5436	a7 	. 
 	ret			;5437	c9 	. 
-	call 0bc80h		;5438	cd 80 bc 	. . . 
+CSRO_s:
+	call MBO		;5438	cd 80 bc 	. . . 
 	ret c			;543b	d8 	. 
 	ld d,043h		;543c	16 43 	. C 
-	jr l53feh		;543e	18 be 	. . 
+	jr PXSendCtl_s		;543e	18 be 	. . 
+ISRI_s:
 	ld (ix+002h),000h		;5440	dd 36 02 00 	. 6 . . 
 	ld hl,fileName		;5444	21 f8 06 	! . . 
 	ld bc,083f3h		;5447	01 f3 83 	. . . 
 	ld de,ErrIdxHigh		;544a	11 0b 09 	. . . 
-l544dh:
+PXSendName2:
 	outi		;544d	ed a3 	. . 
 	inc b			;544f	04 	. 
 	inc b			;5450	04 	. 
 	dec e			;5451	1d 	. 
-	jr nz,l544dh		;5452	20 f9 	  . 
-	call 0bc5ch		;5454	cd 5c bc 	. \ . 
+	jr nz,PXSendName2		;5452	20 f9 	  . 
+PXRecvBlock:
+	call PXSendCtl		;5454	cd 5c bc 	. \ . 
 	ret c			;5457	d8 	. 
 	push hl			;5458	e5 	. 
 	push af			;5459	f5 	. 
@@ -14778,142 +14803,152 @@ l544dh:
 	ld h,(ix+006h)		;545d	dd 66 06 	. f . 
 	ld bc,080f2h		;5460	01 f2 80 	. . . 
 	ld e,080h		;5463	1e 80 	. . 
-l5465h:
+PXRecvByte:
 	ini		;5465	ed a2 	. . 
 	inc b			;5467	04 	. 
 	inc b			;5468	04 	. 
 	dec e			;5469	1d 	. 
-	jr nz,l5465h		;546a	20 f9 	  . 
+	jr nz,PXRecvByte		;546a	20 f9 	  . 
 	inc (ix+002h)		;546c	dd 34 02 	. 4 . 
 	pop af			;546f	f1 	. 
 	pop hl			;5470	e1 	. 
 	ret			;5471	c9 	. 
+MBI_s:
 	push de			;5472	d5 	. 
 	ld d,001h		;5473	16 01 	. . 
-	call 0bcb2h		;5475	cd b2 bc 	. . . 
+	call PXRecvBlock_s		;5475	cd b2 bc 	. . . 
 	pop de			;5478	d1 	. 
 	ret c			;5479	d8 	. 
 	ld a,002h		;547a	3e 02 	> . 
 	cp (ix+002h)		;547c	dd be 02 	. . . 
 	ret nc			;547f	d0 	. 
-	call 0f003h		;5480	cd 03 f0 	. . . 
-	inc hl			;5483	23 	# 
-	ex af,af'			;5484	08 	. 
-	ex af,af'			;5485	08 	. 
-	ex af,af'			;5486	08 	. 
-	ex af,af'			;5487	08 	. 
-	nop			;5488	00 	. 
+	call PV1		;5480	cd 03 f0 	. . . 
+	defb 023h		;5483	23 	# 
+	defb 008h		;5484	08 	. 
+	defb 008h		;5485	08 	. 
+	defb 008h		;5486	08 	. 
+	defb 008h		;5487	08 	. 
+	defb 000h		;5488	00 	. 
 	and a			;5489	a7 	. 
 	ret			;548a	c9 	. 
-	call 0f003h		;548b	cd 03 f0 	. . . 
-	inc l			;548e	2c 	, 
+CSRI_s:
+	call PV1		;548b	cd 03 f0 	. . . 
+	defb 02ch		;548e	2c 	, 
 	ret			;548f	c9 	. 
-	dec c			;5490	0d 	. 
+SUBNEU_s:
+
+; BLOCK 'Rest' (start 0x5490 end 0x5500)
+Rest_first:
+	defb 00dh		;5490	0d 	. 
 l5491h:
-	ld a,(bc)			;5491	0a 	. 
-	add hl,bc			;5492	09 	. 
-	ld b,e			;5493	43 	C 
-	ld d,b			;5494	50 	P 
-	add hl,bc			;5495	09 	. 
-	scf			;5496	37 	7 
-	ld b,(hl)			;5497	46 	F 
-	ld c,b			;5498	48 	H 
-	add hl,bc			;5499	09 	. 
-	dec sp			;549a	3b 	; 
-	ld d,h			;549b	54 	T 
-	ld h,l			;549c	65 	e 
-	ld (hl),e			;549d	73 	s 
-	ld (hl),h			;549e	74 	t 
-	jr nz,l54f1h		;549f	20 50 	  P 
-	ld (hl),d			;54a1	72 	r 
-	ld l,a			;54a2	6f 	o 
-	ld l,h			;54a3	6c 	l 
-	ld l,a			;54a4	6f 	o 
-	ld h,a			;54a5	67 	g 
-	ccf			;54a6	3f 	? 
-	dec c			;54a7	0d 	. 
-	ld a,(bc)			;54a8	0a 	. 
-	add hl,bc			;54a9	09 	. 
-	ld c,c			;54aa	49 	I 
-	ld c,(hl)			;54ab	4e 	N 
-	ld b,e			;54ac	43 	C 
-	add hl,bc			;54ad	09 	. 
-	ld c,b			;54ae	48 	H 
-	ld c,h			;54af	4c 	L 
-	dec c			;54b0	0d 	. 
-	ld a,(bc)			;54b1	0a 	. 
-	add hl,bc			;54b2	09 	. 
-	ld c,d			;54b3	4a 	J 
-	ld d,d			;54b4	52 	R 
-	add hl,bc			;54b5	09 	. 
-	ld e,d			;54b6	5a 	Z 
-	inc l			;54b7	2c 	, 
-	ld d,b			;54b8	50 	P 
-	ld b,c			;54b9	41 	A 
-	ld d,e			;54ba	53 	S 
-	jr nc,l54eeh		;54bb	30 31 	0 1 
-	dec c			;54bd	0d 	. 
-	ld a,(bc)			;54be	0a 	. 
-	add hl,bc			;54bf	09 	. 
-	ld b,h			;54c0	44 	D 
-	ld c,d			;54c1	4a 	J 
-	ld c,(hl)			;54c2	4e 	N 
-	ld e,d			;54c3	5a 	Z 
-	add hl,bc			;54c4	09 	. 
-	ld d,b			;54c5	50 	P 
-	ld b,c			;54c6	41 	A 
-	ld d,e			;54c7	53 	S 
-	jr nc,l54fch		;54c8	30 32 	0 2 
-	dec c			;54ca	0d 	. 
-	ld a,(bc)			;54cb	0a 	. 
-	add hl,bc			;54cc	09 	. 
-	ld c,d			;54cd	4a 	J 
-	ld d,d			;54ce	52 	R 
-	add hl,bc			;54cf	09 	. 
-	ld d,b			;54d0	50 	P 
-	ld b,c			;54d1	41 	A 
-	ld d,e			;54d2	53 	S 
-	jr nc,$+53		;54d3	30 33 	0 3 
-	dec c			;54d5	0d 	. 
-	ld a,(bc)			;54d6	0a 	. 
-	ld d,b			;54d7	50 	P 
-	ld b,c			;54d8	41 	A 
-	ld d,e			;54d9	53 	S 
-	jr nc,$+51		;54da	30 31 	0 1 
-	add hl,bc			;54dc	09 	. 
-	ld c,h			;54dd	4c 	L 
-	ld b,h			;54de	44 	D 
-	add hl,bc			;54df	09 	. 
-	ld c,l			;54e0	4d 	M 
-	inc l			;54e1	2c 	, 
-	jr nc,l54edh		;54e2	30 09 	0 . 
-	dec sp			;54e4	3b 	; 
-	ld l,h			;54e5	6c 	l 
-	ld a,h			;54e6	7c 	| 
-	ld (hl),e			;54e7	73 	s 
-	ld h,e			;54e8	63 	c 
-	ld l,b			;54e9	68 	h 
-	ld h,l			;54ea	65 	e 
-	ld l,(hl)			;54eb	6e 	n 
-	dec c			;54ec	0d 	. 
-l54edh:
-	ld a,(bc)			;54ed	0a 	. 
-l54eeh:
-	ld d,b			;54ee	50 	P 
-	ld b,c			;54ef	41 	A 
-	ld d,e			;54f0	53 	S 
-l54f1h:
-	jr nc,$+53		;54f1	30 33 	0 3 
-	add hl,bc			;54f3	09 	. 
-	ld c,h			;54f4	4c 	L 
-	ld b,h			;54f5	44 	D 
-	add hl,bc			;54f6	09 	. 
-	ld c,b			;54f7	48 	H 
-	ld c,h			;54f8	4c 	L 
-	inc l			;54f9	2c 	, 
-	jr z,$+69		;54fa	28 43 	( C 
-l54fch:
-	ld b,e			;54fc	43 	C 
-	ld d,h			;54fd	54 	T 
-	ld c,h			;54fe	4c 	L 
+	defb 00ah		;5491	0a 	. 
+	defb 009h		;5492	09 	. 
+	defb 043h		;5493	43 	C 
+	defb 050h		;5494	50 	P 
+	defb 009h		;5495	09 	. 
+	defb 037h		;5496	37 	7 
+	defb 046h		;5497	46 	F 
+	defb 048h		;5498	48 	H 
+	defb 009h		;5499	09 	. 
+	defb 03bh		;549a	3b 	; 
+	defb 054h		;549b	54 	T 
+	defb 065h		;549c	65 	e 
+	defb 073h		;549d	73 	s 
+	defb 074h		;549e	74 	t 
+	defb 020h		;549f	20 	  
+	defb 050h		;54a0	50 	P 
+	defb 072h		;54a1	72 	r 
+	defb 06fh		;54a2	6f 	o 
+	defb 06ch		;54a3	6c 	l 
+	defb 06fh		;54a4	6f 	o 
+	defb 067h		;54a5	67 	g 
+	defb 03fh		;54a6	3f 	? 
+	defb 00dh		;54a7	0d 	. 
+	defb 00ah		;54a8	0a 	. 
+	defb 009h		;54a9	09 	. 
+	defb 049h		;54aa	49 	I 
+	defb 04eh		;54ab	4e 	N 
+	defb 043h		;54ac	43 	C 
+	defb 009h		;54ad	09 	. 
+	defb 048h		;54ae	48 	H 
+	defb 04ch		;54af	4c 	L 
+	defb 00dh		;54b0	0d 	. 
+	defb 00ah		;54b1	0a 	. 
+	defb 009h		;54b2	09 	. 
+	defb 04ah		;54b3	4a 	J 
+	defb 052h		;54b4	52 	R 
+	defb 009h		;54b5	09 	. 
+	defb 05ah		;54b6	5a 	Z 
+	defb 02ch		;54b7	2c 	, 
+	defb 050h		;54b8	50 	P 
+	defb 041h		;54b9	41 	A 
+	defb 053h		;54ba	53 	S 
+	defb 030h		;54bb	30 	0 
+	defb 031h		;54bc	31 	1 
+	defb 00dh		;54bd	0d 	. 
+	defb 00ah		;54be	0a 	. 
+	defb 009h		;54bf	09 	. 
+	defb 044h		;54c0	44 	D 
+	defb 04ah		;54c1	4a 	J 
+	defb 04eh		;54c2	4e 	N 
+	defb 05ah		;54c3	5a 	Z 
+	defb 009h		;54c4	09 	. 
+	defb 050h		;54c5	50 	P 
+	defb 041h		;54c6	41 	A 
+	defb 053h		;54c7	53 	S 
+	defb 030h		;54c8	30 	0 
+	defb 032h		;54c9	32 	2 
+	defb 00dh		;54ca	0d 	. 
+	defb 00ah		;54cb	0a 	. 
+	defb 009h		;54cc	09 	. 
+	defb 04ah		;54cd	4a 	J 
+	defb 052h		;54ce	52 	R 
+	defb 009h		;54cf	09 	. 
+	defb 050h		;54d0	50 	P 
+	defb 041h		;54d1	41 	A 
+	defb 053h		;54d2	53 	S 
+	defb 030h		;54d3	30 	0 
+	defb 033h		;54d4	33 	3 
+	defb 00dh		;54d5	0d 	. 
+	defb 00ah		;54d6	0a 	. 
+	defb 050h		;54d7	50 	P 
+	defb 041h		;54d8	41 	A 
+	defb 053h		;54d9	53 	S 
+	defb 030h		;54da	30 	0 
+	defb 031h		;54db	31 	1 
+	defb 009h		;54dc	09 	. 
+	defb 04ch		;54dd	4c 	L 
+	defb 044h		;54de	44 	D 
+	defb 009h		;54df	09 	. 
+	defb 04dh		;54e0	4d 	M 
+	defb 02ch		;54e1	2c 	, 
+	defb 030h		;54e2	30 	0 
+	defb 009h		;54e3	09 	. 
+	defb 03bh		;54e4	3b 	; 
+	defb 06ch		;54e5	6c 	l 
+	defb 07ch		;54e6	7c 	| 
+	defb 073h		;54e7	73 	s 
+	defb 063h		;54e8	63 	c 
+	defb 068h		;54e9	68 	h 
+	defb 065h		;54ea	65 	e 
+	defb 06eh		;54eb	6e 	n 
+	defb 00dh		;54ec	0d 	. 
+	defb 00ah		;54ed	0a 	. 
+	defb 050h		;54ee	50 	P 
+	defb 041h		;54ef	41 	A 
+	defb 053h		;54f0	53 	S 
+	defb 030h		;54f1	30 	0 
+	defb 033h		;54f2	33 	3 
+	defb 009h		;54f3	09 	. 
+	defb 04ch		;54f4	4c 	L 
+	defb 044h		;54f5	44 	D 
+	defb 009h		;54f6	09 	. 
+	defb 048h		;54f7	48 	H 
+	defb 04ch		;54f8	4c 	L 
+	defb 02ch		;54f9	2c 	, 
+	defb 028h		;54fa	28 	( 
+	defb 043h		;54fb	43 	C 
+	defb 043h		;54fc	43 	C 
+	defb 054h		;54fd	54 	T 
+	defb 04ch		;54fe	4c 	L 
 	defb 030h		;54ff	30 	0 
