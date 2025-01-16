@@ -1,6 +1,7 @@
-;header: start 0x0180 unlabeled end 0x01ff type bytedata
-MenuPRec: start 0x020e unlabeled end 0x0216 type bytedata
-MenuPEnt: start 0x021a unlabeled end 0x0224 type bytedata
+PasPrgMenuHdr: unlabeled start 0x0200 unlabeled last 0x202 type worddata
+PasPrgMenuName: unlabeled start 0x0203 unlabeled last 0x20a type bytedata
+MenuPRec: unlabeled start 0x020e unlabeled last 0x0216 type bytedata
+MenuPEnt: unlabeled start 0x021a unlabeled last 0x0224 type bytedata
 OSPrc: unlabeled start 0x0255 unlabeled last 0x0255 type bytedata
 ptr: unlabeled start 0x06b0 unlabeled end 0x06bc type pointers
 nextBlkNum: unlabeled start 0x06bc unlabeled last 0x06bc type bytedata
@@ -15,7 +16,145 @@ realTab1__: start 0x0f24 end 0x0f2f type bytedata
 xxTab__: start 0x1597 end 0x15a7 type bytedata
 LineBuf: start 0x1801 unlabeled end 0x1851 type bytedata
 HeapEndAddr: start 0x1856 unlabeled last 0x1857 type pointers
-PrcFncTab: start 0x1858 unlabeled end 0x1b35 type bytedata
+
+;PrcFncTab: start 0x1858 unlabeled end 0x1b35 type bytedata
+RL_SETSYS: unlabeled start 0x1858 unlabeled last 0x1859 type worddata
+RN_SETSYS: unlabeled start 0x185a unlabeled last 0x1862 type bytedata
+RL_GETSYS: unlabeled start 0x1863 unlabeled last 0x1864 type pointers
+RN_GETSYS: unlabeled start 0x1865 unlabeled last 0x1870 type bytedata
+RL_PLOT: unlabeled start 0x1871 unlabeled last 0x1872 type pointers
+RN_PLOT: unlabeled start 0x1873 unlabeled last 0x1879 type bytedata
+RL_CLRPLOT: unlabeled start 0x187a unlabeled last 0x187b type pointers
+RN_CLRPLOT: unlabeled start 0x187c unlabeled last 0x1885 type bytedata
+RL_PTEST: unlabeled start 0x1886 unlabeled last 0x1887 type pointers
+RN_PTEST: unlabeled start 0x1888 unlabeled last 0x1892 type bytedata
+RL_GETC: unlabeled start 0x1893 unlabeled last 0x1894 type pointers
+RN_GETC: unlabeled start 0x1895 unlabeled last 0x189e type bytedata
+RL_SETC: unlabeled start 0x189f unlabeled last 0x18a0 type pointers
+RN_SETC: unlabeled start 0x18a1 unlabeled last 0x18a7 type bytedata
+RL_LINEPLOT: unlabeled start 0x18a8 unlabeled last 0x18a9 type pointers
+RN_LINEPLOT: unlabeled start 0x18aa unlabeled last 0x18b4 type bytedata
+RL_CIRCLE: unlabeled start 0x18b5 unlabeled last 0x18b6 type pointers
+RN_CIRCLE: unlabeled start 0x18b7 unlabeled last 0x18bf type bytedata
+RL_GOTOXY: unlabeled start 0x18c0 unlabeled last 0x18c1 type pointers
+RN_GOTOXY: unlabeled start 0x18c2 unlabeled last 0x18ca type bytedata
+RL_PI: unlabeled start 0x18cb unlabeled last 0x18cc type pointers
+RN_PI: unlabeled start 0x18cd unlabeled last 0x18d5 type bytedata
+RL_FRAC: unlabeled start 0x18d6 unlabeled last 0x18d7 type pointers
+RN_FRAC: unlabeled start 0x18d8 unlabeled last 0x18de type bytedata
+RL_READKBD: unlabeled start 0x18df unlabeled last 0x18e0 type pointers
+RN_READKBD: unlabeled start 0x18e1 unlabeled last 0x18ed type bytedata
+RL_SHR: unlabeled start 0x18ee unlabeled last 0x18ef type pointers
+RN_SHR: unlabeled start 0x18f0 unlabeled last 0x18f8 type bytedata
+RL_SHL: unlabeled start 0x18f9 unlabeled last 0x18fa type pointers
+RN_SHL: unlabeled start 0x18fb unlabeled last 0x1903 type bytedata
+RL_LO: unlabeled start 0x1904 unlabeled last 0x1905 type pointers
+RN_LO: unlabeled start 0x1906 unlabeled last 0x190d type bytedata
+RL_HI: unlabeled start 0x190e unlabeled last 0x190f type pointers
+RN_HI: unlabeled start 0x1910 unlabeled last 0x1917 type bytedata
+RL_SWAP: unlabeled start 0x1918 unlabeled last 0x1919 type pointers
+RN_SWAP: unlabeled start 0x191a unlabeled last 0x1923 type bytedata
+RL_BXOR: unlabeled start 0x1924 unlabeled last 0x1925 type pointers
+RN_BXOR: unlabeled start 0x1926 unlabeled last 0x192f type bytedata
+RL_BOR: unlabeled start 0x1930 unlabeled last 0x1931 type pointers
+RN_BOR: unlabeled start 0x1932 unlabeled last 0x193a type bytedata
+RL_BAND: unlabeled start 0x193b unlabeled last 0x193c type pointers
+RN_BAND: unlabeled start 0x193d unlabeled last 0x1946 type bytedata
+RL_EXP: unlabeled start 0x1947 unlabeled last 0x1948 type pointers
+RN_EXP: unlabeled start 0x1949 unlabeled last 0x194e type bytedata
+RL_LN: unlabeled start 0x194f unlabeled last 0x1950 type pointers
+RN_LN: unlabeled start 0x1951 unlabeled last 0x1955 type bytedata
+RL_ARCTAN: unlabeled start 0x1956 unlabeled last 0x1957 type pointers
+RN_ARCTAN: unlabeled start 0x1958 unlabeled last 0x1960 type bytedata
+RL_TAN: unlabeled start 0x1961 unlabeled last 0x1962 type pointers
+RN_TAN: unlabeled start 0x1963 unlabeled last 0x1968 type bytedata
+RL_COS: unlabeled start 0x1969 unlabeled last 0x196a type pointers
+RN_COS: unlabeled start 0x196b unlabeled last 0x1970 type bytedata
+RL_SIN: unlabeled start 0x1971 unlabeled last 0x1972 type pointers
+RN_SIN: unlabeled start 0x1973 unlabeled last 0x1978 type bytedata
+RL_INP: unlabeled start 0x1979 unlabeled last 0x197a type pointers
+RN_INP: unlabeled start 0x197b unlabeled last 0x1983 type bytedata
+RL_OUT: unlabeled start 0x1984 unlabeled last 0x1985 type pointers
+RN_OUT: unlabeled start 0x1986 unlabeled last 0x198b type bytedata
+RL_SIZE: unlabeled start 0x198c unlabeled last 0x198d type pointers
+RN_SIZE: unlabeled start 0x198e unlabeled last 0x1994 type bytedata
+RL_ADDR: unlabeled start 0x1995 unlabeled last 0x1996 type pointers
+RN_ADDR: unlabeled start 0x1997 unlabeled last 0x199d type bytedata
+RL_INLINE: unlabeled start 0x199e unlabeled last 0x199f type pointers
+RN_INLINE: unlabeled start 0x19a0 unlabeled last 0x19a8 type bytedata
+RL_ENTIER: unlabeled start 0x19a9 unlabeled last 0x19aa type pointers
+RN_ENTIER: unlabeled start 0x19ab unlabeled last 0x19b3 type bytedata
+RL_USER: unlabeled start 0x19b4 unlabeled last 0x19b5 type pointers
+RN_USER: unlabeled start 0x19b6 unlabeled last 0x19bf type bytedata
+RL_RANDOM: unlabeled start 0x19c0 unlabeled last 0x19c1 type pointers
+RN_RANDOM: unlabeled start 0x19c2 unlabeled last 0x19cd type bytedata
+RL_KEYPRESSED: unlabeled start 0x19ce unlabeled last 0x19cf type pointers
+RN_KEYPRESSED: unlabeled start 0x19d0 unlabeled last 0x19df type bytedata
+RL_HALT: unlabeled start 0x19e0 unlabeled last 0x19e1 type pointers
+RN_HALT: unlabeled start 0x19e2 unlabeled last 0x19eb type bytedata
+RL_EOLN: unlabeled start 0x19ec unlabeled last 0x19ed type pointers
+RN_EOLN: unlabeled start 0x19ee unlabeled last 0x19f7 type bytedata
+RL_PAGE: unlabeled start 0x19f8 unlabeled last 0x19f9 type pointers
+RN_PAGE: unlabeled start 0x19fa unlabeled last 0x1a03 type bytedata
+RL_SQRT: unlabeled start 0x1a04 unlabeled last 0x1a05 type pointers
+RN_SQRT: unlabeled start 0x1a06 unlabeled last 0x1a0c type bytedata
+RL_ROUND: unlabeled start 0x1a0d unlabeled last 0x1a0e type pointers
+RN_ROUND: unlabeled start 0x1a0f unlabeled last 0x1a16 type bytedata
+RL_TRUNC: unlabeled start 0x1a17 unlabeled last 0x1a18 type pointers
+RN_TRUNC: unlabeled start 0x1a19 unlabeled last 0x1a20 type bytedata
+RL_MAXINT: unlabeled start 0x1a21 unlabeled last 0x1a22 type pointers
+RN_MAXINT: unlabeled start 0x1a23 unlabeled last 0x1a2d type bytedata
+RL_SUCC: unlabeled start 0x1a2e unlabeled last 0x1a2f type pointers
+RN_SUCC: unlabeled start 0x1a30 unlabeled last 0x1a36 type bytedata
+RL_PRED: unlabeled start 0x1a37 unlabeled last 0x1a38 type pointers
+RN_PRED: unlabeled start 0x1a39 unlabeled last 0x1a3f type bytedata
+RL_ORD: unlabeled start 0x1a40 unlabeled last 0x1a41 type pointers
+RN_ORD: unlabeled start 0x1a42 unlabeled last 0x1a47 type bytedata
+RL_PEEK: unlabeled start 0x1a48 unlabeled last 0x1a49 type pointers
+RN_PEEK: unlabeled start 0x1a4a unlabeled last 0x1a50 type bytedata
+RL_POKE: unlabeled start 0x1a51 unlabeled last 0x1a52 type pointers
+RN_POKE: unlabeled start 0x1a53 unlabeled last 0x1a59 type bytedata
+RL_RELEASE: unlabeled start 0x1a5a unlabeled last 0x1a5b type pointers
+RN_RELEASE: unlabeled start 0x1a5c unlabeled last 0x1a65 type bytedata
+RL_MARK: unlabeled start 0x1a66 unlabeled last 0x1a67 type pointers
+RN_MARK: unlabeled start 0x1a68 unlabeled last 0x1a6e type bytedata
+RL_NEW: unlabeled start 0x1a6f unlabeled last 0x1a70 type pointers
+RN_NEW: unlabeled start 0x1a71 unlabeled last 0x1a76 type bytedata
+RL_TOUT: unlabeled start 0x1a77 unlabeled last 0x1a78 type pointers
+RN_TOUT: unlabeled start 0x1a79 unlabeled last 0x1a7f type bytedata
+RL_TIN: unlabeled start 0x1a80 unlabeled last 0x1a81 type pointers
+RN_TIN: unlabeled start 0x1a82 unlabeled last 0x1a87 type bytedata
+RL_CHR: unlabeled start 0x1a88 unlabeled last 0x1a89 type pointers
+RN_CHR: unlabeled start 0x1a8a unlabeled last 0x1a92 type bytedata
+RL_ODD: unlabeled start 0x1a93 unlabeled last 0x1a94 type pointers
+RN_ODD: unlabeled start 0x1a95 unlabeled last 0x1a9d type bytedata
+RL_ABS: unlabeled start 0x1a9e unlabeled last 0x1a9f type pointers
+RN_ABS: unlabeled start 0x1aa0 unlabeled last 0x1aa7 type bytedata
+RL_SQR: unlabeled start 0x1aa8 unlabeled last 0x1aa9 type pointers
+RN_SQR: unlabeled start 0x1aaa unlabeled last 0x1ab1 type bytedata
+RL_FALSE: unlabeled start 0x1ab2 unlabeled last 0x1ab3 type pointers
+RN_FALSE: unlabeled start 0x1ab4 unlabeled last 0x1abd type bytedata
+RL_TRUE: unlabeled start 0x1abe unlabeled last 0x1abf type pointers
+RN_TRUE: unlabeled start 0x1ac0 unlabeled last 0x1ac8 type bytedata
+RL_BOOLEAN: unlabeled start 0x1ac9 unlabeled last 0x1aca type pointers
+RN_BOOLEAN: unlabeled start 0x1acb unlabeled last 0x1ada type bytedata
+RL_CHAR: unlabeled start 0x1adb unlabeled last 0x1adc type pointers
+RN_CHAR: unlabeled start 0x1add unlabeled last 0x1ae9 type bytedata
+RL_REAL: unlabeled start 0x1aea unlabeled last 0x1aeb type pointers
+RN_REAL: unlabeled start 0x1aec unlabeled last 0x1af8 type bytedata
+RL_INTEGER: unlabeled start 0x1af9 unlabeled last 0x1afa type pointers
+RN_INTEGER: unlabeled start 0x1afb unlabeled last 0x1b0a type bytedata
+RL_READLN: unlabeled start 0x1b0b unlabeled last 0x1b0c type pointers
+RN_READLN: unlabeled start 0x1b0d unlabeled last 0x1b15 type bytedata
+RL_READ: unlabeled start 0x1b16 unlabeled last 0x1b17 type pointers
+RN_READ: unlabeled start 0x1b18 unlabeled last 0x1b1e type bytedata
+RL_WRITELN: unlabeled start 0x1b1f unlabeled last 0x1b20 type pointers
+RN_WRITELN: unlabeled start 0x1b21 unlabeled last 0x1b2a type bytedata
+RL_WRITE: unlabeled start 0x1b2b unlabeled last 0x1b2c type pointers
+RN_WRITE: unlabeled start 0x1b2d unlabeled last 0x1b34 type bytedata
+
+Symtab_open: start 0x1b35 unlabeled last 0x2354 type bytedata
+
 CmdTab: start 0x2a9d unlabeled end 0x2ad6 type bytedata
 TPdParam: unlabeled start 0x2b00 unlabeled last 0x2b32 type bytedata
 CompVar1: unlabeled start 0x2b50 unlabeled end 0x2b5d type bytedata
@@ -30,7 +169,79 @@ CoVarInitData: start 0x2cd2 unlabeled end 0x2ce0 type bytedata
 TOk: start 0x2f24 unlabeled end 0x2f27 type bytedata
 TLauf: start 0x2f28 unlabeled end 0x2f2d type bytedata
 compOptTab: start 0x3165 unlabeled last 0x3170 type bytedata
-resWords: start 0x3171 unlabeled end 0x326f type bytedata
+
+RL_PACKED: unlabeled start 0x3171 unlabeled last 0x3172 type worddata
+RN_PACKED: unlabeled start 0x3173 unlabeled last 0x3179 type bytedata
+RL_NIL: unlabeled start 0x317a unlabeled last 0x317b type pointers
+RN_NIL: unlabeled start 0x317c unlabeled last 0x317f type bytedata
+RL_FORWARD: unlabeled start 0x3180 unlabeled last 0x3181 type pointers
+RN_FORWARD: unlabeled start 0x3182 unlabeled last 0x3189 type bytedata
+RL_PROGRAM: unlabeled start 0x318a unlabeled last 0x318b type pointers
+RN_PROGRAM: unlabeled start 0x318c unlabeled last 0x3193 type bytedata
+RL_IN: unlabeled start 0x3194 unlabeled last 0x3195 type pointers
+RN_IN: unlabeled start 0x3196 unlabeled last 0x3198 type bytedata
+RL_OR: unlabeled start 0x3199 unlabeled last 0x319a type pointers
+RN_OR: unlabeled start 0x319b unlabeled last 0x319d type bytedata
+RL_ON: unlabeled start 0x319e unlabeled last 0x319f type pointers
+RN_ON: unlabeled start 0x31a0 unlabeled last 0x31a2 type bytedata
+RL_TO: unlabeled start 0x31a3 unlabeled last 0x31a4 type pointers
+RN_TO: unlabeled start 0x31a5 unlabeled last 0x31a7 type bytedata
+RL_DO: unlabeled start 0x31a8 unlabeled last 0x31a9 type pointers
+RN_DO: unlabeled start 0x31aa unlabeled last 0x31ac type bytedata
+RL_IF: unlabeled start 0x31ad unlabeled last 0x31ae type pointers
+RN_IF: unlabeled start 0x31af unlabeled last 0x31b1 type bytedata
+RL_SET: unlabeled start 0x31b2 unlabeled last 0x31b3 type pointers
+RN_SET: unlabeled start 0x31b4 unlabeled last 0x31b7 type bytedata
+RL_NOT: unlabeled start 0x31b8 unlabeled last 0x31b9 type pointers
+RN_NOT: unlabeled start 0x31ba unlabeled last 0x31bd type bytedata
+RL_MOD: unlabeled start 0x31be unlabeled last 0x31bf type pointers
+RN_MOD: unlabeled start 0x31c0 unlabeled last 0x31c3 type bytedata
+RL_DIV: unlabeled start 0x31c4 unlabeled last 0x31c5 type pointers
+RN_DIV: unlabeled start 0x31c6 unlabeled last 0x31c9 type bytedata
+RL_VAR: unlabeled start 0x31ca unlabeled last 0x31cb type pointers
+RN_VAR: unlabeled start 0x31cc unlabeled last 0x31cf type bytedata
+RL_AND: unlabeled start 0x31d0 unlabeled last 0x31d1 type pointers
+RN_AND: unlabeled start 0x31d2 unlabeled last 0x31d5 type bytedata
+RL_FOR: unlabeled start 0x31d6 unlabeled last 0x31d7 type pointers
+RN_FOR: unlabeled start 0x31d8 unlabeled last 0x31db type bytedata
+RL_END: unlabeled start 0x31dc unlabeled last 0x31dd type pointers
+RN_END: unlabeled start 0x31de unlabeled last 0x31e1 type bytedata
+RL_GOTO: unlabeled start 0x31e2 unlabeled last 0x31e3 type pointers
+RN_GOTO: unlabeled start 0x31e4 unlabeled last 0x31e8 type bytedata
+RL_WITH: unlabeled start 0x31e9 unlabeled last 0x31ea type pointers
+RN_WITH: unlabeled start 0x31eb unlabeled last 0x31ef type bytedata
+RL_TYPE: unlabeled start 0x31f0 unlabeled last 0x31f1 type pointers
+RN_TYPE: unlabeled start 0x31f2 unlabeled last 0x31f6 type bytedata
+RL_CASE: unlabeled start 0x31f7 unlabeled last 0x31f8 type pointers
+RN_CASE: unlabeled start 0x31f9 unlabeled last 0x31fd type bytedata
+RL_ELSE: unlabeled start 0x31fe unlabeled last 0x31ff type pointers
+RN_ELSE: unlabeled start 0x3200 unlabeled last 0x3204 type bytedata
+RL_THEN: unlabeled start 0x3205 unlabeled last 0x3206 type pointers
+RN_THEN: unlabeled start 0x3207 unlabeled last 0x320b type bytedata
+RL_LABEL: unlabeled start 0x320c unlabeled last 0x320d type pointers
+RN_LABEL: unlabeled start 0x320e unlabeled last 0x3213 type bytedata
+RL_CONST: unlabeled start 0x3214 unlabeled last 0x3215 type pointers
+RN_CONST: unlabeled start 0x3216 unlabeled last 0x321b type bytedata
+RL_ARRAY: unlabeled start 0x321c unlabeled last 0x321d type pointers
+RN_ARRAY: unlabeled start 0x321e unlabeled last 0x3223 type bytedata
+RL_UNTIL: unlabeled start 0x3224 unlabeled last 0x3225 type pointers
+RN_UNTIL: unlabeled start 0x3226 unlabeled last 0x322b type bytedata
+RL_WHILE: unlabeled start 0x322c unlabeled last 0x322d type pointers
+RN_WHILE: unlabeled start 0x322e unlabeled last 0x3233 type bytedata
+RL_BEGIN: unlabeled start 0x3234 unlabeled last 0x3235 type pointers
+RN_BEGIN: unlabeled start 0x3236 unlabeled last 0x323b type bytedata
+RL_RECORD: unlabeled start 0x323c unlabeled last 0x323d type pointers
+RN_RECORD: unlabeled start 0x323e unlabeled last 0x3244 type bytedata
+RL_DOWNTO: unlabeled start 0x3245 unlabeled last 0x3246 type pointers
+RN_DOWNTO: unlabeled start 0x3247 unlabeled last 0x324d type bytedata
+RL_REPEAT: unlabeled start 0x324e unlabeled last 0x324f type pointers
+RN_REPEAT: unlabeled start 0x3250 unlabeled last 0x3256 type bytedata
+RL_FUNCTION: unlabeled start 0x3257 unlabeled last 0x3258 type pointers
+RN_FUNCTION: unlabeled start 0x3259 unlabeled last 0x3261 type bytedata
+RL_PROCEDURE: unlabeled start 0x3262 unlabeled last 0x3263 type pointers
+RN_PROCEDURE: unlabeled start 0x3264 unlabeled last 0x326d type bytedata
+RL_Entry: unlabeled start 0x326e unlabeled last 0x326f type pointers
+
 TEadr: start 0x3270 unlabeled end 0x327c type bytedata
 TFeh1: start 0x327d unlabeled end 0x3284 type bytedata
 TFeh2: start 0x3285 unlabeled end 0x328d type bytedata

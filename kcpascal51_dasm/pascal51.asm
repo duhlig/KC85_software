@@ -1,7 +1,12 @@
 ; z80dasm 1.1.6
-; command line: z80dasm -a -b p51.block -g 0x200 -l -S p51.sym -t -u -o pascal51.asm pascal51_kcc.bin
+; command line: z80dasm -a -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -t -u -o pascal51.asm pascal51_kcc.bin
 
 	org	00200h
+iobuf+11:	equ 0x008b
+iobuf+16:	equ 0x0090
+iobuf+17:	equ 0x0091
+iobuf+19:	equ 0x0093
+iobuf+20:	equ 0x0094
 l01eeh:	equ 0x01ee
 CCTL0:	equ 0xb7a6
 SUTAB:	equ 0xb7b0
@@ -29,24 +34,20 @@ SUBNEU+16:	equ 0xbcfe
 PV1:	equ 0xf003
 
 l0200h:
-	nop			;0200	00 	. 
-	nop			;0201	00 	. 
+	defw 00000h		;0200	00 00 	. . 
 PasPrgMenuName:
-	nop			;0202	00 	. 
-	nop			;0203	00 	. 
-	nop			;0204	00 	. 
-	nop			;0205	00 	. 
-	nop			;0206	00 	. 
-	nop			;0207	00 	. 
+	defb 000h		;0202	00 	. 
+	defb 000h		;0203	00 	. 
+	defb 000h		;0204	00 	. 
+	defb 000h		;0205	00 	. 
+	defb 000h		;0206	00 	. 
+	defb 000h		;0207	00 	. 
 l0208h:
-	nop			;0208	00 	. 
-	nop			;0209	00 	. 
-	nop			;020a	00 	. 
+	defb 000h		;0208	00 	. 
+	defb 000h		;0209	00 	. 
+	defb 000h		;020a	00 	. 
 	jp PasPrgStart		;020b	c3 c8 06 	. . . 
 MenuPRec:
-
-; BLOCK 'MenuPRec' (start 0x020e end 0x0216)
-MenuPRec_start:
 	defb 07fh		;020e	7f 	 
 	defb 07fh		;020f	7f 	 
 	defb 050h		;0210	50 	P 
@@ -55,12 +56,9 @@ MenuPRec_start:
 	defb 052h		;0213	52 	R 
 	defb 045h		;0214	45 	E 
 	defb 043h		;0215	43 	C 
-	nop			;0216	00 	. 
+	defb 000h		;0216	00 	. 
 	jp Recall		;0217	c3 a8 06 	. . . 
 MenuPEnt:
-
-; BLOCK 'MenuPEnt' (start 0x021a end 0x0224)
-MenuPEnt_start:
 	defb 07fh		;021a	7f 	 
 	defb 07fh		;021b	7f 	 
 	defb 050h		;021c	50 	P 
@@ -71,7 +69,7 @@ MenuPEnt_start:
 	defb 054h		;0221	54 	T 
 	defb 052h		;0222	52 	R 
 	defb 059h		;0223	59 	Y 
-	nop			;0224	00 	. 
+	defb 000h		;0224	00 	. 
 	jp Entry		;0225	c3 a0 06 	. . . 
 DoNopRET:
 	nop			;0228	00 	. 
@@ -192,27 +190,26 @@ CAOS_CRT:
 Save:
 	ld ix,(caos_ix)		;02f5	dd 2a b0 06 	. * . . 
 	ld (SaveBlockAdr),hl		;02f9	22 b8 06 	" . . 
-	ld (00091h),hl		;02fc	22 91 00 	" . . 
-	ld hl,0008bh		;02ff	21 8b 00 	! . . 
+	ld (iobuf+17),hl		;02fc	22 91 00 	" . . 
+	ld hl,iobuf+11		;02ff	21 8b 00 	! . . 
 	ld b,005h		;0302	06 05 	. . 
 KillMem:
 	ld (hl),000h		;0304	36 00 	6 . 
 	inc hl			;0306	23 	# 
 	djnz KillMem		;0307	10 fb 	. . 
-SavePrg:
 	inc de			;0309	13 	. 
 	ld (bin_end),de		;030a	ed 53 ba 06 	. S . . 
-	ld (00093h),de		;030e	ed 53 93 00 	. S . . 
+	ld (iobuf+19),de		;030e	ed 53 93 00 	. S . . 
 	ld a,002h		;0312	3e 02 	> . 
 l0314h:
-	ld (00090h),a		;0314	32 90 00 	2 . . 
+	ld (iobuf+16),a		;0314	32 90 00 	2 . . 
 	ld a,(fileExt)		;0317	3a 00 07 	: . . 
 	cp 043h		;031a	fe 43 	. C 
-	jr nz,l034ch		;031c	20 2e 	  . 
+	jr nz,C_ISRO		;031c	20 2e 	  . 
 	ld a,d			;031e	7a 	z 
-	ld (00093h),a		;031f	32 93 00 	2 . . 
+	ld (iobuf+19),a		;031f	32 93 00 	2 . . 
 	ld hl,l04d5h		;0322	21 d5 04 	! . . 
-	ld (00094h),hl		;0325	22 94 00 	" . . 
+	ld (iobuf+20),hl		;0325	22 94 00 	" . . 
 	ld hl,07f7fh		;0328	21 7f 7f 	!   
 	ld (l0200h),hl		;032b	22 00 02 	" . . 
 	ld hl,00000h		;032e	21 00 00 	! . . 
@@ -224,17 +221,16 @@ l0314h:
 FName2Menu:
 	ld a,(hl)			;033f	7e 	~ 
 	cp 020h		;0340	fe 20 	.   
-	jr z,l034ch		;0342	28 08 	( . 
+	jr z,C_ISRO		;0342	28 08 	( . 
 	or a			;0344	b7 	. 
-	jr z,l034ch		;0345	28 05 	( . 
+	jr z,C_ISRO		;0345	28 05 	( . 
 	ld (de),a			;0347	12 	. 
 	inc hl			;0348	23 	# 
 	inc de			;0349	13 	. 
 	djnz FName2Menu		;034a	10 f3 	. . 
-l034ch:
+C_ISRO:
 	ld hl,fileName		;034c	21 f8 06 	! . . 
 	ld bc,0000bh		;034f	01 0b 00 	. . . 
-l0352h:
 	ld de,00080h		;0352	11 80 00 	. . . 
 	ldir		;0355	ed b0 	. . 
 	ld hl,00080h		;0357	21 80 00 	! . . 
@@ -278,6 +274,7 @@ l0390h:
 	or a			;03af	b7 	. 
 	sbc hl,de		;03b0	ed 52 	. R 
 	jr c,SaveBlock		;03b2	38 c4 	8 . 
+C_CSRO:
 	ld e,009h		;03b4	1e 09 	. . 
 	call CCaos		;03b6	cd 2c 02 	. , . 
 	ld a,012h		;03b9	3e 12 	> . 
@@ -352,8 +349,8 @@ CmpFNamNxtChr:
 	ld a,c			;0440	79 	y 
 	or a			;0441	b7 	. 
 	jp nz,RetryISRI		;0442	c2 d2 03 	. . . 
-	ld de,(00091h)		;0445	ed 5b 91 00 	. [ . . 
-	ld hl,(00093h)		;0449	2a 93 00 	* . . 
+	ld de,(iobuf+17)		;0445	ed 5b 91 00 	. [ . . 
+	ld hl,(iobuf+19)		;0449	2a 93 00 	* . . 
 	or a			;044c	b7 	. 
 	sbc hl,de		;044d	ed 52 	. R 
 	ld (SaveBlockAdr),hl		;044f	22 b8 06 	" . . 
@@ -453,12 +450,10 @@ sub_0502h:
 	rlca			;050e	07 	. 
 	rlca			;050f	07 	. 
 	or l			;0510	b5 	. 
-l0511h:
 	ld l,a			;0511	6f 	o 
 	in a,(088h)		;0512	db 88 	. . 
 	set 5,a		;0514	cb ef 	. . 
 	set 2,a		;0516	cb d7 	. . 
-l0518h:
 	out (088h),a		;0518	d3 88 	. . 
 	ld a,l			;051a	7d 	} 
 	ld (0b7a3h),a		;051b	32 a3 b7 	2 . . 
@@ -743,7 +738,7 @@ l0704h:
 caos_sp:
 	defw 00000h		;0706	00 00 	. . 
 	defw 00000h		;0708	00 00 	. . 
-	defw PrcFncTab_start		;070a	58 18 	X . 
+	defw RL_SETSYS		;070a	58 18 	X . 
 curSrcLineNum:
 	defw 00028h		;070c	28 00 	( . 
 l070eh:
@@ -1227,7 +1222,6 @@ TMathErr:
 	defb 072h		;098c	72 	r 
 	defb 020h		;098d	20 	  
 	defb 046h		;098e	46 	F 
-l098fh:
 	defb 065h		;098f	65 	e 
 	defb 068h		;0990	68 	h 
 	defb 06ch		;0991	6c 	l 
@@ -1258,7 +1252,6 @@ TNumExpected:
 	defb 020h		;09a7	20 	  
 	defb 065h		;09a8	65 	e 
 	defb 072h		;09a9	72 	r 
-l09aah:
 	defb 077h		;09aa	77 	w 
 	defb 061h		;09ab	61 	a 
 	defb 072h		;09ac	72 	r 
@@ -1302,10 +1295,8 @@ l09d1h:
 	rra			;09d1	1f 	. 
 	jr nc,l09cfh		;09d2	30 fb 	0 . 
 	or a			;09d4	b7 	. 
-l09d5h:
 	jr nz,l09cch		;09d5	20 f5 	  . 
 	add hl,de			;09d7	19 	. 
-l09d8h:
 	ret			;09d8	c9 	. 
 JErrOverflow:
 	jp ErrOverflow		;09d9	c3 f2 08 	. . . 
@@ -1315,7 +1306,6 @@ Mul16x8sgn:
 	ld b,a			;09de	47 	G 
 	call AbsHL		;09df	cd 0e 0a 	. . . 
 	ex de,hl			;09e2	eb 	. 
-l09e3h:
 	call AbsHL		;09e3	cd 0e 0a 	. . . 
 	xor a			;09e6	af 	. 
 	sbc hl,de		;09e7	ed 52 	. R 
@@ -1327,7 +1317,6 @@ l09edh:
 	jr nz,JErrOverflow		;09ee	20 e9 	  . 
 	or e			;09f0	b3 	. 
 	ld e,d			;09f1	5a 	Z 
-l09f2h:
 	jp nz,l09fdh		;09f2	c2 fd 09 	. . . 
 	ex de,hl			;09f5	eb 	. 
 	ret			;09f6	c9 	. 
@@ -1344,7 +1333,6 @@ l09fdh:
 	or a			;0a00	b7 	. 
 	jr nz,l09f7h		;0a01	20 f4 	  . 
 	adc hl,de		;0a03	ed 5a 	. Z 
-l0a05h:
 	jr c,JErrOverflow		;0a05	38 d2 	8 . 
 	jp m,JErrOverflow		;0a07	fa d9 09 	. . . 
 	or b			;0a0a	b0 	. 
@@ -1868,7 +1856,6 @@ sub_0ca1h:
 l0ccah:
 	push hl			;0cca	e5 	. 
 	res 7,d		;0ccb	cb ba 	. . 
-l0ccdh:
 	res 7,h		;0ccd	cb bc 	. . 
 l0ccfh:
 	srl d		;0ccf	cb 3a 	. : 
@@ -2297,7 +2284,6 @@ realTab1___start:
 	defb 020h		;0f2d	20 	  
 	defb 000h		;0f2e	00 	. 
 realTab1___end:
-l0f2fh:
 	dec c			;0f2f	0d 	. 
 	ld e,a			;0f30	5f 	_ 
 	ld e,(hl)			;0f31	5e 	^ 
@@ -2419,7 +2405,6 @@ l0ffah:
 	ld a,030h		;0ffa	3e 30 	> 0 
 	add a,d			;0ffc	82 	. 
 	call OutChr		;0ffd	cd 29 07 	. ) . 
-l1000h:
 	ld a,(l1797h)		;1000	3a 97 17 	: . . 
 	cp b			;1003	b8 	. 
 	jr nz,l100bh		;1004	20 05 	  . 
@@ -2577,7 +2562,6 @@ l10f9h:
 	call MulBy10_HL_DE		;10fa	cd 5d 0b 	. ] . 
 	ld a,030h		;10fd	3e 30 	> 0 
 	add a,d			;10ff	82 	. 
-l1100h:
 	call OutChr		;1100	cd 29 07 	. ) . 
 	ld d,000h		;1103	16 00 	. . 
 	pop bc			;1105	c1 	. 
@@ -3065,9 +3049,7 @@ l13a6h:
 	call RealDiv__		;13f7	cd cd 0d 	. . . 
 	call sub_0ca1h		;13fa	cd a1 0c 	. . . 
 	call sub_0ca1h		;13fd	cd a1 0c 	. . . 
-l1400h:
 	call RealDiv__		;1400	cd cd 0d 	. . . 
-sub_1403h:
 	call sub_0ca1h		;1403	cd a1 0c 	. . . 
 	call sub_0ca1h		;1406	cd a1 0c 	. . . 
 	call RealDiv__		;1409	cd cd 0d 	. . . 
@@ -3811,7 +3793,6 @@ l1819h:
 	defb 000h		;1830	00 	. 
 	defb 000h		;1831	00 	. 
 	defb 000h		;1832	00 	. 
-sub_1833h:
 	defb 000h		;1833	00 	. 
 	defb 000h		;1834	00 	. 
 	defb 000h		;1835	00 	. 
@@ -3855,11 +3836,8 @@ PasIDEStartAddr:
 ; BLOCK 'HeapEndAddr' (start 0x1856 end 0x1858)
 HeapEndAddr_start:
 	defw START_PASCAL		;1856	55 23 	U # 
-
-; BLOCK 'PrcFncTab' (start 0x1858 end 0x1b35)
-PrcFncTab_start:
-	defb 000h		;1858	00 	. 
-	defb 000h		;1859	00 	. 
+RL_SETSYS:
+	defw 00000h		;1858	00 00 	. . 
 	defb 053h		;185a	53 	S 
 	defb 045h		;185b	45 	E 
 	defb 054h		;185c	54 	T 
@@ -3869,8 +3847,8 @@ PrcFncTab_start:
 	defb 006h		;1860	06 	. 
 	defb 04ah		;1861	4a 	J 
 	defb 051h		;1862	51 	Q 
-	defb 058h		;1863	58 	X 
-	defb 018h		;1864	18 	. 
+RL_GETSYS:
+	defw RL_SETSYS		;1863	58 18 	X . 
 	defb 047h		;1865	47 	G 
 	defb 045h		;1866	45 	E 
 	defb 054h		;1867	54 	T 
@@ -3883,8 +3861,8 @@ PrcFncTab_start:
 	defb 05bh		;186e	5b 	[ 
 	defb 051h		;186f	51 	Q 
 	defb 002h		;1870	02 	. 
-	defb 063h		;1871	63 	c 
-	defb 018h		;1872	18 	. 
+RL_PLOT:
+	defw RL_GETSYS		;1871	63 18 	c . 
 	defb 050h		;1873	50 	P 
 	defb 04ch		;1874	4c 	L 
 	defb 04fh		;1875	4f 	O 
@@ -3892,8 +3870,8 @@ PrcFncTab_start:
 	defb 006h		;1877	06 	. 
 	defb 074h		;1878	74 	t 
 	defb 051h		;1879	51 	Q 
-	defb 071h		;187a	71 	q 
-	defb 018h		;187b	18 	. 
+RL_CLRPLOT:
+	defw RL_PLOT		;187a	71 18 	q . 
 	defb 043h		;187c	43 	C 
 	defb 04ch		;187d	4c 	L 
 	defb 052h		;187e	52 	R 
@@ -3904,8 +3882,8 @@ PrcFncTab_start:
 	defb 006h		;1883	06 	. 
 	defb 0a0h		;1884	a0 	. 
 	defb 051h		;1885	51 	Q 
-	defb 07ah		;1886	7a 	z 
-	defb 018h		;1887	18 	. 
+RL_PTEST:
+	defw RL_CLRPLOT		;1886	7a 18 	z . 
 	defb 050h		;1888	50 	P 
 	defb 054h		;1889	54 	T 
 	defb 045h		;188a	45 	E 
@@ -3917,8 +3895,8 @@ PrcFncTab_start:
 	defb 088h		;1890	88 	. 
 	defb 051h		;1891	51 	Q 
 	defb 003h		;1892	03 	. 
-	defb 086h		;1893	86 	. 
-	defb 018h		;1894	18 	. 
+RL_GETC:
+	defw RL_PTEST		;1893	86 18 	. . 
 	defb 047h		;1895	47 	G 
 	defb 045h		;1896	45 	E 
 	defb 054h		;1897	54 	T 
@@ -3929,8 +3907,8 @@ PrcFncTab_start:
 	defb 094h		;189c	94 	. 
 	defb 051h		;189d	51 	Q 
 	defb 003h		;189e	03 	. 
-	defb 093h		;189f	93 	. 
-	defb 018h		;18a0	18 	. 
+RL_SETC:
+	defw RL_GETC		;189f	93 18 	. . 
 	defb 053h		;18a1	53 	S 
 	defb 045h		;18a2	45 	E 
 	defb 054h		;18a3	54 	T 
@@ -3938,8 +3916,8 @@ PrcFncTab_start:
 	defb 006h		;18a5	06 	. 
 	defb 060h		;18a6	60 	` 
 	defb 051h		;18a7	51 	Q 
-	defb 09fh		;18a8	9f 	. 
-	defb 018h		;18a9	18 	. 
+RL_LINEPLOT:
+	defw RL_SETC		;18a8	9f 18 	. . 
 	defb 04ch		;18aa	4c 	L 
 	defb 049h		;18ab	49 	I 
 	defb 04eh		;18ac	4e 	N 
@@ -3951,8 +3929,8 @@ PrcFncTab_start:
 	defb 006h		;18b2	06 	. 
 	defb 0b4h		;18b3	b4 	. 
 	defb 051h		;18b4	51 	Q 
-	defb 0a8h		;18b5	a8 	. 
-	defb 018h		;18b6	18 	. 
+RL_CIRCLE:
+	defw RL_LINEPLOT		;18b5	a8 18 	. . 
 	defb 043h		;18b7	43 	C 
 	defb 049h		;18b8	49 	I 
 	defb 052h		;18b9	52 	R 
@@ -3962,8 +3940,8 @@ PrcFncTab_start:
 	defb 006h		;18bd	06 	. 
 	defb 0d0h		;18be	d0 	. 
 	defb 051h		;18bf	51 	Q 
-	defb 0b5h		;18c0	b5 	. 
-	defb 018h		;18c1	18 	. 
+RL_GOTOXY:
+	defw RL_CIRCLE		;18c0	b5 18 	. . 
 	defb 047h		;18c2	47 	G 
 	defb 04fh		;18c3	4f 	O 
 	defb 054h		;18c4	54 	T 
@@ -3973,8 +3951,8 @@ PrcFncTab_start:
 	defb 006h		;18c8	06 	. 
 	defb 036h		;18c9	36 	6 
 	defb 051h		;18ca	51 	Q 
-	defb 0c0h		;18cb	c0 	. 
-	defb 018h		;18cc	18 	. 
+RL_PI:
+	defw RL_GOTOXY		;18cb	c0 18 	. . 
 	defb 050h		;18cd	50 	P 
 	defb 0c9h		;18ce	c9 	. 
 	defb 001h		;18cf	01 	. 
@@ -3984,8 +3962,8 @@ PrcFncTab_start:
 	defb 001h		;18d3	01 	. 
 	defb 087h		;18d4	87 	. 
 	defb 064h		;18d5	64 	d 
-	defb 0cbh		;18d6	cb 	. 
-	defb 018h		;18d7	18 	. 
+RL_FRAC:
+	defw RL_PI		;18d6	cb 18 	. . 
 	defb 046h		;18d8	46 	F 
 	defb 052h		;18d9	52 	R 
 	defb 041h		;18da	41 	A 
@@ -3993,9 +3971,8 @@ PrcFncTab_start:
 	defb 00bh		;18dc	0b 	. 
 	defb 0cch		;18dd	cc 	. 
 	defb 012h		;18de	12 	. 
-l18dfh:
-	defb 0d6h		;18df	d6 	. 
-	defb 018h		;18e0	18 	. 
+RL_READKBD:
+	defw RL_FRAC		;18df	d6 18 	. . 
 	defb 052h		;18e1	52 	R 
 	defb 045h		;18e2	45 	E 
 	defb 041h		;18e3	41 	A 
@@ -4009,8 +3986,8 @@ l18dfh:
 	defb 0e8h		;18eb	e8 	. 
 	defb 051h		;18ec	51 	Q 
 	defb 001h		;18ed	01 	. 
-	defb 0dfh		;18ee	df 	. 
-	defb 018h		;18ef	18 	. 
+RL_SHR:
+	defw RL_READKBD		;18ee	df 18 	. . 
 	defb 053h		;18f0	53 	S 
 	defb 048h		;18f1	48 	H 
 	defb 0d2h		;18f2	d2 	. 
@@ -4020,8 +3997,8 @@ l18dfh:
 	defb 019h		;18f6	19 	. 
 	defb 052h		;18f7	52 	R 
 	defb 003h		;18f8	03 	. 
-	defb 0eeh		;18f9	ee 	. 
-	defb 018h		;18fa	18 	. 
+RL_SHL:
+	defw RL_SHR		;18f9	ee 18 	. . 
 	defb 053h		;18fb	53 	S 
 	defb 048h		;18fc	48 	H 
 	defb 0cch		;18fd	cc 	. 
@@ -4031,8 +4008,8 @@ l18dfh:
 	defb 027h		;1901	27 	' 
 	defb 052h		;1902	52 	R 
 	defb 003h		;1903	03 	. 
-	defb 0f9h		;1904	f9 	. 
-	defb 018h		;1905	18 	. 
+RL_LO:
+	defw RL_SHL		;1904	f9 18 	. . 
 	defb 04ch		;1906	4c 	L 
 	defb 0cfh		;1907	cf 	. 
 	defb 009h		;1908	09 	. 
@@ -4041,8 +4018,8 @@ l18dfh:
 	defb 010h		;190b	10 	. 
 	defb 052h		;190c	52 	R 
 	defb 002h		;190d	02 	. 
-	defb 004h		;190e	04 	. 
-	defb 019h		;190f	19 	. 
+RL_HI:
+	defw RL_LO		;190e	04 19 	. . 
 	defb 048h		;1910	48 	H 
 	defb 0c9h		;1911	c9 	. 
 	defb 009h		;1912	09 	. 
@@ -4051,8 +4028,8 @@ l18dfh:
 	defb 00bh		;1915	0b 	. 
 	defb 052h		;1916	52 	R 
 	defb 002h		;1917	02 	. 
-	defb 00eh		;1918	0e 	. 
-	defb 019h		;1919	19 	. 
+RL_SWAP:
+	defw RL_HI		;1918	0e 19 	. . 
 	defb 053h		;191a	53 	S 
 	defb 057h		;191b	57 	W 
 	defb 041h		;191c	41 	A 
@@ -4063,8 +4040,8 @@ l18dfh:
 	defb 014h		;1921	14 	. 
 	defb 052h		;1922	52 	R 
 	defb 002h		;1923	02 	. 
-	defb 018h		;1924	18 	. 
-	defb 019h		;1925	19 	. 
+RL_BXOR:
+	defw RL_SWAP		;1924	18 19 	. . 
 	defb 042h		;1926	42 	B 
 	defb 058h		;1927	58 	X 
 	defb 04fh		;1928	4f 	O 
@@ -4075,8 +4052,8 @@ l18dfh:
 	defb 001h		;192d	01 	. 
 	defb 052h		;192e	52 	R 
 	defb 003h		;192f	03 	. 
-	defb 024h		;1930	24 	$ 
-	defb 019h		;1931	19 	. 
+RL_BOR:
+	defw RL_BXOR		;1930	24 19 	$ . 
 	defb 042h		;1932	42 	B 
 	defb 04fh		;1933	4f 	O 
 	defb 0d2h		;1934	d2 	. 
@@ -4086,8 +4063,8 @@ l18dfh:
 	defb 0f7h		;1938	f7 	. 
 	defb 051h		;1939	51 	Q 
 	defb 003h		;193a	03 	. 
-	defb 030h		;193b	30 	0 
-	defb 019h		;193c	19 	. 
+RL_BAND:
+	defw RL_BOR		;193b	30 19 	0 . 
 	defb 042h		;193d	42 	B 
 	defb 041h		;193e	41 	A 
 	defb 04eh		;193f	4e 	N 
@@ -4098,23 +4075,23 @@ l18dfh:
 	defb 0edh		;1944	ed 	. 
 	defb 051h		;1945	51 	Q 
 	defb 003h		;1946	03 	. 
-	defb 03bh		;1947	3b 	; 
-	defb 019h		;1948	19 	. 
+RL_EXP:
+	defw RL_BAND		;1947	3b 19 	; . 
 	defb 045h		;1949	45 	E 
 	defb 058h		;194a	58 	X 
 	defb 0d0h		;194b	d0 	. 
 	defb 00bh		;194c	0b 	. 
 	defb 007h		;194d	07 	. 
 	defb 013h		;194e	13 	. 
-	defb 047h		;194f	47 	G 
-	defb 019h		;1950	19 	. 
+RL_LN:
+	defw RL_EXP		;194f	47 19 	G . 
 	defb 04ch		;1951	4c 	L 
 	defb 0ceh		;1952	ce 	. 
 	defb 00bh		;1953	0b 	. 
 	defb 0adh		;1954	ad 	. 
 	defb 013h		;1955	13 	. 
-	defb 04fh		;1956	4f 	O 
-	defb 019h		;1957	19 	. 
+RL_ARCTAN:
+	defw RL_LN		;1956	4f 19 	O . 
 	defb 041h		;1958	41 	A 
 	defb 052h		;1959	52 	R 
 	defb 043h		;195a	43 	C 
@@ -4124,32 +4101,32 @@ l18dfh:
 	defb 00bh		;195e	0b 	. 
 	defb 0a7h		;195f	a7 	. 
 	defb 015h		;1960	15 	. 
-	defb 056h		;1961	56 	V 
-	defb 019h		;1962	19 	. 
+RL_TAN:
+	defw RL_ARCTAN		;1961	56 19 	V . 
 	defb 054h		;1963	54 	T 
 	defb 041h		;1964	41 	A 
 	defb 0ceh		;1965	ce 	. 
 	defb 00bh		;1966	0b 	. 
 	defb 078h		;1967	78 	x 
 	defb 016h		;1968	16 	. 
-	defb 061h		;1969	61 	a 
-	defb 019h		;196a	19 	. 
+RL_COS:
+	defw RL_TAN		;1969	61 19 	a . 
 	defb 043h		;196b	43 	C 
 	defb 04fh		;196c	4f 	O 
 	defb 0d3h		;196d	d3 	. 
 	defb 00bh		;196e	0b 	. 
 	defb 034h		;196f	34 	4 
 	defb 014h		;1970	14 	. 
-	defb 069h		;1971	69 	i 
-	defb 019h		;1972	19 	. 
+RL_SIN:
+	defw RL_COS		;1971	69 19 	i . 
 	defb 053h		;1973	53 	S 
 	defb 049h		;1974	49 	I 
 	defb 0ceh		;1975	ce 	. 
 	defb 00bh		;1976	0b 	. 
 	defb 052h		;1977	52 	R 
 	defb 014h		;1978	14 	. 
-	defb 071h		;1979	71 	q 
-	defb 019h		;197a	19 	. 
+RL_INP:
+	defw RL_SIN		;1979	71 19 	q . 
 	defb 049h		;197b	49 	I 
 	defb 04eh		;197c	4e 	N 
 	defb 0d0h		;197d	d0 	. 
@@ -4159,16 +4136,16 @@ l18dfh:
 	defb 0ach		;1981	ac 	. 
 	defb 052h		;1982	52 	R 
 	defb 002h		;1983	02 	. 
-	defb 079h		;1984	79 	y 
-	defb 019h		;1985	19 	. 
+RL_OUT:
+	defw RL_INP		;1984	79 19 	y . 
 	defb 04fh		;1986	4f 	O 
 	defb 055h		;1987	55 	U 
 	defb 0d4h		;1988	d4 	. 
 	defb 006h		;1989	06 	. 
 	defb 090h		;198a	90 	. 
 	defb 052h		;198b	52 	R 
-	defb 084h		;198c	84 	. 
-	defb 019h		;198d	19 	. 
+RL_SIZE:
+	defw RL_OUT		;198c	84 19 	. . 
 	defb 053h		;198e	53 	S 
 	defb 049h		;198f	49 	I 
 	defb 05ah		;1990	5a 	Z 
@@ -4176,8 +4153,8 @@ l18dfh:
 	defb 007h		;1992	07 	. 
 	defb 06bh		;1993	6b 	k 
 	defb 052h		;1994	52 	R 
-	defb 08ch		;1995	8c 	. 
-	defb 019h		;1996	19 	. 
+RL_ADDR:
+	defw RL_SIZE		;1995	8c 19 	. . 
 	defb 041h		;1997	41 	A 
 	defb 044h		;1998	44 	D 
 	defb 044h		;1999	44 	D 
@@ -4185,8 +4162,8 @@ l18dfh:
 	defb 007h		;199b	07 	. 
 	defb 07fh		;199c	7f 	 
 	defb 052h		;199d	52 	R 
-	defb 095h		;199e	95 	. 
-	defb 019h		;199f	19 	. 
+RL_INLINE:
+	defw RL_ADDR		;199e	95 19 	. . 
 	defb 049h		;19a0	49 	I 
 	defb 04eh		;19a1	4e 	N 
 	defb 04ch		;19a2	4c 	L 
@@ -4196,8 +4173,8 @@ l18dfh:
 	defb 006h		;19a6	06 	. 
 	defb 08ah		;19a7	8a 	. 
 	defb 043h		;19a8	43 	C 
-	defb 09eh		;19a9	9e 	. 
-	defb 019h		;19aa	19 	. 
+RL_ENTIER:
+	defw RL_INLINE		;19a9	9e 19 	. . 
 	defb 045h		;19ab	45 	E 
 	defb 04eh		;19ac	4e 	N 
 	defb 054h		;19ad	54 	T 
@@ -4207,8 +4184,8 @@ l18dfh:
 	defb 00ch		;19b1	0c 	. 
 	defb 0bbh		;19b2	bb 	. 
 	defb 00eh		;19b3	0e 	. 
-	defb 0a9h		;19b4	a9 	. 
-	defb 019h		;19b5	19 	. 
+RL_USER:
+	defw RL_ENTIER		;19b4	a9 19 	. . 
 	defb 055h		;19b6	55 	U 
 	defb 053h		;19b7	53 	S 
 	defb 045h		;19b8	45 	E 
@@ -4219,9 +4196,8 @@ l18dfh:
 	defb 0bch		;19bd	bc 	. 
 	defb 052h		;19be	52 	R 
 	defb 002h		;19bf	02 	. 
-l19c0h:
-	defb 0b4h		;19c0	b4 	. 
-	defb 019h		;19c1	19 	. 
+RL_RANDOM:
+	defw RL_USER		;19c0	b4 19 	. . 
 	defb 052h		;19c2	52 	R 
 	defb 041h		;19c3	41 	A 
 	defb 04eh		;19c4	4e 	N 
@@ -4234,8 +4210,8 @@ l19c0h:
 	defb 0c5h		;19cb	c5 	. 
 	defb 052h		;19cc	52 	R 
 	defb 001h		;19cd	01 	. 
-	defb 0c0h		;19ce	c0 	. 
-	defb 019h		;19cf	19 	. 
+RL_KEYPRESSED:
+	defw RL_RANDOM		;19ce	c0 19 	. . 
 	defb 04bh		;19d0	4b 	K 
 	defb 045h		;19d1	45 	E 
 	defb 059h		;19d2	59 	Y 
@@ -4252,8 +4228,8 @@ l19c0h:
 	defb 0b2h		;19dd	b2 	. 
 	defb 052h		;19de	52 	R 
 	defb 001h		;19df	01 	. 
-	defb 0ceh		;19e0	ce 	. 
-	defb 019h		;19e1	19 	. 
+RL_HALT:
+	defw RL_KEYPRESSED		;19e0	ce 19 	. . 
 	defb 048h		;19e2	48 	H 
 	defb 041h		;19e3	41 	A 
 	defb 04ch		;19e4	4c 	L 
@@ -4264,9 +4240,8 @@ l19c0h:
 	defb 0cah		;19e9	ca 	. 
 	defb 052h		;19ea	52 	R 
 	defb 001h		;19eb	01 	. 
-l19ech:
-	defb 0e0h		;19ec	e0 	. 
-	defb 019h		;19ed	19 	. 
+RL_EOLN:
+	defw RL_HALT		;19ec	e0 19 	. . 
 	defb 045h		;19ee	45 	E 
 	defb 04fh		;19ef	4f 	O 
 	defb 04ch		;19f0	4c 	L 
@@ -4277,8 +4252,8 @@ l19ech:
 	defb 0d1h		;19f5	d1 	. 
 	defb 052h		;19f6	52 	R 
 	defb 001h		;19f7	01 	. 
-	defb 0ech		;19f8	ec 	. 
-	defb 019h		;19f9	19 	. 
+RL_PAGE:
+	defw RL_EOLN		;19f8	ec 19 	. . 
 	defb 050h		;19fa	50 	P 
 	defb 041h		;19fb	41 	A 
 	defb 047h		;19fc	47 	G 
@@ -4289,8 +4264,8 @@ l19ech:
 	defb 0d6h		;1a01	d6 	. 
 	defb 052h		;1a02	52 	R 
 	defb 001h		;1a03	01 	. 
-	defb 0f8h		;1a04	f8 	. 
-	defb 019h		;1a05	19 	. 
+RL_SQRT:
+	defw RL_PAGE		;1a04	f8 19 	. . 
 	defb 053h		;1a06	53 	S 
 	defb 051h		;1a07	51 	Q 
 	defb 052h		;1a08	52 	R 
@@ -4298,8 +4273,8 @@ l19ech:
 	defb 00bh		;1a0a	0b 	. 
 	defb 088h		;1a0b	88 	. 
 	defb 011h		;1a0c	11 	. 
-	defb 004h		;1a0d	04 	. 
-	defb 01ah		;1a0e	1a 	. 
+RL_ROUND:
+	defw RL_SQRT		;1a0d	04 1a 	. . 
 	defb 052h		;1a0f	52 	R 
 	defb 04fh		;1a10	4f 	O 
 	defb 055h		;1a11	55 	U 
@@ -4308,8 +4283,8 @@ l19ech:
 	defb 00ch		;1a14	0c 	. 
 	defb 0b0h		;1a15	b0 	. 
 	defb 00eh		;1a16	0e 	. 
-	defb 00dh		;1a17	0d 	. 
-	defb 01ah		;1a18	1a 	. 
+RL_TRUNC:
+	defw RL_ROUND		;1a17	0d 1a 	. . 
 	defb 054h		;1a19	54 	T 
 	defb 052h		;1a1a	52 	R 
 	defb 055h		;1a1b	55 	U 
@@ -4318,8 +4293,8 @@ l19ech:
 	defb 00ch		;1a1e	0c 	. 
 	defb 069h		;1a1f	69 	i 
 	defb 00eh		;1a20	0e 	. 
-	defb 017h		;1a21	17 	. 
-	defb 01ah		;1a22	1a 	. 
+RL_MAXINT:
+	defw RL_TRUNC		;1a21	17 1a 	. . 
 	defb 04dh		;1a23	4d 	M 
 	defb 041h		;1a24	41 	A 
 	defb 058h		;1a25	58 	X 
@@ -4331,8 +4306,8 @@ l19ech:
 	defb 000h		;1a2b	00 	. 
 	defb 0ffh		;1a2c	ff 	. 
 	defb 07fh		;1a2d	7f 	 
-	defb 021h		;1a2e	21 	! 
-	defb 01ah		;1a2f	1a 	. 
+RL_SUCC:
+	defw RL_MAXINT		;1a2e	21 1a 	! . 
 	defb 053h		;1a30	53 	S 
 	defb 055h		;1a31	55 	U 
 	defb 043h		;1a32	43 	C 
@@ -4340,8 +4315,8 @@ l19ech:
 	defb 007h		;1a34	07 	. 
 	defb 06ch		;1a35	6c 	l 
 	defb 043h		;1a36	43 	C 
-	defb 02eh		;1a37	2e 	. 
-	defb 01ah		;1a38	1a 	. 
+RL_PRED:
+	defw RL_SUCC		;1a37	2e 1a 	. . 
 	defb 050h		;1a39	50 	P 
 	defb 052h		;1a3a	52 	R 
 	defb 045h		;1a3b	45 	E 
@@ -4349,16 +4324,16 @@ l19ech:
 	defb 007h		;1a3d	07 	. 
 	defb 05bh		;1a3e	5b 	[ 
 	defb 043h		;1a3f	43 	C 
-	defb 037h		;1a40	37 	7 
-	defb 01ah		;1a41	1a 	. 
+RL_ORD:
+	defw RL_PRED		;1a40	37 1a 	7 . 
 	defb 04fh		;1a42	4f 	O 
 	defb 052h		;1a43	52 	R 
 	defb 0c4h		;1a44	c4 	. 
 	defb 007h		;1a45	07 	. 
 	defb 04ch		;1a46	4c 	L 
 	defb 043h		;1a47	43 	C 
-	defb 040h		;1a48	40 	@ 
-	defb 01ah		;1a49	1a 	. 
+RL_PEEK:
+	defw RL_ORD		;1a48	40 1a 	@ . 
 	defb 050h		;1a4a	50 	P 
 	defb 045h		;1a4b	45 	E 
 	defb 045h		;1a4c	45 	E 
@@ -4366,8 +4341,8 @@ l19ech:
 	defb 007h		;1a4e	07 	. 
 	defb 036h		;1a4f	36 	6 
 	defb 045h		;1a50	45 	E 
-	defb 048h		;1a51	48 	H 
-	defb 01ah		;1a52	1a 	. 
+RL_POKE:
+	defw RL_PEEK		;1a51	48 1a 	H . 
 	defb 050h		;1a53	50 	P 
 	defb 04fh		;1a54	4f 	O 
 	defb 04bh		;1a55	4b 	K 
@@ -4375,8 +4350,8 @@ l19ech:
 	defb 006h		;1a57	06 	. 
 	defb 044h		;1a58	44 	D 
 	defb 038h		;1a59	38 	8 
-	defb 051h		;1a5a	51 	Q 
-	defb 01ah		;1a5b	1a 	. 
+RL_RELEASE:
+	defw RL_POKE		;1a5a	51 1a 	Q . 
 	defb 052h		;1a5c	52 	R 
 	defb 045h		;1a5d	45 	E 
 	defb 04ch		;1a5e	4c 	L 
@@ -4387,8 +4362,8 @@ l19ech:
 	defb 006h		;1a63	06 	. 
 	defb 07bh		;1a64	7b 	{ 
 	defb 050h		;1a65	50 	P 
-	defb 05ah		;1a66	5a 	Z 
-	defb 01ah		;1a67	1a 	. 
+RL_MARK:
+	defw RL_RELEASE		;1a66	5a 1a 	Z . 
 	defb 04dh		;1a68	4d 	M 
 	defb 041h		;1a69	41 	A 
 	defb 052h		;1a6a	52 	R 
@@ -4396,16 +4371,16 @@ l19ech:
 	defb 006h		;1a6c	06 	. 
 	defb 076h		;1a6d	76 	v 
 	defb 050h		;1a6e	50 	P 
-	defb 066h		;1a6f	66 	f 
-	defb 01ah		;1a70	1a 	. 
+RL_NEW:
+	defw RL_MARK		;1a6f	66 1a 	f . 
 	defb 04eh		;1a71	4e 	N 
 	defb 045h		;1a72	45 	E 
 	defb 0d7h		;1a73	d7 	. 
 	defb 006h		;1a74	06 	. 
 	defb 09eh		;1a75	9e 	. 
 	defb 050h		;1a76	50 	P 
-	defb 06fh		;1a77	6f 	o 
-	defb 01ah		;1a78	1a 	. 
+RL_TOUT:
+	defw RL_NEW		;1a77	6f 1a 	o . 
 	defb 054h		;1a79	54 	T 
 	defb 04fh		;1a7a	4f 	O 
 	defb 055h		;1a7b	55 	U 
@@ -4413,16 +4388,16 @@ l19ech:
 	defb 006h		;1a7d	06 	. 
 	defb 0fah		;1a7e	fa 	. 
 	defb 050h		;1a7f	50 	P 
-	defb 077h		;1a80	77 	w 
-	defb 01ah		;1a81	1a 	. 
+RL_TIN:
+	defw RL_TOUT		;1a80	77 1a 	w . 
 	defb 054h		;1a82	54 	T 
 	defb 049h		;1a83	49 	I 
 	defb 0ceh		;1a84	ce 	. 
 	defb 006h		;1a85	06 	. 
 	defb 0eeh		;1a86	ee 	. 
 	defb 050h		;1a87	50 	P 
-	defb 080h		;1a88	80 	. 
-	defb 01ah		;1a89	1a 	. 
+RL_CHR:
+	defw RL_TIN		;1a88	80 1a 	. . 
 	defb 043h		;1a8a	43 	C 
 	defb 048h		;1a8b	48 	H 
 	defb 0d2h		;1a8c	d2 	. 
@@ -4432,8 +4407,8 @@ l19ech:
 	defb 0ceh		;1a90	ce 	. 
 	defb 052h		;1a91	52 	R 
 	defb 002h		;1a92	02 	. 
-	defb 088h		;1a93	88 	. 
-	defb 01ah		;1a94	1a 	. 
+RL_ODD:
+	defw RL_CHR		;1a93	88 1a 	. . 
 	defb 04fh		;1a95	4f 	O 
 	defb 044h		;1a96	44 	D 
 	defb 0c4h		;1a97	c4 	. 
@@ -4443,8 +4418,8 @@ l19ech:
 	defb 0c0h		;1a9b	c0 	. 
 	defb 052h		;1a9c	52 	R 
 	defb 002h		;1a9d	02 	. 
-	defb 093h		;1a9e	93 	. 
-	defb 01ah		;1a9f	1a 	. 
+RL_ABS:
+	defw RL_ODD		;1a9e	93 1a 	. . 
 	defb 041h		;1aa0	41 	A 
 	defb 042h		;1aa1	42 	B 
 	defb 0d3h		;1aa2	d3 	. 
@@ -4453,8 +4428,8 @@ l19ech:
 	defb 052h		;1aa5	52 	R 
 	defb 0eeh		;1aa6	ee 	. 
 	defb 052h		;1aa7	52 	R 
-	defb 09eh		;1aa8	9e 	. 
-	defb 01ah		;1aa9	1a 	. 
+RL_SQR:
+	defw RL_ABS		;1aa8	9e 1a 	. . 
 	defb 053h		;1aaa	53 	S 
 	defb 051h		;1aab	51 	Q 
 	defb 0d2h		;1aac	d2 	. 
@@ -4463,9 +4438,8 @@ l19ech:
 	defb 052h		;1aaf	52 	R 
 	defb 0e8h		;1ab0	e8 	. 
 	defb 052h		;1ab1	52 	R 
-l1ab2h:
-	defb 0a8h		;1ab2	a8 	. 
-	defb 01ah		;1ab3	1a 	. 
+RL_FALSE:
+	defw RL_SQR		;1ab2	a8 1a 	. . 
 	defb 046h		;1ab4	46 	F 
 	defb 041h		;1ab5	41 	A 
 	defb 04ch		;1ab6	4c 	L 
@@ -4476,8 +4450,8 @@ l1ab2h:
 	defb 000h		;1abb	00 	. 
 	defb 000h		;1abc	00 	. 
 	defb 001h		;1abd	01 	. 
-	defb 0b2h		;1abe	b2 	. 
-	defb 01ah		;1abf	1a 	. 
+RL_TRUE:
+	defw RL_FALSE		;1abe	b2 1a 	. . 
 	defb 054h		;1ac0	54 	T 
 	defb 052h		;1ac1	52 	R 
 	defb 055h		;1ac2	55 	U 
@@ -4487,8 +4461,8 @@ l1ab2h:
 	defb 000h		;1ac6	00 	. 
 	defb 001h		;1ac7	01 	. 
 	defb 001h		;1ac8	01 	. 
-	defb 0beh		;1ac9	be 	. 
-	defb 01ah		;1aca	1a 	. 
+RL_BOOLEAN:
+	defw RL_TRUE		;1ac9	be 1a 	. . 
 	defb 042h		;1acb	42 	B 
 	defb 04fh		;1acc	4f 	O 
 	defb 04fh		;1acd	4f 	O 
@@ -4505,8 +4479,8 @@ l1ab2h:
 	defb 001h		;1ad8	01 	. 
 	defb 001h		;1ad9	01 	. 
 	defb 000h		;1ada	00 	. 
-	defb 0c9h		;1adb	c9 	. 
-	defb 01ah		;1adc	1a 	. 
+RL_CHAR:
+	defw RL_BOOLEAN		;1adb	c9 1a 	. . 
 	defb 043h		;1add	43 	C 
 	defb 048h		;1ade	48 	H 
 	defb 041h		;1adf	41 	A 
@@ -4520,8 +4494,8 @@ l1ab2h:
 	defb 0ffh		;1ae7	ff 	. 
 	defb 001h		;1ae8	01 	. 
 	defb 000h		;1ae9	00 	. 
-	defb 0dbh		;1aea	db 	. 
-	defb 01ah		;1aeb	1a 	. 
+RL_REAL:
+	defw RL_CHAR		;1aea	db 1a 	. . 
 	defb 052h		;1aec	52 	R 
 	defb 045h		;1aed	45 	E 
 	defb 041h		;1aee	41 	A 
@@ -4535,8 +4509,8 @@ l1ab2h:
 	defb 000h		;1af6	00 	. 
 	defb 004h		;1af7	04 	. 
 	defb 000h		;1af8	00 	. 
-	defb 0eah		;1af9	ea 	. 
-	defb 01ah		;1afa	1a 	. 
+RL_INTEGER:
+	defw RL_REAL		;1af9	ea 1a 	. . 
 	defb 049h		;1afb	49 	I 
 	defb 04eh		;1afc	4e 	N 
 	defb 054h		;1afd	54 	T 
@@ -4553,8 +4527,8 @@ l1ab2h:
 	defb 07fh		;1b08	7f 	 
 	defb 002h		;1b09	02 	. 
 	defb 000h		;1b0a	00 	. 
-	defb 0f9h		;1b0b	f9 	. 
-	defb 01ah		;1b0c	1a 	. 
+RL_READLN:
+	defw RL_INTEGER		;1b0b	f9 1a 	. . 
 	defb 052h		;1b0d	52 	R 
 	defb 045h		;1b0e	45 	E 
 	defb 041h		;1b0f	41 	A 
@@ -4564,8 +4538,8 @@ l1ab2h:
 	defb 006h		;1b13	06 	. 
 	defb 0e5h		;1b14	e5 	. 
 	defb 03eh		;1b15	3e 	> 
-	defb 00bh		;1b16	0b 	. 
-	defb 01bh		;1b17	1b 	. 
+RL_READ:
+	defw RL_READLN		;1b16	0b 1b 	. . 
 	defb 052h		;1b18	52 	R 
 	defb 045h		;1b19	45 	E 
 	defb 041h		;1b1a	41 	A 
@@ -4573,8 +4547,8 @@ l1ab2h:
 	defb 006h		;1b1c	06 	. 
 	defb 095h		;1b1d	95 	. 
 	defb 03eh		;1b1e	3e 	> 
-	defb 016h		;1b1f	16 	. 
-	defb 01bh		;1b20	1b 	. 
+RL_WRITELN:
+	defw RL_READ		;1b1f	16 1b 	. . 
 	defb 057h		;1b21	57 	W 
 	defb 052h		;1b22	52 	R 
 	defb 049h		;1b23	49 	I 
@@ -4585,9 +4559,8 @@ l1ab2h:
 	defb 006h		;1b28	06 	. 
 	defb 06eh		;1b29	6e 	n 
 	defb 03dh		;1b2a	3d 	= 
-l1b2bh:
-	defb 01fh		;1b2b	1f 	. 
-	defb 01bh		;1b2c	1b 	. 
+RL_WRITE:
+	defw RL_WRITELN		;1b2b	1f 1b 	. . 
 	defb 057h		;1b2d	57 	W 
 	defb 052h		;1b2e	52 	R 
 	defb 049h		;1b2f	49 	I 
@@ -4596,2090 +4569,2091 @@ l1b2bh:
 	defb 006h		;1b32	06 	. 
 	defb 081h		;1b33	81 	. 
 	defb 03dh		;1b34	3d 	= 
-	nop			;1b35	00 	. 
-	nop			;1b36	00 	. 
-	nop			;1b37	00 	. 
-	nop			;1b38	00 	. 
-	nop			;1b39	00 	. 
-	nop			;1b3a	00 	. 
-	nop			;1b3b	00 	. 
-	nop			;1b3c	00 	. 
-	nop			;1b3d	00 	. 
-	nop			;1b3e	00 	. 
-	nop			;1b3f	00 	. 
-	nop			;1b40	00 	. 
-	nop			;1b41	00 	. 
-	nop			;1b42	00 	. 
-	nop			;1b43	00 	. 
-	nop			;1b44	00 	. 
-	nop			;1b45	00 	. 
-	nop			;1b46	00 	. 
-	nop			;1b47	00 	. 
-	nop			;1b48	00 	. 
-	nop			;1b49	00 	. 
-	nop			;1b4a	00 	. 
-	nop			;1b4b	00 	. 
-	nop			;1b4c	00 	. 
-	nop			;1b4d	00 	. 
-	nop			;1b4e	00 	. 
-	nop			;1b4f	00 	. 
-	nop			;1b50	00 	. 
-	nop			;1b51	00 	. 
-	nop			;1b52	00 	. 
-	nop			;1b53	00 	. 
-	nop			;1b54	00 	. 
-	nop			;1b55	00 	. 
-	nop			;1b56	00 	. 
-	nop			;1b57	00 	. 
-	nop			;1b58	00 	. 
-	nop			;1b59	00 	. 
-	nop			;1b5a	00 	. 
-	nop			;1b5b	00 	. 
-	nop			;1b5c	00 	. 
-	nop			;1b5d	00 	. 
-	nop			;1b5e	00 	. 
-	nop			;1b5f	00 	. 
-	nop			;1b60	00 	. 
-	nop			;1b61	00 	. 
-	nop			;1b62	00 	. 
-	nop			;1b63	00 	. 
-	nop			;1b64	00 	. 
-	nop			;1b65	00 	. 
-	nop			;1b66	00 	. 
-	nop			;1b67	00 	. 
-	nop			;1b68	00 	. 
-	nop			;1b69	00 	. 
-	nop			;1b6a	00 	. 
-	nop			;1b6b	00 	. 
-	nop			;1b6c	00 	. 
-	nop			;1b6d	00 	. 
-	nop			;1b6e	00 	. 
-	nop			;1b6f	00 	. 
-	nop			;1b70	00 	. 
-	nop			;1b71	00 	. 
-	nop			;1b72	00 	. 
-	nop			;1b73	00 	. 
-	nop			;1b74	00 	. 
-	nop			;1b75	00 	. 
-	nop			;1b76	00 	. 
-	nop			;1b77	00 	. 
-	nop			;1b78	00 	. 
-	nop			;1b79	00 	. 
-	nop			;1b7a	00 	. 
-	nop			;1b7b	00 	. 
-	nop			;1b7c	00 	. 
-	nop			;1b7d	00 	. 
-	nop			;1b7e	00 	. 
-	nop			;1b7f	00 	. 
-	nop			;1b80	00 	. 
-	nop			;1b81	00 	. 
-	nop			;1b82	00 	. 
-	nop			;1b83	00 	. 
-	nop			;1b84	00 	. 
-	nop			;1b85	00 	. 
-	nop			;1b86	00 	. 
-	nop			;1b87	00 	. 
-	nop			;1b88	00 	. 
-	nop			;1b89	00 	. 
-	nop			;1b8a	00 	. 
-	nop			;1b8b	00 	. 
-	nop			;1b8c	00 	. 
-	nop			;1b8d	00 	. 
-	nop			;1b8e	00 	. 
-	nop			;1b8f	00 	. 
-	nop			;1b90	00 	. 
-	nop			;1b91	00 	. 
-	nop			;1b92	00 	. 
-	nop			;1b93	00 	. 
-	nop			;1b94	00 	. 
-	nop			;1b95	00 	. 
-	nop			;1b96	00 	. 
-	nop			;1b97	00 	. 
-	nop			;1b98	00 	. 
-	nop			;1b99	00 	. 
-	nop			;1b9a	00 	. 
-	nop			;1b9b	00 	. 
-	nop			;1b9c	00 	. 
-	nop			;1b9d	00 	. 
-	nop			;1b9e	00 	. 
-	nop			;1b9f	00 	. 
-	nop			;1ba0	00 	. 
-	nop			;1ba1	00 	. 
-	nop			;1ba2	00 	. 
-	nop			;1ba3	00 	. 
-	nop			;1ba4	00 	. 
-	nop			;1ba5	00 	. 
-	nop			;1ba6	00 	. 
-	nop			;1ba7	00 	. 
-	nop			;1ba8	00 	. 
-	nop			;1ba9	00 	. 
-	nop			;1baa	00 	. 
-	nop			;1bab	00 	. 
-	nop			;1bac	00 	. 
-	nop			;1bad	00 	. 
-	nop			;1bae	00 	. 
-	nop			;1baf	00 	. 
-	nop			;1bb0	00 	. 
-	nop			;1bb1	00 	. 
-	nop			;1bb2	00 	. 
-	nop			;1bb3	00 	. 
-	nop			;1bb4	00 	. 
-	nop			;1bb5	00 	. 
-	nop			;1bb6	00 	. 
-	nop			;1bb7	00 	. 
-	nop			;1bb8	00 	. 
-	nop			;1bb9	00 	. 
-	nop			;1bba	00 	. 
-	nop			;1bbb	00 	. 
-	nop			;1bbc	00 	. 
-	nop			;1bbd	00 	. 
-	nop			;1bbe	00 	. 
-	nop			;1bbf	00 	. 
-	nop			;1bc0	00 	. 
-	nop			;1bc1	00 	. 
-	nop			;1bc2	00 	. 
-	nop			;1bc3	00 	. 
-	nop			;1bc4	00 	. 
-	nop			;1bc5	00 	. 
-	nop			;1bc6	00 	. 
-	nop			;1bc7	00 	. 
-	nop			;1bc8	00 	. 
-	nop			;1bc9	00 	. 
-	nop			;1bca	00 	. 
-	nop			;1bcb	00 	. 
-	nop			;1bcc	00 	. 
-	nop			;1bcd	00 	. 
-	nop			;1bce	00 	. 
-	nop			;1bcf	00 	. 
-	nop			;1bd0	00 	. 
-	nop			;1bd1	00 	. 
-	nop			;1bd2	00 	. 
-	nop			;1bd3	00 	. 
-	nop			;1bd4	00 	. 
-	nop			;1bd5	00 	. 
-	nop			;1bd6	00 	. 
-	nop			;1bd7	00 	. 
-	nop			;1bd8	00 	. 
-	nop			;1bd9	00 	. 
-	nop			;1bda	00 	. 
-	nop			;1bdb	00 	. 
-	nop			;1bdc	00 	. 
-	nop			;1bdd	00 	. 
-	nop			;1bde	00 	. 
-	nop			;1bdf	00 	. 
-	nop			;1be0	00 	. 
-	nop			;1be1	00 	. 
-	nop			;1be2	00 	. 
-	nop			;1be3	00 	. 
-	nop			;1be4	00 	. 
-	nop			;1be5	00 	. 
-	nop			;1be6	00 	. 
-	nop			;1be7	00 	. 
-	nop			;1be8	00 	. 
-	nop			;1be9	00 	. 
-	nop			;1bea	00 	. 
-	nop			;1beb	00 	. 
-	nop			;1bec	00 	. 
-	nop			;1bed	00 	. 
-	nop			;1bee	00 	. 
-	nop			;1bef	00 	. 
-	nop			;1bf0	00 	. 
-	nop			;1bf1	00 	. 
-	nop			;1bf2	00 	. 
-	nop			;1bf3	00 	. 
-	nop			;1bf4	00 	. 
-	nop			;1bf5	00 	. 
-	nop			;1bf6	00 	. 
-	nop			;1bf7	00 	. 
-	nop			;1bf8	00 	. 
-	nop			;1bf9	00 	. 
-	nop			;1bfa	00 	. 
-	nop			;1bfb	00 	. 
-	nop			;1bfc	00 	. 
-	nop			;1bfd	00 	. 
-	nop			;1bfe	00 	. 
-	nop			;1bff	00 	. 
-	nop			;1c00	00 	. 
-	nop			;1c01	00 	. 
-	nop			;1c02	00 	. 
-	nop			;1c03	00 	. 
-	nop			;1c04	00 	. 
-	nop			;1c05	00 	. 
-	nop			;1c06	00 	. 
-	nop			;1c07	00 	. 
-	nop			;1c08	00 	. 
-	nop			;1c09	00 	. 
-	nop			;1c0a	00 	. 
-	nop			;1c0b	00 	. 
-	nop			;1c0c	00 	. 
-	nop			;1c0d	00 	. 
-	nop			;1c0e	00 	. 
-	nop			;1c0f	00 	. 
-	nop			;1c10	00 	. 
-	nop			;1c11	00 	. 
-	nop			;1c12	00 	. 
-	nop			;1c13	00 	. 
-	nop			;1c14	00 	. 
-	nop			;1c15	00 	. 
-	nop			;1c16	00 	. 
-	nop			;1c17	00 	. 
-	nop			;1c18	00 	. 
-	nop			;1c19	00 	. 
-	nop			;1c1a	00 	. 
-	nop			;1c1b	00 	. 
-	nop			;1c1c	00 	. 
-	nop			;1c1d	00 	. 
-	nop			;1c1e	00 	. 
-	nop			;1c1f	00 	. 
-	nop			;1c20	00 	. 
-	nop			;1c21	00 	. 
-	nop			;1c22	00 	. 
-	nop			;1c23	00 	. 
-	nop			;1c24	00 	. 
-	nop			;1c25	00 	. 
-	nop			;1c26	00 	. 
-	nop			;1c27	00 	. 
-	nop			;1c28	00 	. 
-	nop			;1c29	00 	. 
-	nop			;1c2a	00 	. 
-	nop			;1c2b	00 	. 
-	nop			;1c2c	00 	. 
-	nop			;1c2d	00 	. 
-	nop			;1c2e	00 	. 
-	nop			;1c2f	00 	. 
-	nop			;1c30	00 	. 
-	nop			;1c31	00 	. 
-	nop			;1c32	00 	. 
-	nop			;1c33	00 	. 
-	nop			;1c34	00 	. 
-	nop			;1c35	00 	. 
-	nop			;1c36	00 	. 
-	nop			;1c37	00 	. 
-	nop			;1c38	00 	. 
-	nop			;1c39	00 	. 
-	nop			;1c3a	00 	. 
-	nop			;1c3b	00 	. 
-	nop			;1c3c	00 	. 
-	nop			;1c3d	00 	. 
-	nop			;1c3e	00 	. 
-	nop			;1c3f	00 	. 
-	nop			;1c40	00 	. 
-	nop			;1c41	00 	. 
-	nop			;1c42	00 	. 
-	nop			;1c43	00 	. 
-	nop			;1c44	00 	. 
-	nop			;1c45	00 	. 
-	nop			;1c46	00 	. 
-	nop			;1c47	00 	. 
-	nop			;1c48	00 	. 
-	nop			;1c49	00 	. 
-	nop			;1c4a	00 	. 
-	nop			;1c4b	00 	. 
-	nop			;1c4c	00 	. 
-	nop			;1c4d	00 	. 
-	nop			;1c4e	00 	. 
-	nop			;1c4f	00 	. 
-	nop			;1c50	00 	. 
-	nop			;1c51	00 	. 
-	nop			;1c52	00 	. 
-	nop			;1c53	00 	. 
-	nop			;1c54	00 	. 
-	nop			;1c55	00 	. 
-	nop			;1c56	00 	. 
-	nop			;1c57	00 	. 
-	nop			;1c58	00 	. 
-	nop			;1c59	00 	. 
-	nop			;1c5a	00 	. 
-	nop			;1c5b	00 	. 
-	nop			;1c5c	00 	. 
-	nop			;1c5d	00 	. 
-	nop			;1c5e	00 	. 
-	nop			;1c5f	00 	. 
-	nop			;1c60	00 	. 
-	nop			;1c61	00 	. 
-	nop			;1c62	00 	. 
-	nop			;1c63	00 	. 
-	nop			;1c64	00 	. 
-	nop			;1c65	00 	. 
-	nop			;1c66	00 	. 
-	nop			;1c67	00 	. 
-	nop			;1c68	00 	. 
-	nop			;1c69	00 	. 
-	nop			;1c6a	00 	. 
-	nop			;1c6b	00 	. 
-	nop			;1c6c	00 	. 
-	nop			;1c6d	00 	. 
-	nop			;1c6e	00 	. 
-	nop			;1c6f	00 	. 
-	nop			;1c70	00 	. 
-	nop			;1c71	00 	. 
-	nop			;1c72	00 	. 
-	nop			;1c73	00 	. 
-	nop			;1c74	00 	. 
-	nop			;1c75	00 	. 
-	nop			;1c76	00 	. 
-	nop			;1c77	00 	. 
-	nop			;1c78	00 	. 
-	nop			;1c79	00 	. 
-	nop			;1c7a	00 	. 
-	nop			;1c7b	00 	. 
-	nop			;1c7c	00 	. 
-	nop			;1c7d	00 	. 
-	nop			;1c7e	00 	. 
-	nop			;1c7f	00 	. 
-	nop			;1c80	00 	. 
-	nop			;1c81	00 	. 
-	nop			;1c82	00 	. 
-	nop			;1c83	00 	. 
-	nop			;1c84	00 	. 
-	nop			;1c85	00 	. 
-	nop			;1c86	00 	. 
-	nop			;1c87	00 	. 
-	nop			;1c88	00 	. 
-	nop			;1c89	00 	. 
-	nop			;1c8a	00 	. 
-	nop			;1c8b	00 	. 
-	nop			;1c8c	00 	. 
-	nop			;1c8d	00 	. 
-	nop			;1c8e	00 	. 
-	nop			;1c8f	00 	. 
-	nop			;1c90	00 	. 
-	nop			;1c91	00 	. 
-	nop			;1c92	00 	. 
-	nop			;1c93	00 	. 
-	nop			;1c94	00 	. 
-	nop			;1c95	00 	. 
-	nop			;1c96	00 	. 
-	nop			;1c97	00 	. 
-	nop			;1c98	00 	. 
-	nop			;1c99	00 	. 
-	nop			;1c9a	00 	. 
-	nop			;1c9b	00 	. 
-	nop			;1c9c	00 	. 
-	nop			;1c9d	00 	. 
-	nop			;1c9e	00 	. 
-	nop			;1c9f	00 	. 
-	nop			;1ca0	00 	. 
-	nop			;1ca1	00 	. 
-	nop			;1ca2	00 	. 
-	nop			;1ca3	00 	. 
-	nop			;1ca4	00 	. 
-	nop			;1ca5	00 	. 
-	nop			;1ca6	00 	. 
-	nop			;1ca7	00 	. 
-	nop			;1ca8	00 	. 
-	nop			;1ca9	00 	. 
-	nop			;1caa	00 	. 
-	nop			;1cab	00 	. 
-	nop			;1cac	00 	. 
-	nop			;1cad	00 	. 
-	nop			;1cae	00 	. 
-	nop			;1caf	00 	. 
-	nop			;1cb0	00 	. 
-	nop			;1cb1	00 	. 
-	nop			;1cb2	00 	. 
-	nop			;1cb3	00 	. 
-	nop			;1cb4	00 	. 
-	nop			;1cb5	00 	. 
-	nop			;1cb6	00 	. 
-	nop			;1cb7	00 	. 
-	nop			;1cb8	00 	. 
-	nop			;1cb9	00 	. 
-	nop			;1cba	00 	. 
-	nop			;1cbb	00 	. 
-	nop			;1cbc	00 	. 
-	nop			;1cbd	00 	. 
-	nop			;1cbe	00 	. 
-	nop			;1cbf	00 	. 
-	nop			;1cc0	00 	. 
-	nop			;1cc1	00 	. 
-	nop			;1cc2	00 	. 
-	nop			;1cc3	00 	. 
-	nop			;1cc4	00 	. 
-	nop			;1cc5	00 	. 
-	nop			;1cc6	00 	. 
-	nop			;1cc7	00 	. 
-	nop			;1cc8	00 	. 
-	nop			;1cc9	00 	. 
-	nop			;1cca	00 	. 
-	nop			;1ccb	00 	. 
-	nop			;1ccc	00 	. 
-	nop			;1ccd	00 	. 
-	nop			;1cce	00 	. 
-	nop			;1ccf	00 	. 
-	nop			;1cd0	00 	. 
-	nop			;1cd1	00 	. 
-	nop			;1cd2	00 	. 
-	nop			;1cd3	00 	. 
-	nop			;1cd4	00 	. 
-	nop			;1cd5	00 	. 
-	nop			;1cd6	00 	. 
-	nop			;1cd7	00 	. 
-	nop			;1cd8	00 	. 
-	nop			;1cd9	00 	. 
-	nop			;1cda	00 	. 
-	nop			;1cdb	00 	. 
-	nop			;1cdc	00 	. 
-	nop			;1cdd	00 	. 
-	nop			;1cde	00 	. 
-	nop			;1cdf	00 	. 
-	nop			;1ce0	00 	. 
-	nop			;1ce1	00 	. 
-	nop			;1ce2	00 	. 
-	nop			;1ce3	00 	. 
-	nop			;1ce4	00 	. 
-	nop			;1ce5	00 	. 
-	nop			;1ce6	00 	. 
-	nop			;1ce7	00 	. 
-	nop			;1ce8	00 	. 
-	nop			;1ce9	00 	. 
-	nop			;1cea	00 	. 
-	nop			;1ceb	00 	. 
-	nop			;1cec	00 	. 
-	nop			;1ced	00 	. 
-	nop			;1cee	00 	. 
-	nop			;1cef	00 	. 
-	nop			;1cf0	00 	. 
-	nop			;1cf1	00 	. 
-	nop			;1cf2	00 	. 
-	nop			;1cf3	00 	. 
-	nop			;1cf4	00 	. 
-	nop			;1cf5	00 	. 
-	nop			;1cf6	00 	. 
-	nop			;1cf7	00 	. 
-	nop			;1cf8	00 	. 
-	nop			;1cf9	00 	. 
-	nop			;1cfa	00 	. 
-	nop			;1cfb	00 	. 
-	nop			;1cfc	00 	. 
-	nop			;1cfd	00 	. 
-	nop			;1cfe	00 	. 
-	nop			;1cff	00 	. 
-	nop			;1d00	00 	. 
-	nop			;1d01	00 	. 
-	nop			;1d02	00 	. 
-	nop			;1d03	00 	. 
-	nop			;1d04	00 	. 
-	nop			;1d05	00 	. 
-	nop			;1d06	00 	. 
-	nop			;1d07	00 	. 
-	nop			;1d08	00 	. 
-	nop			;1d09	00 	. 
-	nop			;1d0a	00 	. 
-	nop			;1d0b	00 	. 
-	nop			;1d0c	00 	. 
-	nop			;1d0d	00 	. 
-	nop			;1d0e	00 	. 
-	nop			;1d0f	00 	. 
-	nop			;1d10	00 	. 
-	nop			;1d11	00 	. 
-	nop			;1d12	00 	. 
-	nop			;1d13	00 	. 
-	nop			;1d14	00 	. 
-	nop			;1d15	00 	. 
-	nop			;1d16	00 	. 
-	nop			;1d17	00 	. 
-	nop			;1d18	00 	. 
-	nop			;1d19	00 	. 
-	nop			;1d1a	00 	. 
-	nop			;1d1b	00 	. 
-	nop			;1d1c	00 	. 
-	nop			;1d1d	00 	. 
-	nop			;1d1e	00 	. 
-	nop			;1d1f	00 	. 
-	nop			;1d20	00 	. 
-	nop			;1d21	00 	. 
-	nop			;1d22	00 	. 
-	nop			;1d23	00 	. 
-	nop			;1d24	00 	. 
-	nop			;1d25	00 	. 
-	nop			;1d26	00 	. 
-	nop			;1d27	00 	. 
-	nop			;1d28	00 	. 
-	nop			;1d29	00 	. 
-	nop			;1d2a	00 	. 
-	nop			;1d2b	00 	. 
-	nop			;1d2c	00 	. 
-	nop			;1d2d	00 	. 
-	nop			;1d2e	00 	. 
-	nop			;1d2f	00 	. 
-	nop			;1d30	00 	. 
-	nop			;1d31	00 	. 
-	nop			;1d32	00 	. 
-	nop			;1d33	00 	. 
-	nop			;1d34	00 	. 
-	nop			;1d35	00 	. 
-	nop			;1d36	00 	. 
-	nop			;1d37	00 	. 
-	nop			;1d38	00 	. 
-	nop			;1d39	00 	. 
-	nop			;1d3a	00 	. 
-	nop			;1d3b	00 	. 
-	nop			;1d3c	00 	. 
-	nop			;1d3d	00 	. 
-	nop			;1d3e	00 	. 
-	nop			;1d3f	00 	. 
-	nop			;1d40	00 	. 
-	nop			;1d41	00 	. 
-	nop			;1d42	00 	. 
-	nop			;1d43	00 	. 
-	nop			;1d44	00 	. 
-	nop			;1d45	00 	. 
-	nop			;1d46	00 	. 
-	nop			;1d47	00 	. 
-	nop			;1d48	00 	. 
-	nop			;1d49	00 	. 
-	nop			;1d4a	00 	. 
-	nop			;1d4b	00 	. 
-	nop			;1d4c	00 	. 
-	nop			;1d4d	00 	. 
-	nop			;1d4e	00 	. 
-	nop			;1d4f	00 	. 
-	nop			;1d50	00 	. 
-	nop			;1d51	00 	. 
-	nop			;1d52	00 	. 
-	nop			;1d53	00 	. 
-	nop			;1d54	00 	. 
-	nop			;1d55	00 	. 
-	nop			;1d56	00 	. 
-	nop			;1d57	00 	. 
-	nop			;1d58	00 	. 
-	nop			;1d59	00 	. 
-	nop			;1d5a	00 	. 
-	nop			;1d5b	00 	. 
-	nop			;1d5c	00 	. 
-	nop			;1d5d	00 	. 
-	nop			;1d5e	00 	. 
-	nop			;1d5f	00 	. 
-	nop			;1d60	00 	. 
-	nop			;1d61	00 	. 
-	nop			;1d62	00 	. 
-	nop			;1d63	00 	. 
-	nop			;1d64	00 	. 
-	nop			;1d65	00 	. 
-	nop			;1d66	00 	. 
-	nop			;1d67	00 	. 
-	nop			;1d68	00 	. 
-	nop			;1d69	00 	. 
-	nop			;1d6a	00 	. 
-	nop			;1d6b	00 	. 
-	nop			;1d6c	00 	. 
-	nop			;1d6d	00 	. 
-	nop			;1d6e	00 	. 
-	nop			;1d6f	00 	. 
-	nop			;1d70	00 	. 
-	nop			;1d71	00 	. 
-	nop			;1d72	00 	. 
-	nop			;1d73	00 	. 
-	nop			;1d74	00 	. 
-	nop			;1d75	00 	. 
-	nop			;1d76	00 	. 
-	nop			;1d77	00 	. 
-	nop			;1d78	00 	. 
-	nop			;1d79	00 	. 
-	nop			;1d7a	00 	. 
-	nop			;1d7b	00 	. 
-	nop			;1d7c	00 	. 
-	nop			;1d7d	00 	. 
-	nop			;1d7e	00 	. 
-	nop			;1d7f	00 	. 
-	nop			;1d80	00 	. 
-	nop			;1d81	00 	. 
-	nop			;1d82	00 	. 
-	nop			;1d83	00 	. 
-	nop			;1d84	00 	. 
-	nop			;1d85	00 	. 
-	nop			;1d86	00 	. 
-	nop			;1d87	00 	. 
-	nop			;1d88	00 	. 
-	nop			;1d89	00 	. 
-	nop			;1d8a	00 	. 
-	nop			;1d8b	00 	. 
-	nop			;1d8c	00 	. 
-	nop			;1d8d	00 	. 
-	nop			;1d8e	00 	. 
-	nop			;1d8f	00 	. 
-	nop			;1d90	00 	. 
-	nop			;1d91	00 	. 
-	nop			;1d92	00 	. 
-	nop			;1d93	00 	. 
-	nop			;1d94	00 	. 
-	nop			;1d95	00 	. 
-	nop			;1d96	00 	. 
-	nop			;1d97	00 	. 
-	nop			;1d98	00 	. 
-	nop			;1d99	00 	. 
-	nop			;1d9a	00 	. 
-	nop			;1d9b	00 	. 
-	nop			;1d9c	00 	. 
-	nop			;1d9d	00 	. 
-	nop			;1d9e	00 	. 
-	nop			;1d9f	00 	. 
-	nop			;1da0	00 	. 
-	nop			;1da1	00 	. 
-	nop			;1da2	00 	. 
-	nop			;1da3	00 	. 
-	nop			;1da4	00 	. 
-	nop			;1da5	00 	. 
-	nop			;1da6	00 	. 
-	nop			;1da7	00 	. 
-	nop			;1da8	00 	. 
-	nop			;1da9	00 	. 
-	nop			;1daa	00 	. 
-	nop			;1dab	00 	. 
-	nop			;1dac	00 	. 
-	nop			;1dad	00 	. 
-	nop			;1dae	00 	. 
-	nop			;1daf	00 	. 
-	nop			;1db0	00 	. 
-	nop			;1db1	00 	. 
-	nop			;1db2	00 	. 
-	nop			;1db3	00 	. 
-	nop			;1db4	00 	. 
-	nop			;1db5	00 	. 
-	nop			;1db6	00 	. 
-	nop			;1db7	00 	. 
-	nop			;1db8	00 	. 
-	nop			;1db9	00 	. 
-	nop			;1dba	00 	. 
-	nop			;1dbb	00 	. 
-	nop			;1dbc	00 	. 
-	nop			;1dbd	00 	. 
-	nop			;1dbe	00 	. 
-	nop			;1dbf	00 	. 
-	nop			;1dc0	00 	. 
-	nop			;1dc1	00 	. 
-	nop			;1dc2	00 	. 
-	nop			;1dc3	00 	. 
-	nop			;1dc4	00 	. 
-	nop			;1dc5	00 	. 
-	nop			;1dc6	00 	. 
-	nop			;1dc7	00 	. 
-	nop			;1dc8	00 	. 
-	nop			;1dc9	00 	. 
-	nop			;1dca	00 	. 
-	nop			;1dcb	00 	. 
-	nop			;1dcc	00 	. 
-	nop			;1dcd	00 	. 
-	nop			;1dce	00 	. 
-	nop			;1dcf	00 	. 
-	nop			;1dd0	00 	. 
-	nop			;1dd1	00 	. 
-	nop			;1dd2	00 	. 
-	nop			;1dd3	00 	. 
-	nop			;1dd4	00 	. 
-	nop			;1dd5	00 	. 
-	nop			;1dd6	00 	. 
-	nop			;1dd7	00 	. 
-	nop			;1dd8	00 	. 
-	nop			;1dd9	00 	. 
-	nop			;1dda	00 	. 
-	nop			;1ddb	00 	. 
-	nop			;1ddc	00 	. 
-	nop			;1ddd	00 	. 
-	nop			;1dde	00 	. 
-	nop			;1ddf	00 	. 
-	nop			;1de0	00 	. 
-	nop			;1de1	00 	. 
-	nop			;1de2	00 	. 
-	nop			;1de3	00 	. 
-	nop			;1de4	00 	. 
-	nop			;1de5	00 	. 
-	nop			;1de6	00 	. 
-	nop			;1de7	00 	. 
-	nop			;1de8	00 	. 
-	nop			;1de9	00 	. 
-	nop			;1dea	00 	. 
-	nop			;1deb	00 	. 
-	nop			;1dec	00 	. 
-	nop			;1ded	00 	. 
-	nop			;1dee	00 	. 
-	nop			;1def	00 	. 
-	nop			;1df0	00 	. 
-	nop			;1df1	00 	. 
-	nop			;1df2	00 	. 
-	nop			;1df3	00 	. 
-	nop			;1df4	00 	. 
-	nop			;1df5	00 	. 
-	nop			;1df6	00 	. 
-	nop			;1df7	00 	. 
-	nop			;1df8	00 	. 
-	nop			;1df9	00 	. 
-	nop			;1dfa	00 	. 
-	nop			;1dfb	00 	. 
-	nop			;1dfc	00 	. 
-	nop			;1dfd	00 	. 
-	nop			;1dfe	00 	. 
-	nop			;1dff	00 	. 
-	nop			;1e00	00 	. 
-	nop			;1e01	00 	. 
-	nop			;1e02	00 	. 
-	nop			;1e03	00 	. 
-	nop			;1e04	00 	. 
-	nop			;1e05	00 	. 
-	nop			;1e06	00 	. 
-	nop			;1e07	00 	. 
-	nop			;1e08	00 	. 
-	nop			;1e09	00 	. 
-	nop			;1e0a	00 	. 
-	nop			;1e0b	00 	. 
-	nop			;1e0c	00 	. 
-	nop			;1e0d	00 	. 
-	nop			;1e0e	00 	. 
-	nop			;1e0f	00 	. 
-	nop			;1e10	00 	. 
-	nop			;1e11	00 	. 
-	nop			;1e12	00 	. 
-	nop			;1e13	00 	. 
-	nop			;1e14	00 	. 
-	nop			;1e15	00 	. 
-	nop			;1e16	00 	. 
-	nop			;1e17	00 	. 
-	nop			;1e18	00 	. 
-	nop			;1e19	00 	. 
-	nop			;1e1a	00 	. 
-	nop			;1e1b	00 	. 
-	nop			;1e1c	00 	. 
-	nop			;1e1d	00 	. 
-	nop			;1e1e	00 	. 
-	nop			;1e1f	00 	. 
-	nop			;1e20	00 	. 
-	nop			;1e21	00 	. 
-	nop			;1e22	00 	. 
-	nop			;1e23	00 	. 
-	nop			;1e24	00 	. 
-	nop			;1e25	00 	. 
-	nop			;1e26	00 	. 
-	nop			;1e27	00 	. 
-	nop			;1e28	00 	. 
-	nop			;1e29	00 	. 
-	nop			;1e2a	00 	. 
-	nop			;1e2b	00 	. 
-	nop			;1e2c	00 	. 
-	nop			;1e2d	00 	. 
-	nop			;1e2e	00 	. 
-	nop			;1e2f	00 	. 
-	nop			;1e30	00 	. 
-	nop			;1e31	00 	. 
-	nop			;1e32	00 	. 
-	nop			;1e33	00 	. 
-	nop			;1e34	00 	. 
-	nop			;1e35	00 	. 
-	nop			;1e36	00 	. 
-	nop			;1e37	00 	. 
-	nop			;1e38	00 	. 
-	nop			;1e39	00 	. 
-	nop			;1e3a	00 	. 
-	nop			;1e3b	00 	. 
-	nop			;1e3c	00 	. 
-	nop			;1e3d	00 	. 
-	nop			;1e3e	00 	. 
-	nop			;1e3f	00 	. 
-	nop			;1e40	00 	. 
-	nop			;1e41	00 	. 
-	nop			;1e42	00 	. 
-	nop			;1e43	00 	. 
-	nop			;1e44	00 	. 
-	nop			;1e45	00 	. 
-	nop			;1e46	00 	. 
-	nop			;1e47	00 	. 
-	nop			;1e48	00 	. 
-	nop			;1e49	00 	. 
-	nop			;1e4a	00 	. 
-	nop			;1e4b	00 	. 
-	nop			;1e4c	00 	. 
-	nop			;1e4d	00 	. 
-	nop			;1e4e	00 	. 
-	nop			;1e4f	00 	. 
-	nop			;1e50	00 	. 
-	nop			;1e51	00 	. 
-	nop			;1e52	00 	. 
-	nop			;1e53	00 	. 
-	nop			;1e54	00 	. 
-	nop			;1e55	00 	. 
-	nop			;1e56	00 	. 
-	nop			;1e57	00 	. 
-	nop			;1e58	00 	. 
-	nop			;1e59	00 	. 
-	nop			;1e5a	00 	. 
-	nop			;1e5b	00 	. 
-	nop			;1e5c	00 	. 
-	nop			;1e5d	00 	. 
-	nop			;1e5e	00 	. 
-	nop			;1e5f	00 	. 
-	nop			;1e60	00 	. 
-	nop			;1e61	00 	. 
-	nop			;1e62	00 	. 
-	nop			;1e63	00 	. 
-	nop			;1e64	00 	. 
-	nop			;1e65	00 	. 
-	nop			;1e66	00 	. 
-	nop			;1e67	00 	. 
-	nop			;1e68	00 	. 
-	nop			;1e69	00 	. 
-	nop			;1e6a	00 	. 
-	nop			;1e6b	00 	. 
-	nop			;1e6c	00 	. 
-	nop			;1e6d	00 	. 
-	nop			;1e6e	00 	. 
-	nop			;1e6f	00 	. 
-	nop			;1e70	00 	. 
-	nop			;1e71	00 	. 
-	nop			;1e72	00 	. 
-	nop			;1e73	00 	. 
-	nop			;1e74	00 	. 
-	nop			;1e75	00 	. 
-	nop			;1e76	00 	. 
-	nop			;1e77	00 	. 
-	nop			;1e78	00 	. 
-	nop			;1e79	00 	. 
-	nop			;1e7a	00 	. 
-	nop			;1e7b	00 	. 
-	nop			;1e7c	00 	. 
-	nop			;1e7d	00 	. 
-	nop			;1e7e	00 	. 
-	nop			;1e7f	00 	. 
-	nop			;1e80	00 	. 
-	nop			;1e81	00 	. 
-	nop			;1e82	00 	. 
-	nop			;1e83	00 	. 
-	nop			;1e84	00 	. 
-	nop			;1e85	00 	. 
-	nop			;1e86	00 	. 
-	nop			;1e87	00 	. 
-	nop			;1e88	00 	. 
-	nop			;1e89	00 	. 
-	nop			;1e8a	00 	. 
-	nop			;1e8b	00 	. 
-	nop			;1e8c	00 	. 
-	nop			;1e8d	00 	. 
-	nop			;1e8e	00 	. 
-	nop			;1e8f	00 	. 
-	nop			;1e90	00 	. 
-	nop			;1e91	00 	. 
-	nop			;1e92	00 	. 
-	nop			;1e93	00 	. 
-	nop			;1e94	00 	. 
-	nop			;1e95	00 	. 
-	nop			;1e96	00 	. 
-	nop			;1e97	00 	. 
-	nop			;1e98	00 	. 
-	nop			;1e99	00 	. 
-	nop			;1e9a	00 	. 
-	nop			;1e9b	00 	. 
-	nop			;1e9c	00 	. 
-	nop			;1e9d	00 	. 
-	nop			;1e9e	00 	. 
-	nop			;1e9f	00 	. 
-	nop			;1ea0	00 	. 
-	nop			;1ea1	00 	. 
-	nop			;1ea2	00 	. 
-	nop			;1ea3	00 	. 
-	nop			;1ea4	00 	. 
-	nop			;1ea5	00 	. 
-	nop			;1ea6	00 	. 
-	nop			;1ea7	00 	. 
-	nop			;1ea8	00 	. 
-	nop			;1ea9	00 	. 
-	nop			;1eaa	00 	. 
-	nop			;1eab	00 	. 
-	nop			;1eac	00 	. 
-	nop			;1ead	00 	. 
-	nop			;1eae	00 	. 
-	nop			;1eaf	00 	. 
-	nop			;1eb0	00 	. 
-	nop			;1eb1	00 	. 
-	nop			;1eb2	00 	. 
-	nop			;1eb3	00 	. 
-	nop			;1eb4	00 	. 
-	nop			;1eb5	00 	. 
-	nop			;1eb6	00 	. 
-	nop			;1eb7	00 	. 
-	nop			;1eb8	00 	. 
-	nop			;1eb9	00 	. 
-	nop			;1eba	00 	. 
-	nop			;1ebb	00 	. 
-	nop			;1ebc	00 	. 
-	nop			;1ebd	00 	. 
-	nop			;1ebe	00 	. 
-	nop			;1ebf	00 	. 
-	nop			;1ec0	00 	. 
-	nop			;1ec1	00 	. 
-	nop			;1ec2	00 	. 
-	nop			;1ec3	00 	. 
-	nop			;1ec4	00 	. 
-	nop			;1ec5	00 	. 
-	nop			;1ec6	00 	. 
-	nop			;1ec7	00 	. 
-	nop			;1ec8	00 	. 
-	nop			;1ec9	00 	. 
-	nop			;1eca	00 	. 
-	nop			;1ecb	00 	. 
-	nop			;1ecc	00 	. 
-	nop			;1ecd	00 	. 
-	nop			;1ece	00 	. 
-	nop			;1ecf	00 	. 
-	nop			;1ed0	00 	. 
-	nop			;1ed1	00 	. 
-	nop			;1ed2	00 	. 
-	nop			;1ed3	00 	. 
-	nop			;1ed4	00 	. 
-	nop			;1ed5	00 	. 
-	nop			;1ed6	00 	. 
-	nop			;1ed7	00 	. 
-	nop			;1ed8	00 	. 
-	nop			;1ed9	00 	. 
-	nop			;1eda	00 	. 
-	nop			;1edb	00 	. 
-	nop			;1edc	00 	. 
-	nop			;1edd	00 	. 
-	nop			;1ede	00 	. 
-	nop			;1edf	00 	. 
-	nop			;1ee0	00 	. 
-	nop			;1ee1	00 	. 
-	nop			;1ee2	00 	. 
-	nop			;1ee3	00 	. 
-	nop			;1ee4	00 	. 
-	nop			;1ee5	00 	. 
-	nop			;1ee6	00 	. 
-	nop			;1ee7	00 	. 
-	nop			;1ee8	00 	. 
-	nop			;1ee9	00 	. 
-	nop			;1eea	00 	. 
-	nop			;1eeb	00 	. 
-	nop			;1eec	00 	. 
-	nop			;1eed	00 	. 
-	nop			;1eee	00 	. 
-	nop			;1eef	00 	. 
-	nop			;1ef0	00 	. 
-	nop			;1ef1	00 	. 
-	nop			;1ef2	00 	. 
-	nop			;1ef3	00 	. 
-	nop			;1ef4	00 	. 
-	nop			;1ef5	00 	. 
-	nop			;1ef6	00 	. 
-	nop			;1ef7	00 	. 
-	nop			;1ef8	00 	. 
-	nop			;1ef9	00 	. 
-	nop			;1efa	00 	. 
-	nop			;1efb	00 	. 
-	nop			;1efc	00 	. 
-	nop			;1efd	00 	. 
-	nop			;1efe	00 	. 
-	nop			;1eff	00 	. 
-	nop			;1f00	00 	. 
-	nop			;1f01	00 	. 
-	nop			;1f02	00 	. 
-	nop			;1f03	00 	. 
-	nop			;1f04	00 	. 
-	nop			;1f05	00 	. 
-	nop			;1f06	00 	. 
-	nop			;1f07	00 	. 
-	nop			;1f08	00 	. 
-	nop			;1f09	00 	. 
-	nop			;1f0a	00 	. 
-	nop			;1f0b	00 	. 
-	nop			;1f0c	00 	. 
-	nop			;1f0d	00 	. 
-	nop			;1f0e	00 	. 
-	nop			;1f0f	00 	. 
-	nop			;1f10	00 	. 
-	nop			;1f11	00 	. 
-	nop			;1f12	00 	. 
-	nop			;1f13	00 	. 
-	nop			;1f14	00 	. 
-	nop			;1f15	00 	. 
-	nop			;1f16	00 	. 
-	nop			;1f17	00 	. 
-	nop			;1f18	00 	. 
-	nop			;1f19	00 	. 
-	nop			;1f1a	00 	. 
-	nop			;1f1b	00 	. 
-	nop			;1f1c	00 	. 
-	nop			;1f1d	00 	. 
-	nop			;1f1e	00 	. 
-	nop			;1f1f	00 	. 
-	nop			;1f20	00 	. 
-	nop			;1f21	00 	. 
-	nop			;1f22	00 	. 
-	nop			;1f23	00 	. 
-	nop			;1f24	00 	. 
-	nop			;1f25	00 	. 
-	nop			;1f26	00 	. 
-	nop			;1f27	00 	. 
-	nop			;1f28	00 	. 
-	nop			;1f29	00 	. 
-	nop			;1f2a	00 	. 
-	nop			;1f2b	00 	. 
-	nop			;1f2c	00 	. 
-	nop			;1f2d	00 	. 
-	nop			;1f2e	00 	. 
-	nop			;1f2f	00 	. 
-	nop			;1f30	00 	. 
-	nop			;1f31	00 	. 
-	nop			;1f32	00 	. 
-	nop			;1f33	00 	. 
-	nop			;1f34	00 	. 
-	nop			;1f35	00 	. 
-	nop			;1f36	00 	. 
-	nop			;1f37	00 	. 
-	nop			;1f38	00 	. 
-	nop			;1f39	00 	. 
-	nop			;1f3a	00 	. 
-	nop			;1f3b	00 	. 
-	nop			;1f3c	00 	. 
-	nop			;1f3d	00 	. 
-	nop			;1f3e	00 	. 
-	nop			;1f3f	00 	. 
+
+; BLOCK 'Symtab_open' (start 0x1b35 end 0x2355)
+Symtab_open_start:
+	defb 000h		;1b35	00 	. 
+	defb 000h		;1b36	00 	. 
+	defb 000h		;1b37	00 	. 
+	defb 000h		;1b38	00 	. 
+	defb 000h		;1b39	00 	. 
+	defb 000h		;1b3a	00 	. 
+	defb 000h		;1b3b	00 	. 
+	defb 000h		;1b3c	00 	. 
+	defb 000h		;1b3d	00 	. 
+	defb 000h		;1b3e	00 	. 
+	defb 000h		;1b3f	00 	. 
+	defb 000h		;1b40	00 	. 
+	defb 000h		;1b41	00 	. 
+	defb 000h		;1b42	00 	. 
+	defb 000h		;1b43	00 	. 
+	defb 000h		;1b44	00 	. 
+	defb 000h		;1b45	00 	. 
+	defb 000h		;1b46	00 	. 
+	defb 000h		;1b47	00 	. 
+	defb 000h		;1b48	00 	. 
+	defb 000h		;1b49	00 	. 
+	defb 000h		;1b4a	00 	. 
+	defb 000h		;1b4b	00 	. 
+	defb 000h		;1b4c	00 	. 
+	defb 000h		;1b4d	00 	. 
+	defb 000h		;1b4e	00 	. 
+	defb 000h		;1b4f	00 	. 
+	defb 000h		;1b50	00 	. 
+	defb 000h		;1b51	00 	. 
+	defb 000h		;1b52	00 	. 
+	defb 000h		;1b53	00 	. 
+	defb 000h		;1b54	00 	. 
+	defb 000h		;1b55	00 	. 
+	defb 000h		;1b56	00 	. 
+	defb 000h		;1b57	00 	. 
+	defb 000h		;1b58	00 	. 
+	defb 000h		;1b59	00 	. 
+	defb 000h		;1b5a	00 	. 
+	defb 000h		;1b5b	00 	. 
+	defb 000h		;1b5c	00 	. 
+	defb 000h		;1b5d	00 	. 
+	defb 000h		;1b5e	00 	. 
+	defb 000h		;1b5f	00 	. 
+	defb 000h		;1b60	00 	. 
+	defb 000h		;1b61	00 	. 
+	defb 000h		;1b62	00 	. 
+	defb 000h		;1b63	00 	. 
+	defb 000h		;1b64	00 	. 
+	defb 000h		;1b65	00 	. 
+	defb 000h		;1b66	00 	. 
+	defb 000h		;1b67	00 	. 
+	defb 000h		;1b68	00 	. 
+	defb 000h		;1b69	00 	. 
+	defb 000h		;1b6a	00 	. 
+	defb 000h		;1b6b	00 	. 
+	defb 000h		;1b6c	00 	. 
+	defb 000h		;1b6d	00 	. 
+	defb 000h		;1b6e	00 	. 
+	defb 000h		;1b6f	00 	. 
+	defb 000h		;1b70	00 	. 
+	defb 000h		;1b71	00 	. 
+	defb 000h		;1b72	00 	. 
+	defb 000h		;1b73	00 	. 
+	defb 000h		;1b74	00 	. 
+	defb 000h		;1b75	00 	. 
+	defb 000h		;1b76	00 	. 
+	defb 000h		;1b77	00 	. 
+	defb 000h		;1b78	00 	. 
+	defb 000h		;1b79	00 	. 
+	defb 000h		;1b7a	00 	. 
+	defb 000h		;1b7b	00 	. 
+	defb 000h		;1b7c	00 	. 
+	defb 000h		;1b7d	00 	. 
+	defb 000h		;1b7e	00 	. 
+	defb 000h		;1b7f	00 	. 
+	defb 000h		;1b80	00 	. 
+	defb 000h		;1b81	00 	. 
+	defb 000h		;1b82	00 	. 
+	defb 000h		;1b83	00 	. 
+	defb 000h		;1b84	00 	. 
+	defb 000h		;1b85	00 	. 
+	defb 000h		;1b86	00 	. 
+	defb 000h		;1b87	00 	. 
+	defb 000h		;1b88	00 	. 
+	defb 000h		;1b89	00 	. 
+	defb 000h		;1b8a	00 	. 
+	defb 000h		;1b8b	00 	. 
+	defb 000h		;1b8c	00 	. 
+	defb 000h		;1b8d	00 	. 
+	defb 000h		;1b8e	00 	. 
+	defb 000h		;1b8f	00 	. 
+	defb 000h		;1b90	00 	. 
+	defb 000h		;1b91	00 	. 
+	defb 000h		;1b92	00 	. 
+	defb 000h		;1b93	00 	. 
+	defb 000h		;1b94	00 	. 
+	defb 000h		;1b95	00 	. 
+	defb 000h		;1b96	00 	. 
+	defb 000h		;1b97	00 	. 
+	defb 000h		;1b98	00 	. 
+	defb 000h		;1b99	00 	. 
+	defb 000h		;1b9a	00 	. 
+	defb 000h		;1b9b	00 	. 
+	defb 000h		;1b9c	00 	. 
+	defb 000h		;1b9d	00 	. 
+	defb 000h		;1b9e	00 	. 
+	defb 000h		;1b9f	00 	. 
+	defb 000h		;1ba0	00 	. 
+	defb 000h		;1ba1	00 	. 
+	defb 000h		;1ba2	00 	. 
+	defb 000h		;1ba3	00 	. 
+	defb 000h		;1ba4	00 	. 
+	defb 000h		;1ba5	00 	. 
+	defb 000h		;1ba6	00 	. 
+	defb 000h		;1ba7	00 	. 
+	defb 000h		;1ba8	00 	. 
+	defb 000h		;1ba9	00 	. 
+	defb 000h		;1baa	00 	. 
+	defb 000h		;1bab	00 	. 
+	defb 000h		;1bac	00 	. 
+	defb 000h		;1bad	00 	. 
+	defb 000h		;1bae	00 	. 
+	defb 000h		;1baf	00 	. 
+	defb 000h		;1bb0	00 	. 
+	defb 000h		;1bb1	00 	. 
+	defb 000h		;1bb2	00 	. 
+	defb 000h		;1bb3	00 	. 
+	defb 000h		;1bb4	00 	. 
+	defb 000h		;1bb5	00 	. 
+	defb 000h		;1bb6	00 	. 
+	defb 000h		;1bb7	00 	. 
+	defb 000h		;1bb8	00 	. 
+	defb 000h		;1bb9	00 	. 
+	defb 000h		;1bba	00 	. 
+	defb 000h		;1bbb	00 	. 
+	defb 000h		;1bbc	00 	. 
+	defb 000h		;1bbd	00 	. 
+	defb 000h		;1bbe	00 	. 
+	defb 000h		;1bbf	00 	. 
+	defb 000h		;1bc0	00 	. 
+	defb 000h		;1bc1	00 	. 
+	defb 000h		;1bc2	00 	. 
+	defb 000h		;1bc3	00 	. 
+	defb 000h		;1bc4	00 	. 
+	defb 000h		;1bc5	00 	. 
+	defb 000h		;1bc6	00 	. 
+	defb 000h		;1bc7	00 	. 
+	defb 000h		;1bc8	00 	. 
+	defb 000h		;1bc9	00 	. 
+	defb 000h		;1bca	00 	. 
+	defb 000h		;1bcb	00 	. 
+	defb 000h		;1bcc	00 	. 
+	defb 000h		;1bcd	00 	. 
+	defb 000h		;1bce	00 	. 
+	defb 000h		;1bcf	00 	. 
+	defb 000h		;1bd0	00 	. 
+	defb 000h		;1bd1	00 	. 
+	defb 000h		;1bd2	00 	. 
+	defb 000h		;1bd3	00 	. 
+	defb 000h		;1bd4	00 	. 
+	defb 000h		;1bd5	00 	. 
+	defb 000h		;1bd6	00 	. 
+	defb 000h		;1bd7	00 	. 
+	defb 000h		;1bd8	00 	. 
+	defb 000h		;1bd9	00 	. 
+	defb 000h		;1bda	00 	. 
+	defb 000h		;1bdb	00 	. 
+	defb 000h		;1bdc	00 	. 
+	defb 000h		;1bdd	00 	. 
+	defb 000h		;1bde	00 	. 
+	defb 000h		;1bdf	00 	. 
+	defb 000h		;1be0	00 	. 
+	defb 000h		;1be1	00 	. 
+	defb 000h		;1be2	00 	. 
+	defb 000h		;1be3	00 	. 
+	defb 000h		;1be4	00 	. 
+	defb 000h		;1be5	00 	. 
+	defb 000h		;1be6	00 	. 
+	defb 000h		;1be7	00 	. 
+	defb 000h		;1be8	00 	. 
+	defb 000h		;1be9	00 	. 
+	defb 000h		;1bea	00 	. 
+	defb 000h		;1beb	00 	. 
+	defb 000h		;1bec	00 	. 
+	defb 000h		;1bed	00 	. 
+	defb 000h		;1bee	00 	. 
+	defb 000h		;1bef	00 	. 
+	defb 000h		;1bf0	00 	. 
+	defb 000h		;1bf1	00 	. 
+	defb 000h		;1bf2	00 	. 
+	defb 000h		;1bf3	00 	. 
+	defb 000h		;1bf4	00 	. 
+	defb 000h		;1bf5	00 	. 
+	defb 000h		;1bf6	00 	. 
+	defb 000h		;1bf7	00 	. 
+	defb 000h		;1bf8	00 	. 
+	defb 000h		;1bf9	00 	. 
+	defb 000h		;1bfa	00 	. 
+	defb 000h		;1bfb	00 	. 
+	defb 000h		;1bfc	00 	. 
+	defb 000h		;1bfd	00 	. 
+	defb 000h		;1bfe	00 	. 
+	defb 000h		;1bff	00 	. 
+	defb 000h		;1c00	00 	. 
+	defb 000h		;1c01	00 	. 
+	defb 000h		;1c02	00 	. 
+	defb 000h		;1c03	00 	. 
+	defb 000h		;1c04	00 	. 
+	defb 000h		;1c05	00 	. 
+	defb 000h		;1c06	00 	. 
+	defb 000h		;1c07	00 	. 
+	defb 000h		;1c08	00 	. 
+	defb 000h		;1c09	00 	. 
+	defb 000h		;1c0a	00 	. 
+	defb 000h		;1c0b	00 	. 
+	defb 000h		;1c0c	00 	. 
+	defb 000h		;1c0d	00 	. 
+	defb 000h		;1c0e	00 	. 
+	defb 000h		;1c0f	00 	. 
+	defb 000h		;1c10	00 	. 
+	defb 000h		;1c11	00 	. 
+	defb 000h		;1c12	00 	. 
+	defb 000h		;1c13	00 	. 
+	defb 000h		;1c14	00 	. 
+	defb 000h		;1c15	00 	. 
+	defb 000h		;1c16	00 	. 
+	defb 000h		;1c17	00 	. 
+	defb 000h		;1c18	00 	. 
+	defb 000h		;1c19	00 	. 
+	defb 000h		;1c1a	00 	. 
+	defb 000h		;1c1b	00 	. 
+	defb 000h		;1c1c	00 	. 
+	defb 000h		;1c1d	00 	. 
+	defb 000h		;1c1e	00 	. 
+	defb 000h		;1c1f	00 	. 
+	defb 000h		;1c20	00 	. 
+	defb 000h		;1c21	00 	. 
+	defb 000h		;1c22	00 	. 
+	defb 000h		;1c23	00 	. 
+	defb 000h		;1c24	00 	. 
+	defb 000h		;1c25	00 	. 
+	defb 000h		;1c26	00 	. 
+	defb 000h		;1c27	00 	. 
+	defb 000h		;1c28	00 	. 
+	defb 000h		;1c29	00 	. 
+	defb 000h		;1c2a	00 	. 
+	defb 000h		;1c2b	00 	. 
+	defb 000h		;1c2c	00 	. 
+	defb 000h		;1c2d	00 	. 
+	defb 000h		;1c2e	00 	. 
+	defb 000h		;1c2f	00 	. 
+	defb 000h		;1c30	00 	. 
+	defb 000h		;1c31	00 	. 
+	defb 000h		;1c32	00 	. 
+	defb 000h		;1c33	00 	. 
+	defb 000h		;1c34	00 	. 
+	defb 000h		;1c35	00 	. 
+	defb 000h		;1c36	00 	. 
+	defb 000h		;1c37	00 	. 
+	defb 000h		;1c38	00 	. 
+	defb 000h		;1c39	00 	. 
+	defb 000h		;1c3a	00 	. 
+	defb 000h		;1c3b	00 	. 
+	defb 000h		;1c3c	00 	. 
+	defb 000h		;1c3d	00 	. 
+	defb 000h		;1c3e	00 	. 
+	defb 000h		;1c3f	00 	. 
+	defb 000h		;1c40	00 	. 
+	defb 000h		;1c41	00 	. 
+	defb 000h		;1c42	00 	. 
+	defb 000h		;1c43	00 	. 
+	defb 000h		;1c44	00 	. 
+	defb 000h		;1c45	00 	. 
+	defb 000h		;1c46	00 	. 
+	defb 000h		;1c47	00 	. 
+	defb 000h		;1c48	00 	. 
+	defb 000h		;1c49	00 	. 
+	defb 000h		;1c4a	00 	. 
+	defb 000h		;1c4b	00 	. 
+	defb 000h		;1c4c	00 	. 
+	defb 000h		;1c4d	00 	. 
+	defb 000h		;1c4e	00 	. 
+	defb 000h		;1c4f	00 	. 
+	defb 000h		;1c50	00 	. 
+	defb 000h		;1c51	00 	. 
+	defb 000h		;1c52	00 	. 
+	defb 000h		;1c53	00 	. 
+	defb 000h		;1c54	00 	. 
+	defb 000h		;1c55	00 	. 
+	defb 000h		;1c56	00 	. 
+	defb 000h		;1c57	00 	. 
+	defb 000h		;1c58	00 	. 
+	defb 000h		;1c59	00 	. 
+	defb 000h		;1c5a	00 	. 
+	defb 000h		;1c5b	00 	. 
+	defb 000h		;1c5c	00 	. 
+	defb 000h		;1c5d	00 	. 
+	defb 000h		;1c5e	00 	. 
+	defb 000h		;1c5f	00 	. 
+	defb 000h		;1c60	00 	. 
+	defb 000h		;1c61	00 	. 
+	defb 000h		;1c62	00 	. 
+	defb 000h		;1c63	00 	. 
+	defb 000h		;1c64	00 	. 
+	defb 000h		;1c65	00 	. 
+	defb 000h		;1c66	00 	. 
+	defb 000h		;1c67	00 	. 
+	defb 000h		;1c68	00 	. 
+	defb 000h		;1c69	00 	. 
+	defb 000h		;1c6a	00 	. 
+	defb 000h		;1c6b	00 	. 
+	defb 000h		;1c6c	00 	. 
+	defb 000h		;1c6d	00 	. 
+	defb 000h		;1c6e	00 	. 
+	defb 000h		;1c6f	00 	. 
+	defb 000h		;1c70	00 	. 
+	defb 000h		;1c71	00 	. 
+	defb 000h		;1c72	00 	. 
+	defb 000h		;1c73	00 	. 
+	defb 000h		;1c74	00 	. 
+	defb 000h		;1c75	00 	. 
+	defb 000h		;1c76	00 	. 
+	defb 000h		;1c77	00 	. 
+	defb 000h		;1c78	00 	. 
+	defb 000h		;1c79	00 	. 
+	defb 000h		;1c7a	00 	. 
+	defb 000h		;1c7b	00 	. 
+	defb 000h		;1c7c	00 	. 
+	defb 000h		;1c7d	00 	. 
+	defb 000h		;1c7e	00 	. 
+	defb 000h		;1c7f	00 	. 
+	defb 000h		;1c80	00 	. 
+	defb 000h		;1c81	00 	. 
+	defb 000h		;1c82	00 	. 
+	defb 000h		;1c83	00 	. 
+	defb 000h		;1c84	00 	. 
+	defb 000h		;1c85	00 	. 
+	defb 000h		;1c86	00 	. 
+	defb 000h		;1c87	00 	. 
+	defb 000h		;1c88	00 	. 
+	defb 000h		;1c89	00 	. 
+	defb 000h		;1c8a	00 	. 
+	defb 000h		;1c8b	00 	. 
+	defb 000h		;1c8c	00 	. 
+	defb 000h		;1c8d	00 	. 
+	defb 000h		;1c8e	00 	. 
+	defb 000h		;1c8f	00 	. 
+	defb 000h		;1c90	00 	. 
+	defb 000h		;1c91	00 	. 
+	defb 000h		;1c92	00 	. 
+	defb 000h		;1c93	00 	. 
+	defb 000h		;1c94	00 	. 
+	defb 000h		;1c95	00 	. 
+	defb 000h		;1c96	00 	. 
+	defb 000h		;1c97	00 	. 
+	defb 000h		;1c98	00 	. 
+	defb 000h		;1c99	00 	. 
+	defb 000h		;1c9a	00 	. 
+	defb 000h		;1c9b	00 	. 
+	defb 000h		;1c9c	00 	. 
+	defb 000h		;1c9d	00 	. 
+	defb 000h		;1c9e	00 	. 
+	defb 000h		;1c9f	00 	. 
+	defb 000h		;1ca0	00 	. 
+	defb 000h		;1ca1	00 	. 
+	defb 000h		;1ca2	00 	. 
+	defb 000h		;1ca3	00 	. 
+	defb 000h		;1ca4	00 	. 
+	defb 000h		;1ca5	00 	. 
+	defb 000h		;1ca6	00 	. 
+	defb 000h		;1ca7	00 	. 
+	defb 000h		;1ca8	00 	. 
+	defb 000h		;1ca9	00 	. 
+	defb 000h		;1caa	00 	. 
+	defb 000h		;1cab	00 	. 
+	defb 000h		;1cac	00 	. 
+	defb 000h		;1cad	00 	. 
+	defb 000h		;1cae	00 	. 
+	defb 000h		;1caf	00 	. 
+	defb 000h		;1cb0	00 	. 
+	defb 000h		;1cb1	00 	. 
+	defb 000h		;1cb2	00 	. 
+	defb 000h		;1cb3	00 	. 
+	defb 000h		;1cb4	00 	. 
+	defb 000h		;1cb5	00 	. 
+	defb 000h		;1cb6	00 	. 
+	defb 000h		;1cb7	00 	. 
+	defb 000h		;1cb8	00 	. 
+	defb 000h		;1cb9	00 	. 
+	defb 000h		;1cba	00 	. 
+	defb 000h		;1cbb	00 	. 
+	defb 000h		;1cbc	00 	. 
+	defb 000h		;1cbd	00 	. 
+	defb 000h		;1cbe	00 	. 
+	defb 000h		;1cbf	00 	. 
+	defb 000h		;1cc0	00 	. 
+	defb 000h		;1cc1	00 	. 
+	defb 000h		;1cc2	00 	. 
+	defb 000h		;1cc3	00 	. 
+	defb 000h		;1cc4	00 	. 
+	defb 000h		;1cc5	00 	. 
+	defb 000h		;1cc6	00 	. 
+	defb 000h		;1cc7	00 	. 
+	defb 000h		;1cc8	00 	. 
+	defb 000h		;1cc9	00 	. 
+	defb 000h		;1cca	00 	. 
+	defb 000h		;1ccb	00 	. 
+	defb 000h		;1ccc	00 	. 
+	defb 000h		;1ccd	00 	. 
+	defb 000h		;1cce	00 	. 
+	defb 000h		;1ccf	00 	. 
+	defb 000h		;1cd0	00 	. 
+	defb 000h		;1cd1	00 	. 
+	defb 000h		;1cd2	00 	. 
+	defb 000h		;1cd3	00 	. 
+	defb 000h		;1cd4	00 	. 
+	defb 000h		;1cd5	00 	. 
+	defb 000h		;1cd6	00 	. 
+	defb 000h		;1cd7	00 	. 
+	defb 000h		;1cd8	00 	. 
+	defb 000h		;1cd9	00 	. 
+	defb 000h		;1cda	00 	. 
+	defb 000h		;1cdb	00 	. 
+	defb 000h		;1cdc	00 	. 
+	defb 000h		;1cdd	00 	. 
+	defb 000h		;1cde	00 	. 
+	defb 000h		;1cdf	00 	. 
+	defb 000h		;1ce0	00 	. 
+	defb 000h		;1ce1	00 	. 
+	defb 000h		;1ce2	00 	. 
+	defb 000h		;1ce3	00 	. 
+	defb 000h		;1ce4	00 	. 
+	defb 000h		;1ce5	00 	. 
+	defb 000h		;1ce6	00 	. 
+	defb 000h		;1ce7	00 	. 
+	defb 000h		;1ce8	00 	. 
+	defb 000h		;1ce9	00 	. 
+	defb 000h		;1cea	00 	. 
+	defb 000h		;1ceb	00 	. 
+	defb 000h		;1cec	00 	. 
+	defb 000h		;1ced	00 	. 
+	defb 000h		;1cee	00 	. 
+	defb 000h		;1cef	00 	. 
+	defb 000h		;1cf0	00 	. 
+	defb 000h		;1cf1	00 	. 
+	defb 000h		;1cf2	00 	. 
+	defb 000h		;1cf3	00 	. 
+	defb 000h		;1cf4	00 	. 
+	defb 000h		;1cf5	00 	. 
+	defb 000h		;1cf6	00 	. 
+	defb 000h		;1cf7	00 	. 
+	defb 000h		;1cf8	00 	. 
+	defb 000h		;1cf9	00 	. 
+	defb 000h		;1cfa	00 	. 
+	defb 000h		;1cfb	00 	. 
+	defb 000h		;1cfc	00 	. 
+	defb 000h		;1cfd	00 	. 
+	defb 000h		;1cfe	00 	. 
+	defb 000h		;1cff	00 	. 
+	defb 000h		;1d00	00 	. 
+	defb 000h		;1d01	00 	. 
+	defb 000h		;1d02	00 	. 
+	defb 000h		;1d03	00 	. 
+	defb 000h		;1d04	00 	. 
+	defb 000h		;1d05	00 	. 
+	defb 000h		;1d06	00 	. 
+	defb 000h		;1d07	00 	. 
+	defb 000h		;1d08	00 	. 
+	defb 000h		;1d09	00 	. 
+	defb 000h		;1d0a	00 	. 
+	defb 000h		;1d0b	00 	. 
+	defb 000h		;1d0c	00 	. 
+	defb 000h		;1d0d	00 	. 
+	defb 000h		;1d0e	00 	. 
+	defb 000h		;1d0f	00 	. 
+	defb 000h		;1d10	00 	. 
+	defb 000h		;1d11	00 	. 
+	defb 000h		;1d12	00 	. 
+	defb 000h		;1d13	00 	. 
+	defb 000h		;1d14	00 	. 
+	defb 000h		;1d15	00 	. 
+	defb 000h		;1d16	00 	. 
+	defb 000h		;1d17	00 	. 
+	defb 000h		;1d18	00 	. 
+	defb 000h		;1d19	00 	. 
+	defb 000h		;1d1a	00 	. 
+	defb 000h		;1d1b	00 	. 
+	defb 000h		;1d1c	00 	. 
+	defb 000h		;1d1d	00 	. 
+	defb 000h		;1d1e	00 	. 
+	defb 000h		;1d1f	00 	. 
+	defb 000h		;1d20	00 	. 
+	defb 000h		;1d21	00 	. 
+	defb 000h		;1d22	00 	. 
+	defb 000h		;1d23	00 	. 
+	defb 000h		;1d24	00 	. 
+	defb 000h		;1d25	00 	. 
+	defb 000h		;1d26	00 	. 
+	defb 000h		;1d27	00 	. 
+	defb 000h		;1d28	00 	. 
+	defb 000h		;1d29	00 	. 
+	defb 000h		;1d2a	00 	. 
+	defb 000h		;1d2b	00 	. 
+	defb 000h		;1d2c	00 	. 
+	defb 000h		;1d2d	00 	. 
+	defb 000h		;1d2e	00 	. 
+	defb 000h		;1d2f	00 	. 
+	defb 000h		;1d30	00 	. 
+	defb 000h		;1d31	00 	. 
+	defb 000h		;1d32	00 	. 
+	defb 000h		;1d33	00 	. 
+	defb 000h		;1d34	00 	. 
+	defb 000h		;1d35	00 	. 
+	defb 000h		;1d36	00 	. 
+	defb 000h		;1d37	00 	. 
+	defb 000h		;1d38	00 	. 
+	defb 000h		;1d39	00 	. 
+	defb 000h		;1d3a	00 	. 
+	defb 000h		;1d3b	00 	. 
+	defb 000h		;1d3c	00 	. 
+	defb 000h		;1d3d	00 	. 
+	defb 000h		;1d3e	00 	. 
+	defb 000h		;1d3f	00 	. 
+	defb 000h		;1d40	00 	. 
+	defb 000h		;1d41	00 	. 
+	defb 000h		;1d42	00 	. 
+	defb 000h		;1d43	00 	. 
+	defb 000h		;1d44	00 	. 
+	defb 000h		;1d45	00 	. 
+	defb 000h		;1d46	00 	. 
+	defb 000h		;1d47	00 	. 
+	defb 000h		;1d48	00 	. 
+	defb 000h		;1d49	00 	. 
+	defb 000h		;1d4a	00 	. 
+	defb 000h		;1d4b	00 	. 
+	defb 000h		;1d4c	00 	. 
+	defb 000h		;1d4d	00 	. 
+	defb 000h		;1d4e	00 	. 
+	defb 000h		;1d4f	00 	. 
+	defb 000h		;1d50	00 	. 
+	defb 000h		;1d51	00 	. 
+	defb 000h		;1d52	00 	. 
+	defb 000h		;1d53	00 	. 
+	defb 000h		;1d54	00 	. 
+	defb 000h		;1d55	00 	. 
+	defb 000h		;1d56	00 	. 
+	defb 000h		;1d57	00 	. 
+	defb 000h		;1d58	00 	. 
+	defb 000h		;1d59	00 	. 
+	defb 000h		;1d5a	00 	. 
+	defb 000h		;1d5b	00 	. 
+	defb 000h		;1d5c	00 	. 
+	defb 000h		;1d5d	00 	. 
+	defb 000h		;1d5e	00 	. 
+	defb 000h		;1d5f	00 	. 
+	defb 000h		;1d60	00 	. 
+	defb 000h		;1d61	00 	. 
+	defb 000h		;1d62	00 	. 
+	defb 000h		;1d63	00 	. 
+	defb 000h		;1d64	00 	. 
+	defb 000h		;1d65	00 	. 
+	defb 000h		;1d66	00 	. 
+	defb 000h		;1d67	00 	. 
+	defb 000h		;1d68	00 	. 
+	defb 000h		;1d69	00 	. 
+	defb 000h		;1d6a	00 	. 
+	defb 000h		;1d6b	00 	. 
+	defb 000h		;1d6c	00 	. 
+	defb 000h		;1d6d	00 	. 
+	defb 000h		;1d6e	00 	. 
+	defb 000h		;1d6f	00 	. 
+	defb 000h		;1d70	00 	. 
+	defb 000h		;1d71	00 	. 
+	defb 000h		;1d72	00 	. 
+	defb 000h		;1d73	00 	. 
+	defb 000h		;1d74	00 	. 
+	defb 000h		;1d75	00 	. 
+	defb 000h		;1d76	00 	. 
+	defb 000h		;1d77	00 	. 
+	defb 000h		;1d78	00 	. 
+	defb 000h		;1d79	00 	. 
+	defb 000h		;1d7a	00 	. 
+	defb 000h		;1d7b	00 	. 
+	defb 000h		;1d7c	00 	. 
+	defb 000h		;1d7d	00 	. 
+	defb 000h		;1d7e	00 	. 
+	defb 000h		;1d7f	00 	. 
+	defb 000h		;1d80	00 	. 
+	defb 000h		;1d81	00 	. 
+	defb 000h		;1d82	00 	. 
+	defb 000h		;1d83	00 	. 
+	defb 000h		;1d84	00 	. 
+	defb 000h		;1d85	00 	. 
+	defb 000h		;1d86	00 	. 
+	defb 000h		;1d87	00 	. 
+	defb 000h		;1d88	00 	. 
+	defb 000h		;1d89	00 	. 
+	defb 000h		;1d8a	00 	. 
+	defb 000h		;1d8b	00 	. 
+	defb 000h		;1d8c	00 	. 
+	defb 000h		;1d8d	00 	. 
+	defb 000h		;1d8e	00 	. 
+	defb 000h		;1d8f	00 	. 
+	defb 000h		;1d90	00 	. 
+	defb 000h		;1d91	00 	. 
+	defb 000h		;1d92	00 	. 
+	defb 000h		;1d93	00 	. 
+	defb 000h		;1d94	00 	. 
+	defb 000h		;1d95	00 	. 
+	defb 000h		;1d96	00 	. 
+	defb 000h		;1d97	00 	. 
+	defb 000h		;1d98	00 	. 
+	defb 000h		;1d99	00 	. 
+	defb 000h		;1d9a	00 	. 
+	defb 000h		;1d9b	00 	. 
+	defb 000h		;1d9c	00 	. 
+	defb 000h		;1d9d	00 	. 
+	defb 000h		;1d9e	00 	. 
+	defb 000h		;1d9f	00 	. 
+	defb 000h		;1da0	00 	. 
+	defb 000h		;1da1	00 	. 
+	defb 000h		;1da2	00 	. 
+	defb 000h		;1da3	00 	. 
+	defb 000h		;1da4	00 	. 
+	defb 000h		;1da5	00 	. 
+	defb 000h		;1da6	00 	. 
+	defb 000h		;1da7	00 	. 
+	defb 000h		;1da8	00 	. 
+	defb 000h		;1da9	00 	. 
+	defb 000h		;1daa	00 	. 
+	defb 000h		;1dab	00 	. 
+	defb 000h		;1dac	00 	. 
+	defb 000h		;1dad	00 	. 
+	defb 000h		;1dae	00 	. 
+	defb 000h		;1daf	00 	. 
+	defb 000h		;1db0	00 	. 
+	defb 000h		;1db1	00 	. 
+	defb 000h		;1db2	00 	. 
+	defb 000h		;1db3	00 	. 
+	defb 000h		;1db4	00 	. 
+	defb 000h		;1db5	00 	. 
+	defb 000h		;1db6	00 	. 
+	defb 000h		;1db7	00 	. 
+	defb 000h		;1db8	00 	. 
+	defb 000h		;1db9	00 	. 
+	defb 000h		;1dba	00 	. 
+	defb 000h		;1dbb	00 	. 
+	defb 000h		;1dbc	00 	. 
+	defb 000h		;1dbd	00 	. 
+	defb 000h		;1dbe	00 	. 
+	defb 000h		;1dbf	00 	. 
+	defb 000h		;1dc0	00 	. 
+	defb 000h		;1dc1	00 	. 
+	defb 000h		;1dc2	00 	. 
+	defb 000h		;1dc3	00 	. 
+	defb 000h		;1dc4	00 	. 
+	defb 000h		;1dc5	00 	. 
+	defb 000h		;1dc6	00 	. 
+	defb 000h		;1dc7	00 	. 
+	defb 000h		;1dc8	00 	. 
+	defb 000h		;1dc9	00 	. 
+	defb 000h		;1dca	00 	. 
+	defb 000h		;1dcb	00 	. 
+	defb 000h		;1dcc	00 	. 
+	defb 000h		;1dcd	00 	. 
+	defb 000h		;1dce	00 	. 
+	defb 000h		;1dcf	00 	. 
+	defb 000h		;1dd0	00 	. 
+	defb 000h		;1dd1	00 	. 
+	defb 000h		;1dd2	00 	. 
+	defb 000h		;1dd3	00 	. 
+	defb 000h		;1dd4	00 	. 
+	defb 000h		;1dd5	00 	. 
+	defb 000h		;1dd6	00 	. 
+	defb 000h		;1dd7	00 	. 
+	defb 000h		;1dd8	00 	. 
+	defb 000h		;1dd9	00 	. 
+	defb 000h		;1dda	00 	. 
+	defb 000h		;1ddb	00 	. 
+	defb 000h		;1ddc	00 	. 
+	defb 000h		;1ddd	00 	. 
+	defb 000h		;1dde	00 	. 
+	defb 000h		;1ddf	00 	. 
+	defb 000h		;1de0	00 	. 
+	defb 000h		;1de1	00 	. 
+	defb 000h		;1de2	00 	. 
+	defb 000h		;1de3	00 	. 
+	defb 000h		;1de4	00 	. 
+	defb 000h		;1de5	00 	. 
+	defb 000h		;1de6	00 	. 
+	defb 000h		;1de7	00 	. 
+	defb 000h		;1de8	00 	. 
+	defb 000h		;1de9	00 	. 
+	defb 000h		;1dea	00 	. 
+	defb 000h		;1deb	00 	. 
+	defb 000h		;1dec	00 	. 
+	defb 000h		;1ded	00 	. 
+	defb 000h		;1dee	00 	. 
+	defb 000h		;1def	00 	. 
+	defb 000h		;1df0	00 	. 
+	defb 000h		;1df1	00 	. 
+	defb 000h		;1df2	00 	. 
+	defb 000h		;1df3	00 	. 
+	defb 000h		;1df4	00 	. 
+	defb 000h		;1df5	00 	. 
+	defb 000h		;1df6	00 	. 
+	defb 000h		;1df7	00 	. 
+	defb 000h		;1df8	00 	. 
+	defb 000h		;1df9	00 	. 
+	defb 000h		;1dfa	00 	. 
+	defb 000h		;1dfb	00 	. 
+	defb 000h		;1dfc	00 	. 
+	defb 000h		;1dfd	00 	. 
+	defb 000h		;1dfe	00 	. 
+	defb 000h		;1dff	00 	. 
+	defb 000h		;1e00	00 	. 
+	defb 000h		;1e01	00 	. 
+	defb 000h		;1e02	00 	. 
+	defb 000h		;1e03	00 	. 
+	defb 000h		;1e04	00 	. 
+	defb 000h		;1e05	00 	. 
+	defb 000h		;1e06	00 	. 
+	defb 000h		;1e07	00 	. 
+	defb 000h		;1e08	00 	. 
+	defb 000h		;1e09	00 	. 
+	defb 000h		;1e0a	00 	. 
+	defb 000h		;1e0b	00 	. 
+	defb 000h		;1e0c	00 	. 
+	defb 000h		;1e0d	00 	. 
+	defb 000h		;1e0e	00 	. 
+	defb 000h		;1e0f	00 	. 
+	defb 000h		;1e10	00 	. 
+	defb 000h		;1e11	00 	. 
+	defb 000h		;1e12	00 	. 
+	defb 000h		;1e13	00 	. 
+	defb 000h		;1e14	00 	. 
+	defb 000h		;1e15	00 	. 
+	defb 000h		;1e16	00 	. 
+	defb 000h		;1e17	00 	. 
+	defb 000h		;1e18	00 	. 
+	defb 000h		;1e19	00 	. 
+	defb 000h		;1e1a	00 	. 
+	defb 000h		;1e1b	00 	. 
+	defb 000h		;1e1c	00 	. 
+	defb 000h		;1e1d	00 	. 
+	defb 000h		;1e1e	00 	. 
+	defb 000h		;1e1f	00 	. 
+	defb 000h		;1e20	00 	. 
+	defb 000h		;1e21	00 	. 
+	defb 000h		;1e22	00 	. 
+	defb 000h		;1e23	00 	. 
+	defb 000h		;1e24	00 	. 
+	defb 000h		;1e25	00 	. 
+	defb 000h		;1e26	00 	. 
+	defb 000h		;1e27	00 	. 
+	defb 000h		;1e28	00 	. 
+	defb 000h		;1e29	00 	. 
+	defb 000h		;1e2a	00 	. 
+	defb 000h		;1e2b	00 	. 
+	defb 000h		;1e2c	00 	. 
+	defb 000h		;1e2d	00 	. 
+	defb 000h		;1e2e	00 	. 
+	defb 000h		;1e2f	00 	. 
+	defb 000h		;1e30	00 	. 
+	defb 000h		;1e31	00 	. 
+	defb 000h		;1e32	00 	. 
+	defb 000h		;1e33	00 	. 
+	defb 000h		;1e34	00 	. 
+	defb 000h		;1e35	00 	. 
+	defb 000h		;1e36	00 	. 
+	defb 000h		;1e37	00 	. 
+	defb 000h		;1e38	00 	. 
+	defb 000h		;1e39	00 	. 
+	defb 000h		;1e3a	00 	. 
+	defb 000h		;1e3b	00 	. 
+	defb 000h		;1e3c	00 	. 
+	defb 000h		;1e3d	00 	. 
+	defb 000h		;1e3e	00 	. 
+	defb 000h		;1e3f	00 	. 
+	defb 000h		;1e40	00 	. 
+	defb 000h		;1e41	00 	. 
+	defb 000h		;1e42	00 	. 
+	defb 000h		;1e43	00 	. 
+	defb 000h		;1e44	00 	. 
+	defb 000h		;1e45	00 	. 
+	defb 000h		;1e46	00 	. 
+	defb 000h		;1e47	00 	. 
+	defb 000h		;1e48	00 	. 
+	defb 000h		;1e49	00 	. 
+	defb 000h		;1e4a	00 	. 
+	defb 000h		;1e4b	00 	. 
+	defb 000h		;1e4c	00 	. 
+	defb 000h		;1e4d	00 	. 
+	defb 000h		;1e4e	00 	. 
+	defb 000h		;1e4f	00 	. 
+	defb 000h		;1e50	00 	. 
+	defb 000h		;1e51	00 	. 
+	defb 000h		;1e52	00 	. 
+	defb 000h		;1e53	00 	. 
+	defb 000h		;1e54	00 	. 
+	defb 000h		;1e55	00 	. 
+	defb 000h		;1e56	00 	. 
+	defb 000h		;1e57	00 	. 
+	defb 000h		;1e58	00 	. 
+	defb 000h		;1e59	00 	. 
+	defb 000h		;1e5a	00 	. 
+	defb 000h		;1e5b	00 	. 
+	defb 000h		;1e5c	00 	. 
+	defb 000h		;1e5d	00 	. 
+	defb 000h		;1e5e	00 	. 
+	defb 000h		;1e5f	00 	. 
+	defb 000h		;1e60	00 	. 
+	defb 000h		;1e61	00 	. 
+	defb 000h		;1e62	00 	. 
+	defb 000h		;1e63	00 	. 
+	defb 000h		;1e64	00 	. 
+	defb 000h		;1e65	00 	. 
+	defb 000h		;1e66	00 	. 
+	defb 000h		;1e67	00 	. 
+	defb 000h		;1e68	00 	. 
+	defb 000h		;1e69	00 	. 
+	defb 000h		;1e6a	00 	. 
+	defb 000h		;1e6b	00 	. 
+	defb 000h		;1e6c	00 	. 
+	defb 000h		;1e6d	00 	. 
+	defb 000h		;1e6e	00 	. 
+	defb 000h		;1e6f	00 	. 
+	defb 000h		;1e70	00 	. 
+	defb 000h		;1e71	00 	. 
+	defb 000h		;1e72	00 	. 
+	defb 000h		;1e73	00 	. 
+	defb 000h		;1e74	00 	. 
+	defb 000h		;1e75	00 	. 
+	defb 000h		;1e76	00 	. 
+	defb 000h		;1e77	00 	. 
+	defb 000h		;1e78	00 	. 
+	defb 000h		;1e79	00 	. 
+	defb 000h		;1e7a	00 	. 
+	defb 000h		;1e7b	00 	. 
+	defb 000h		;1e7c	00 	. 
+	defb 000h		;1e7d	00 	. 
+	defb 000h		;1e7e	00 	. 
+	defb 000h		;1e7f	00 	. 
+	defb 000h		;1e80	00 	. 
+	defb 000h		;1e81	00 	. 
+	defb 000h		;1e82	00 	. 
+	defb 000h		;1e83	00 	. 
+	defb 000h		;1e84	00 	. 
+	defb 000h		;1e85	00 	. 
+	defb 000h		;1e86	00 	. 
+	defb 000h		;1e87	00 	. 
+	defb 000h		;1e88	00 	. 
+	defb 000h		;1e89	00 	. 
+	defb 000h		;1e8a	00 	. 
+	defb 000h		;1e8b	00 	. 
+	defb 000h		;1e8c	00 	. 
+	defb 000h		;1e8d	00 	. 
+	defb 000h		;1e8e	00 	. 
+	defb 000h		;1e8f	00 	. 
+	defb 000h		;1e90	00 	. 
+	defb 000h		;1e91	00 	. 
+	defb 000h		;1e92	00 	. 
+	defb 000h		;1e93	00 	. 
+	defb 000h		;1e94	00 	. 
+	defb 000h		;1e95	00 	. 
+	defb 000h		;1e96	00 	. 
+	defb 000h		;1e97	00 	. 
+	defb 000h		;1e98	00 	. 
+	defb 000h		;1e99	00 	. 
+	defb 000h		;1e9a	00 	. 
+	defb 000h		;1e9b	00 	. 
+	defb 000h		;1e9c	00 	. 
+	defb 000h		;1e9d	00 	. 
+	defb 000h		;1e9e	00 	. 
+	defb 000h		;1e9f	00 	. 
+	defb 000h		;1ea0	00 	. 
+	defb 000h		;1ea1	00 	. 
+	defb 000h		;1ea2	00 	. 
+	defb 000h		;1ea3	00 	. 
+	defb 000h		;1ea4	00 	. 
+	defb 000h		;1ea5	00 	. 
+	defb 000h		;1ea6	00 	. 
+	defb 000h		;1ea7	00 	. 
+	defb 000h		;1ea8	00 	. 
+	defb 000h		;1ea9	00 	. 
+	defb 000h		;1eaa	00 	. 
+	defb 000h		;1eab	00 	. 
+	defb 000h		;1eac	00 	. 
+	defb 000h		;1ead	00 	. 
+	defb 000h		;1eae	00 	. 
+	defb 000h		;1eaf	00 	. 
+	defb 000h		;1eb0	00 	. 
+	defb 000h		;1eb1	00 	. 
+	defb 000h		;1eb2	00 	. 
+	defb 000h		;1eb3	00 	. 
+	defb 000h		;1eb4	00 	. 
+	defb 000h		;1eb5	00 	. 
+	defb 000h		;1eb6	00 	. 
+	defb 000h		;1eb7	00 	. 
+	defb 000h		;1eb8	00 	. 
+	defb 000h		;1eb9	00 	. 
+	defb 000h		;1eba	00 	. 
+	defb 000h		;1ebb	00 	. 
+	defb 000h		;1ebc	00 	. 
+	defb 000h		;1ebd	00 	. 
+	defb 000h		;1ebe	00 	. 
+	defb 000h		;1ebf	00 	. 
+	defb 000h		;1ec0	00 	. 
+	defb 000h		;1ec1	00 	. 
+	defb 000h		;1ec2	00 	. 
+	defb 000h		;1ec3	00 	. 
+	defb 000h		;1ec4	00 	. 
+	defb 000h		;1ec5	00 	. 
+	defb 000h		;1ec6	00 	. 
+	defb 000h		;1ec7	00 	. 
+	defb 000h		;1ec8	00 	. 
+	defb 000h		;1ec9	00 	. 
+	defb 000h		;1eca	00 	. 
+	defb 000h		;1ecb	00 	. 
+	defb 000h		;1ecc	00 	. 
+	defb 000h		;1ecd	00 	. 
+	defb 000h		;1ece	00 	. 
+	defb 000h		;1ecf	00 	. 
+	defb 000h		;1ed0	00 	. 
+	defb 000h		;1ed1	00 	. 
+	defb 000h		;1ed2	00 	. 
+	defb 000h		;1ed3	00 	. 
+	defb 000h		;1ed4	00 	. 
+	defb 000h		;1ed5	00 	. 
+	defb 000h		;1ed6	00 	. 
+	defb 000h		;1ed7	00 	. 
+	defb 000h		;1ed8	00 	. 
+	defb 000h		;1ed9	00 	. 
+	defb 000h		;1eda	00 	. 
+	defb 000h		;1edb	00 	. 
+	defb 000h		;1edc	00 	. 
+	defb 000h		;1edd	00 	. 
+	defb 000h		;1ede	00 	. 
+	defb 000h		;1edf	00 	. 
+	defb 000h		;1ee0	00 	. 
+	defb 000h		;1ee1	00 	. 
+	defb 000h		;1ee2	00 	. 
+	defb 000h		;1ee3	00 	. 
+	defb 000h		;1ee4	00 	. 
+	defb 000h		;1ee5	00 	. 
+	defb 000h		;1ee6	00 	. 
+	defb 000h		;1ee7	00 	. 
+	defb 000h		;1ee8	00 	. 
+	defb 000h		;1ee9	00 	. 
+	defb 000h		;1eea	00 	. 
+	defb 000h		;1eeb	00 	. 
+	defb 000h		;1eec	00 	. 
+	defb 000h		;1eed	00 	. 
+	defb 000h		;1eee	00 	. 
+	defb 000h		;1eef	00 	. 
+	defb 000h		;1ef0	00 	. 
+	defb 000h		;1ef1	00 	. 
+	defb 000h		;1ef2	00 	. 
+	defb 000h		;1ef3	00 	. 
+	defb 000h		;1ef4	00 	. 
+	defb 000h		;1ef5	00 	. 
+	defb 000h		;1ef6	00 	. 
+	defb 000h		;1ef7	00 	. 
+	defb 000h		;1ef8	00 	. 
+	defb 000h		;1ef9	00 	. 
+	defb 000h		;1efa	00 	. 
+	defb 000h		;1efb	00 	. 
+	defb 000h		;1efc	00 	. 
+	defb 000h		;1efd	00 	. 
+	defb 000h		;1efe	00 	. 
+	defb 000h		;1eff	00 	. 
+	defb 000h		;1f00	00 	. 
+	defb 000h		;1f01	00 	. 
+	defb 000h		;1f02	00 	. 
+	defb 000h		;1f03	00 	. 
+	defb 000h		;1f04	00 	. 
+	defb 000h		;1f05	00 	. 
+	defb 000h		;1f06	00 	. 
+	defb 000h		;1f07	00 	. 
+	defb 000h		;1f08	00 	. 
+	defb 000h		;1f09	00 	. 
+	defb 000h		;1f0a	00 	. 
+	defb 000h		;1f0b	00 	. 
+	defb 000h		;1f0c	00 	. 
+	defb 000h		;1f0d	00 	. 
+	defb 000h		;1f0e	00 	. 
+	defb 000h		;1f0f	00 	. 
+	defb 000h		;1f10	00 	. 
+	defb 000h		;1f11	00 	. 
+	defb 000h		;1f12	00 	. 
+	defb 000h		;1f13	00 	. 
+	defb 000h		;1f14	00 	. 
+	defb 000h		;1f15	00 	. 
+	defb 000h		;1f16	00 	. 
+	defb 000h		;1f17	00 	. 
+	defb 000h		;1f18	00 	. 
+	defb 000h		;1f19	00 	. 
+	defb 000h		;1f1a	00 	. 
+	defb 000h		;1f1b	00 	. 
+	defb 000h		;1f1c	00 	. 
+	defb 000h		;1f1d	00 	. 
+	defb 000h		;1f1e	00 	. 
+	defb 000h		;1f1f	00 	. 
+	defb 000h		;1f20	00 	. 
+	defb 000h		;1f21	00 	. 
+	defb 000h		;1f22	00 	. 
+	defb 000h		;1f23	00 	. 
+	defb 000h		;1f24	00 	. 
+	defb 000h		;1f25	00 	. 
+	defb 000h		;1f26	00 	. 
+	defb 000h		;1f27	00 	. 
+	defb 000h		;1f28	00 	. 
+	defb 000h		;1f29	00 	. 
+	defb 000h		;1f2a	00 	. 
+	defb 000h		;1f2b	00 	. 
+	defb 000h		;1f2c	00 	. 
+	defb 000h		;1f2d	00 	. 
+	defb 000h		;1f2e	00 	. 
+	defb 000h		;1f2f	00 	. 
+	defb 000h		;1f30	00 	. 
+	defb 000h		;1f31	00 	. 
+	defb 000h		;1f32	00 	. 
+	defb 000h		;1f33	00 	. 
+	defb 000h		;1f34	00 	. 
+	defb 000h		;1f35	00 	. 
+	defb 000h		;1f36	00 	. 
+	defb 000h		;1f37	00 	. 
+	defb 000h		;1f38	00 	. 
+	defb 000h		;1f39	00 	. 
+	defb 000h		;1f3a	00 	. 
+	defb 000h		;1f3b	00 	. 
+	defb 000h		;1f3c	00 	. 
+	defb 000h		;1f3d	00 	. 
+	defb 000h		;1f3e	00 	. 
+	defb 000h		;1f3f	00 	. 
 l1f40h:
-	nop			;1f40	00 	. 
-	nop			;1f41	00 	. 
-	nop			;1f42	00 	. 
-	nop			;1f43	00 	. 
-	nop			;1f44	00 	. 
-	nop			;1f45	00 	. 
-	nop			;1f46	00 	. 
-	nop			;1f47	00 	. 
-	nop			;1f48	00 	. 
-	nop			;1f49	00 	. 
-	nop			;1f4a	00 	. 
-	nop			;1f4b	00 	. 
-	nop			;1f4c	00 	. 
-	nop			;1f4d	00 	. 
-	nop			;1f4e	00 	. 
-	nop			;1f4f	00 	. 
-	nop			;1f50	00 	. 
-	nop			;1f51	00 	. 
-	nop			;1f52	00 	. 
-	nop			;1f53	00 	. 
-	nop			;1f54	00 	. 
-	nop			;1f55	00 	. 
-	nop			;1f56	00 	. 
-	nop			;1f57	00 	. 
-	nop			;1f58	00 	. 
-	nop			;1f59	00 	. 
-	nop			;1f5a	00 	. 
-	nop			;1f5b	00 	. 
-	nop			;1f5c	00 	. 
-	nop			;1f5d	00 	. 
-	nop			;1f5e	00 	. 
-	nop			;1f5f	00 	. 
-	nop			;1f60	00 	. 
-	nop			;1f61	00 	. 
-	nop			;1f62	00 	. 
-	nop			;1f63	00 	. 
-	nop			;1f64	00 	. 
-	nop			;1f65	00 	. 
-	nop			;1f66	00 	. 
-	nop			;1f67	00 	. 
-	nop			;1f68	00 	. 
-	nop			;1f69	00 	. 
-	nop			;1f6a	00 	. 
-	nop			;1f6b	00 	. 
-	nop			;1f6c	00 	. 
-	nop			;1f6d	00 	. 
-	nop			;1f6e	00 	. 
-	nop			;1f6f	00 	. 
-	nop			;1f70	00 	. 
-	nop			;1f71	00 	. 
-	nop			;1f72	00 	. 
-	nop			;1f73	00 	. 
-	nop			;1f74	00 	. 
-	nop			;1f75	00 	. 
-	nop			;1f76	00 	. 
-	nop			;1f77	00 	. 
-	nop			;1f78	00 	. 
-	nop			;1f79	00 	. 
-	nop			;1f7a	00 	. 
-	nop			;1f7b	00 	. 
-	nop			;1f7c	00 	. 
-	nop			;1f7d	00 	. 
-	nop			;1f7e	00 	. 
-	nop			;1f7f	00 	. 
-	nop			;1f80	00 	. 
-	nop			;1f81	00 	. 
-	nop			;1f82	00 	. 
-	nop			;1f83	00 	. 
-	nop			;1f84	00 	. 
-	nop			;1f85	00 	. 
-	nop			;1f86	00 	. 
-	nop			;1f87	00 	. 
-	nop			;1f88	00 	. 
-	nop			;1f89	00 	. 
-	nop			;1f8a	00 	. 
-	nop			;1f8b	00 	. 
-	nop			;1f8c	00 	. 
-	nop			;1f8d	00 	. 
-	nop			;1f8e	00 	. 
-	nop			;1f8f	00 	. 
-	nop			;1f90	00 	. 
-	nop			;1f91	00 	. 
-	nop			;1f92	00 	. 
-	nop			;1f93	00 	. 
-	nop			;1f94	00 	. 
-	nop			;1f95	00 	. 
-	nop			;1f96	00 	. 
-	nop			;1f97	00 	. 
-	nop			;1f98	00 	. 
-	nop			;1f99	00 	. 
-	nop			;1f9a	00 	. 
-	nop			;1f9b	00 	. 
-	nop			;1f9c	00 	. 
-	nop			;1f9d	00 	. 
-	nop			;1f9e	00 	. 
-	nop			;1f9f	00 	. 
-	nop			;1fa0	00 	. 
-	nop			;1fa1	00 	. 
-	nop			;1fa2	00 	. 
-	nop			;1fa3	00 	. 
-	nop			;1fa4	00 	. 
-	nop			;1fa5	00 	. 
-	nop			;1fa6	00 	. 
-	nop			;1fa7	00 	. 
-	nop			;1fa8	00 	. 
-	nop			;1fa9	00 	. 
-	nop			;1faa	00 	. 
-	nop			;1fab	00 	. 
-	nop			;1fac	00 	. 
-	nop			;1fad	00 	. 
-	nop			;1fae	00 	. 
-	nop			;1faf	00 	. 
-	nop			;1fb0	00 	. 
-	nop			;1fb1	00 	. 
-	nop			;1fb2	00 	. 
-	nop			;1fb3	00 	. 
-	nop			;1fb4	00 	. 
-	nop			;1fb5	00 	. 
-	nop			;1fb6	00 	. 
-	nop			;1fb7	00 	. 
-	nop			;1fb8	00 	. 
-	nop			;1fb9	00 	. 
-	nop			;1fba	00 	. 
-	nop			;1fbb	00 	. 
-	nop			;1fbc	00 	. 
-	nop			;1fbd	00 	. 
-	nop			;1fbe	00 	. 
-	nop			;1fbf	00 	. 
-	nop			;1fc0	00 	. 
-	nop			;1fc1	00 	. 
-	nop			;1fc2	00 	. 
-	nop			;1fc3	00 	. 
-	nop			;1fc4	00 	. 
-	nop			;1fc5	00 	. 
-	nop			;1fc6	00 	. 
-	nop			;1fc7	00 	. 
-	nop			;1fc8	00 	. 
-	nop			;1fc9	00 	. 
-	nop			;1fca	00 	. 
-	nop			;1fcb	00 	. 
-	nop			;1fcc	00 	. 
-	nop			;1fcd	00 	. 
-	nop			;1fce	00 	. 
-	nop			;1fcf	00 	. 
-	nop			;1fd0	00 	. 
-	nop			;1fd1	00 	. 
-	nop			;1fd2	00 	. 
-	nop			;1fd3	00 	. 
-	nop			;1fd4	00 	. 
-	nop			;1fd5	00 	. 
-	nop			;1fd6	00 	. 
-	nop			;1fd7	00 	. 
-	nop			;1fd8	00 	. 
-	nop			;1fd9	00 	. 
-	nop			;1fda	00 	. 
-	nop			;1fdb	00 	. 
-	nop			;1fdc	00 	. 
-	nop			;1fdd	00 	. 
-	nop			;1fde	00 	. 
-	nop			;1fdf	00 	. 
-	nop			;1fe0	00 	. 
-	nop			;1fe1	00 	. 
-	nop			;1fe2	00 	. 
-	nop			;1fe3	00 	. 
-	nop			;1fe4	00 	. 
-	nop			;1fe5	00 	. 
-	nop			;1fe6	00 	. 
-	nop			;1fe7	00 	. 
-	nop			;1fe8	00 	. 
-	nop			;1fe9	00 	. 
-	nop			;1fea	00 	. 
-	nop			;1feb	00 	. 
-	nop			;1fec	00 	. 
-	nop			;1fed	00 	. 
-	nop			;1fee	00 	. 
-	nop			;1fef	00 	. 
-	nop			;1ff0	00 	. 
-	nop			;1ff1	00 	. 
-	nop			;1ff2	00 	. 
-	nop			;1ff3	00 	. 
-	nop			;1ff4	00 	. 
-	nop			;1ff5	00 	. 
-	nop			;1ff6	00 	. 
-	nop			;1ff7	00 	. 
-	nop			;1ff8	00 	. 
-	nop			;1ff9	00 	. 
-	nop			;1ffa	00 	. 
-	nop			;1ffb	00 	. 
-	nop			;1ffc	00 	. 
-	nop			;1ffd	00 	. 
-	nop			;1ffe	00 	. 
-	nop			;1fff	00 	. 
-	nop			;2000	00 	. 
-	nop			;2001	00 	. 
-	nop			;2002	00 	. 
-	nop			;2003	00 	. 
-	nop			;2004	00 	. 
-	nop			;2005	00 	. 
-	nop			;2006	00 	. 
-	nop			;2007	00 	. 
-	nop			;2008	00 	. 
-	nop			;2009	00 	. 
-	nop			;200a	00 	. 
-	nop			;200b	00 	. 
-	nop			;200c	00 	. 
-	nop			;200d	00 	. 
-	nop			;200e	00 	. 
-	nop			;200f	00 	. 
-	nop			;2010	00 	. 
-	nop			;2011	00 	. 
-	nop			;2012	00 	. 
-	nop			;2013	00 	. 
-	nop			;2014	00 	. 
-	nop			;2015	00 	. 
-	nop			;2016	00 	. 
-	nop			;2017	00 	. 
-	nop			;2018	00 	. 
-	nop			;2019	00 	. 
-	nop			;201a	00 	. 
-	nop			;201b	00 	. 
-	nop			;201c	00 	. 
-	nop			;201d	00 	. 
-	nop			;201e	00 	. 
-	nop			;201f	00 	. 
-	nop			;2020	00 	. 
-	nop			;2021	00 	. 
-	nop			;2022	00 	. 
-	nop			;2023	00 	. 
-	nop			;2024	00 	. 
-	nop			;2025	00 	. 
-	nop			;2026	00 	. 
-	nop			;2027	00 	. 
-	nop			;2028	00 	. 
-	nop			;2029	00 	. 
-	nop			;202a	00 	. 
-	nop			;202b	00 	. 
-	nop			;202c	00 	. 
-	nop			;202d	00 	. 
-	nop			;202e	00 	. 
-	nop			;202f	00 	. 
-	nop			;2030	00 	. 
-	nop			;2031	00 	. 
-	nop			;2032	00 	. 
-	nop			;2033	00 	. 
-	nop			;2034	00 	. 
-	nop			;2035	00 	. 
-	nop			;2036	00 	. 
-	nop			;2037	00 	. 
-	nop			;2038	00 	. 
-	nop			;2039	00 	. 
-	nop			;203a	00 	. 
-	nop			;203b	00 	. 
-	nop			;203c	00 	. 
-	nop			;203d	00 	. 
-	nop			;203e	00 	. 
-	nop			;203f	00 	. 
-	nop			;2040	00 	. 
-	nop			;2041	00 	. 
-	nop			;2042	00 	. 
-	nop			;2043	00 	. 
-	nop			;2044	00 	. 
-	nop			;2045	00 	. 
-	nop			;2046	00 	. 
-	nop			;2047	00 	. 
-	nop			;2048	00 	. 
-	nop			;2049	00 	. 
-	nop			;204a	00 	. 
-	nop			;204b	00 	. 
-	nop			;204c	00 	. 
-	nop			;204d	00 	. 
-	nop			;204e	00 	. 
-	nop			;204f	00 	. 
-	nop			;2050	00 	. 
-	nop			;2051	00 	. 
-	nop			;2052	00 	. 
+	defb 000h		;1f40	00 	. 
+	defb 000h		;1f41	00 	. 
+	defb 000h		;1f42	00 	. 
+	defb 000h		;1f43	00 	. 
+	defb 000h		;1f44	00 	. 
+	defb 000h		;1f45	00 	. 
+	defb 000h		;1f46	00 	. 
+	defb 000h		;1f47	00 	. 
+	defb 000h		;1f48	00 	. 
+	defb 000h		;1f49	00 	. 
+	defb 000h		;1f4a	00 	. 
+	defb 000h		;1f4b	00 	. 
+	defb 000h		;1f4c	00 	. 
+	defb 000h		;1f4d	00 	. 
+	defb 000h		;1f4e	00 	. 
+	defb 000h		;1f4f	00 	. 
+	defb 000h		;1f50	00 	. 
+	defb 000h		;1f51	00 	. 
+	defb 000h		;1f52	00 	. 
+	defb 000h		;1f53	00 	. 
+	defb 000h		;1f54	00 	. 
+	defb 000h		;1f55	00 	. 
+	defb 000h		;1f56	00 	. 
+	defb 000h		;1f57	00 	. 
+	defb 000h		;1f58	00 	. 
+	defb 000h		;1f59	00 	. 
+	defb 000h		;1f5a	00 	. 
+	defb 000h		;1f5b	00 	. 
+	defb 000h		;1f5c	00 	. 
+	defb 000h		;1f5d	00 	. 
+	defb 000h		;1f5e	00 	. 
+	defb 000h		;1f5f	00 	. 
+	defb 000h		;1f60	00 	. 
+	defb 000h		;1f61	00 	. 
+	defb 000h		;1f62	00 	. 
+	defb 000h		;1f63	00 	. 
+	defb 000h		;1f64	00 	. 
+	defb 000h		;1f65	00 	. 
+	defb 000h		;1f66	00 	. 
+	defb 000h		;1f67	00 	. 
+	defb 000h		;1f68	00 	. 
+	defb 000h		;1f69	00 	. 
+	defb 000h		;1f6a	00 	. 
+	defb 000h		;1f6b	00 	. 
+	defb 000h		;1f6c	00 	. 
+	defb 000h		;1f6d	00 	. 
+	defb 000h		;1f6e	00 	. 
+	defb 000h		;1f6f	00 	. 
+	defb 000h		;1f70	00 	. 
+	defb 000h		;1f71	00 	. 
+	defb 000h		;1f72	00 	. 
+	defb 000h		;1f73	00 	. 
+	defb 000h		;1f74	00 	. 
+	defb 000h		;1f75	00 	. 
+	defb 000h		;1f76	00 	. 
+	defb 000h		;1f77	00 	. 
+	defb 000h		;1f78	00 	. 
+	defb 000h		;1f79	00 	. 
+	defb 000h		;1f7a	00 	. 
+	defb 000h		;1f7b	00 	. 
+	defb 000h		;1f7c	00 	. 
+	defb 000h		;1f7d	00 	. 
+	defb 000h		;1f7e	00 	. 
+	defb 000h		;1f7f	00 	. 
+	defb 000h		;1f80	00 	. 
+	defb 000h		;1f81	00 	. 
+	defb 000h		;1f82	00 	. 
+	defb 000h		;1f83	00 	. 
+	defb 000h		;1f84	00 	. 
+	defb 000h		;1f85	00 	. 
+	defb 000h		;1f86	00 	. 
+	defb 000h		;1f87	00 	. 
+	defb 000h		;1f88	00 	. 
+	defb 000h		;1f89	00 	. 
+	defb 000h		;1f8a	00 	. 
+	defb 000h		;1f8b	00 	. 
+	defb 000h		;1f8c	00 	. 
+	defb 000h		;1f8d	00 	. 
+	defb 000h		;1f8e	00 	. 
+	defb 000h		;1f8f	00 	. 
+	defb 000h		;1f90	00 	. 
+	defb 000h		;1f91	00 	. 
+	defb 000h		;1f92	00 	. 
+	defb 000h		;1f93	00 	. 
+	defb 000h		;1f94	00 	. 
+	defb 000h		;1f95	00 	. 
+	defb 000h		;1f96	00 	. 
+	defb 000h		;1f97	00 	. 
+	defb 000h		;1f98	00 	. 
+	defb 000h		;1f99	00 	. 
+	defb 000h		;1f9a	00 	. 
+	defb 000h		;1f9b	00 	. 
+	defb 000h		;1f9c	00 	. 
+	defb 000h		;1f9d	00 	. 
+	defb 000h		;1f9e	00 	. 
+	defb 000h		;1f9f	00 	. 
+	defb 000h		;1fa0	00 	. 
+	defb 000h		;1fa1	00 	. 
+	defb 000h		;1fa2	00 	. 
+	defb 000h		;1fa3	00 	. 
+	defb 000h		;1fa4	00 	. 
+	defb 000h		;1fa5	00 	. 
+	defb 000h		;1fa6	00 	. 
+	defb 000h		;1fa7	00 	. 
+	defb 000h		;1fa8	00 	. 
+	defb 000h		;1fa9	00 	. 
+	defb 000h		;1faa	00 	. 
+	defb 000h		;1fab	00 	. 
+	defb 000h		;1fac	00 	. 
+	defb 000h		;1fad	00 	. 
+	defb 000h		;1fae	00 	. 
+	defb 000h		;1faf	00 	. 
+	defb 000h		;1fb0	00 	. 
+	defb 000h		;1fb1	00 	. 
+	defb 000h		;1fb2	00 	. 
+	defb 000h		;1fb3	00 	. 
+	defb 000h		;1fb4	00 	. 
+	defb 000h		;1fb5	00 	. 
+	defb 000h		;1fb6	00 	. 
+	defb 000h		;1fb7	00 	. 
+	defb 000h		;1fb8	00 	. 
+	defb 000h		;1fb9	00 	. 
+	defb 000h		;1fba	00 	. 
+	defb 000h		;1fbb	00 	. 
+	defb 000h		;1fbc	00 	. 
+	defb 000h		;1fbd	00 	. 
+	defb 000h		;1fbe	00 	. 
+	defb 000h		;1fbf	00 	. 
+	defb 000h		;1fc0	00 	. 
+	defb 000h		;1fc1	00 	. 
+	defb 000h		;1fc2	00 	. 
+	defb 000h		;1fc3	00 	. 
+	defb 000h		;1fc4	00 	. 
+	defb 000h		;1fc5	00 	. 
+	defb 000h		;1fc6	00 	. 
+	defb 000h		;1fc7	00 	. 
+	defb 000h		;1fc8	00 	. 
+	defb 000h		;1fc9	00 	. 
+	defb 000h		;1fca	00 	. 
+	defb 000h		;1fcb	00 	. 
+	defb 000h		;1fcc	00 	. 
+	defb 000h		;1fcd	00 	. 
+	defb 000h		;1fce	00 	. 
+	defb 000h		;1fcf	00 	. 
+	defb 000h		;1fd0	00 	. 
+	defb 000h		;1fd1	00 	. 
+	defb 000h		;1fd2	00 	. 
+	defb 000h		;1fd3	00 	. 
+	defb 000h		;1fd4	00 	. 
+	defb 000h		;1fd5	00 	. 
+	defb 000h		;1fd6	00 	. 
+	defb 000h		;1fd7	00 	. 
+	defb 000h		;1fd8	00 	. 
+	defb 000h		;1fd9	00 	. 
+	defb 000h		;1fda	00 	. 
+	defb 000h		;1fdb	00 	. 
+	defb 000h		;1fdc	00 	. 
+	defb 000h		;1fdd	00 	. 
+	defb 000h		;1fde	00 	. 
+	defb 000h		;1fdf	00 	. 
+	defb 000h		;1fe0	00 	. 
+	defb 000h		;1fe1	00 	. 
+	defb 000h		;1fe2	00 	. 
+	defb 000h		;1fe3	00 	. 
+	defb 000h		;1fe4	00 	. 
+	defb 000h		;1fe5	00 	. 
+	defb 000h		;1fe6	00 	. 
+	defb 000h		;1fe7	00 	. 
+	defb 000h		;1fe8	00 	. 
+	defb 000h		;1fe9	00 	. 
+	defb 000h		;1fea	00 	. 
+	defb 000h		;1feb	00 	. 
+	defb 000h		;1fec	00 	. 
+	defb 000h		;1fed	00 	. 
+	defb 000h		;1fee	00 	. 
+	defb 000h		;1fef	00 	. 
+	defb 000h		;1ff0	00 	. 
+	defb 000h		;1ff1	00 	. 
+	defb 000h		;1ff2	00 	. 
+	defb 000h		;1ff3	00 	. 
+	defb 000h		;1ff4	00 	. 
+	defb 000h		;1ff5	00 	. 
+	defb 000h		;1ff6	00 	. 
+	defb 000h		;1ff7	00 	. 
+	defb 000h		;1ff8	00 	. 
+	defb 000h		;1ff9	00 	. 
+	defb 000h		;1ffa	00 	. 
+	defb 000h		;1ffb	00 	. 
+	defb 000h		;1ffc	00 	. 
+	defb 000h		;1ffd	00 	. 
+	defb 000h		;1ffe	00 	. 
+	defb 000h		;1fff	00 	. 
+	defb 000h		;2000	00 	. 
+	defb 000h		;2001	00 	. 
+	defb 000h		;2002	00 	. 
+	defb 000h		;2003	00 	. 
+	defb 000h		;2004	00 	. 
+	defb 000h		;2005	00 	. 
+	defb 000h		;2006	00 	. 
+	defb 000h		;2007	00 	. 
+	defb 000h		;2008	00 	. 
+	defb 000h		;2009	00 	. 
+	defb 000h		;200a	00 	. 
+	defb 000h		;200b	00 	. 
+	defb 000h		;200c	00 	. 
+	defb 000h		;200d	00 	. 
+	defb 000h		;200e	00 	. 
+	defb 000h		;200f	00 	. 
+	defb 000h		;2010	00 	. 
+	defb 000h		;2011	00 	. 
+	defb 000h		;2012	00 	. 
+	defb 000h		;2013	00 	. 
+	defb 000h		;2014	00 	. 
+	defb 000h		;2015	00 	. 
+	defb 000h		;2016	00 	. 
+	defb 000h		;2017	00 	. 
+	defb 000h		;2018	00 	. 
+	defb 000h		;2019	00 	. 
+	defb 000h		;201a	00 	. 
+	defb 000h		;201b	00 	. 
+	defb 000h		;201c	00 	. 
+	defb 000h		;201d	00 	. 
+	defb 000h		;201e	00 	. 
+	defb 000h		;201f	00 	. 
+	defb 000h		;2020	00 	. 
+	defb 000h		;2021	00 	. 
+	defb 000h		;2022	00 	. 
+	defb 000h		;2023	00 	. 
+	defb 000h		;2024	00 	. 
+	defb 000h		;2025	00 	. 
+	defb 000h		;2026	00 	. 
+	defb 000h		;2027	00 	. 
+	defb 000h		;2028	00 	. 
+	defb 000h		;2029	00 	. 
+	defb 000h		;202a	00 	. 
+	defb 000h		;202b	00 	. 
+	defb 000h		;202c	00 	. 
+	defb 000h		;202d	00 	. 
+	defb 000h		;202e	00 	. 
+	defb 000h		;202f	00 	. 
+	defb 000h		;2030	00 	. 
+	defb 000h		;2031	00 	. 
+	defb 000h		;2032	00 	. 
+	defb 000h		;2033	00 	. 
+	defb 000h		;2034	00 	. 
+	defb 000h		;2035	00 	. 
+	defb 000h		;2036	00 	. 
+	defb 000h		;2037	00 	. 
+	defb 000h		;2038	00 	. 
+	defb 000h		;2039	00 	. 
+	defb 000h		;203a	00 	. 
+	defb 000h		;203b	00 	. 
+	defb 000h		;203c	00 	. 
+	defb 000h		;203d	00 	. 
+	defb 000h		;203e	00 	. 
+	defb 000h		;203f	00 	. 
+	defb 000h		;2040	00 	. 
+	defb 000h		;2041	00 	. 
+	defb 000h		;2042	00 	. 
+	defb 000h		;2043	00 	. 
+	defb 000h		;2044	00 	. 
+	defb 000h		;2045	00 	. 
+	defb 000h		;2046	00 	. 
+	defb 000h		;2047	00 	. 
+	defb 000h		;2048	00 	. 
+	defb 000h		;2049	00 	. 
+	defb 000h		;204a	00 	. 
+	defb 000h		;204b	00 	. 
+	defb 000h		;204c	00 	. 
+	defb 000h		;204d	00 	. 
+	defb 000h		;204e	00 	. 
+	defb 000h		;204f	00 	. 
+	defb 000h		;2050	00 	. 
+	defb 000h		;2051	00 	. 
+	defb 000h		;2052	00 	. 
 l2053h:
-	nop			;2053	00 	. 
-	nop			;2054	00 	. 
-	nop			;2055	00 	. 
-l2056h:
-	nop			;2056	00 	. 
-	nop			;2057	00 	. 
-	nop			;2058	00 	. 
-	nop			;2059	00 	. 
-	nop			;205a	00 	. 
-	nop			;205b	00 	. 
-	nop			;205c	00 	. 
-	nop			;205d	00 	. 
-	nop			;205e	00 	. 
-	nop			;205f	00 	. 
-	nop			;2060	00 	. 
-	nop			;2061	00 	. 
-	nop			;2062	00 	. 
-	nop			;2063	00 	. 
-	nop			;2064	00 	. 
-	nop			;2065	00 	. 
-	nop			;2066	00 	. 
-	nop			;2067	00 	. 
-	nop			;2068	00 	. 
-	nop			;2069	00 	. 
-	nop			;206a	00 	. 
-	nop			;206b	00 	. 
-	nop			;206c	00 	. 
-	nop			;206d	00 	. 
-	nop			;206e	00 	. 
-	nop			;206f	00 	. 
-	nop			;2070	00 	. 
-	nop			;2071	00 	. 
-	nop			;2072	00 	. 
-	nop			;2073	00 	. 
-	nop			;2074	00 	. 
-	nop			;2075	00 	. 
-	nop			;2076	00 	. 
-	nop			;2077	00 	. 
-	nop			;2078	00 	. 
-	nop			;2079	00 	. 
-	nop			;207a	00 	. 
-	nop			;207b	00 	. 
-	nop			;207c	00 	. 
-	nop			;207d	00 	. 
-	nop			;207e	00 	. 
-	nop			;207f	00 	. 
-	nop			;2080	00 	. 
-	nop			;2081	00 	. 
-	nop			;2082	00 	. 
-	nop			;2083	00 	. 
-	nop			;2084	00 	. 
-	nop			;2085	00 	. 
-	nop			;2086	00 	. 
-	nop			;2087	00 	. 
-	nop			;2088	00 	. 
-	nop			;2089	00 	. 
-	nop			;208a	00 	. 
-	nop			;208b	00 	. 
-	nop			;208c	00 	. 
-	nop			;208d	00 	. 
-	nop			;208e	00 	. 
-	nop			;208f	00 	. 
-	nop			;2090	00 	. 
-	nop			;2091	00 	. 
-	nop			;2092	00 	. 
-	nop			;2093	00 	. 
-	nop			;2094	00 	. 
-	nop			;2095	00 	. 
-	nop			;2096	00 	. 
-	nop			;2097	00 	. 
-	nop			;2098	00 	. 
-	nop			;2099	00 	. 
-	nop			;209a	00 	. 
-	nop			;209b	00 	. 
-	nop			;209c	00 	. 
-	nop			;209d	00 	. 
-	nop			;209e	00 	. 
-	nop			;209f	00 	. 
-	nop			;20a0	00 	. 
-	nop			;20a1	00 	. 
-	nop			;20a2	00 	. 
-	nop			;20a3	00 	. 
-	nop			;20a4	00 	. 
-	nop			;20a5	00 	. 
-	nop			;20a6	00 	. 
-	nop			;20a7	00 	. 
-	nop			;20a8	00 	. 
-	nop			;20a9	00 	. 
-	nop			;20aa	00 	. 
-	nop			;20ab	00 	. 
-	nop			;20ac	00 	. 
-	nop			;20ad	00 	. 
-	nop			;20ae	00 	. 
-	nop			;20af	00 	. 
-	nop			;20b0	00 	. 
-	nop			;20b1	00 	. 
-	nop			;20b2	00 	. 
-	nop			;20b3	00 	. 
-	nop			;20b4	00 	. 
-	nop			;20b5	00 	. 
-	nop			;20b6	00 	. 
-	nop			;20b7	00 	. 
-	nop			;20b8	00 	. 
-	nop			;20b9	00 	. 
-	nop			;20ba	00 	. 
-	nop			;20bb	00 	. 
-	nop			;20bc	00 	. 
-	nop			;20bd	00 	. 
-	nop			;20be	00 	. 
-	nop			;20bf	00 	. 
-	nop			;20c0	00 	. 
-	nop			;20c1	00 	. 
-	nop			;20c2	00 	. 
-	nop			;20c3	00 	. 
-	nop			;20c4	00 	. 
-	nop			;20c5	00 	. 
-	nop			;20c6	00 	. 
-	nop			;20c7	00 	. 
-	nop			;20c8	00 	. 
-	nop			;20c9	00 	. 
-	nop			;20ca	00 	. 
-	nop			;20cb	00 	. 
-	nop			;20cc	00 	. 
-	nop			;20cd	00 	. 
-	nop			;20ce	00 	. 
-	nop			;20cf	00 	. 
-	nop			;20d0	00 	. 
-	nop			;20d1	00 	. 
-	nop			;20d2	00 	. 
-	nop			;20d3	00 	. 
-	nop			;20d4	00 	. 
-	nop			;20d5	00 	. 
-	nop			;20d6	00 	. 
-	nop			;20d7	00 	. 
-	nop			;20d8	00 	. 
-	nop			;20d9	00 	. 
-	nop			;20da	00 	. 
-	nop			;20db	00 	. 
-	nop			;20dc	00 	. 
-	nop			;20dd	00 	. 
-	nop			;20de	00 	. 
-	nop			;20df	00 	. 
-	nop			;20e0	00 	. 
-	nop			;20e1	00 	. 
-	nop			;20e2	00 	. 
-	nop			;20e3	00 	. 
-	nop			;20e4	00 	. 
-	nop			;20e5	00 	. 
-	nop			;20e6	00 	. 
-	nop			;20e7	00 	. 
-	nop			;20e8	00 	. 
-	nop			;20e9	00 	. 
-	nop			;20ea	00 	. 
-	nop			;20eb	00 	. 
-	nop			;20ec	00 	. 
-	nop			;20ed	00 	. 
-	nop			;20ee	00 	. 
-	nop			;20ef	00 	. 
-	nop			;20f0	00 	. 
-	nop			;20f1	00 	. 
-	nop			;20f2	00 	. 
-	nop			;20f3	00 	. 
-	nop			;20f4	00 	. 
-	nop			;20f5	00 	. 
-	nop			;20f6	00 	. 
-	nop			;20f7	00 	. 
-	nop			;20f8	00 	. 
-	nop			;20f9	00 	. 
-	nop			;20fa	00 	. 
-	nop			;20fb	00 	. 
-	nop			;20fc	00 	. 
-	nop			;20fd	00 	. 
-	nop			;20fe	00 	. 
-	nop			;20ff	00 	. 
-	nop			;2100	00 	. 
-	nop			;2101	00 	. 
-	nop			;2102	00 	. 
-	nop			;2103	00 	. 
-	nop			;2104	00 	. 
-	nop			;2105	00 	. 
-	nop			;2106	00 	. 
-	nop			;2107	00 	. 
-	nop			;2108	00 	. 
-	nop			;2109	00 	. 
-	nop			;210a	00 	. 
-	nop			;210b	00 	. 
-	nop			;210c	00 	. 
-	nop			;210d	00 	. 
-	nop			;210e	00 	. 
-	nop			;210f	00 	. 
-	nop			;2110	00 	. 
-	nop			;2111	00 	. 
-	nop			;2112	00 	. 
-	nop			;2113	00 	. 
-	nop			;2114	00 	. 
-	nop			;2115	00 	. 
-	nop			;2116	00 	. 
-	nop			;2117	00 	. 
-	nop			;2118	00 	. 
-	nop			;2119	00 	. 
-	nop			;211a	00 	. 
-	nop			;211b	00 	. 
-	nop			;211c	00 	. 
-	nop			;211d	00 	. 
-	nop			;211e	00 	. 
-	nop			;211f	00 	. 
-	nop			;2120	00 	. 
-	nop			;2121	00 	. 
-	nop			;2122	00 	. 
-	nop			;2123	00 	. 
-	nop			;2124	00 	. 
-	nop			;2125	00 	. 
-	nop			;2126	00 	. 
-	nop			;2127	00 	. 
-	nop			;2128	00 	. 
-	nop			;2129	00 	. 
-	nop			;212a	00 	. 
-	nop			;212b	00 	. 
-	nop			;212c	00 	. 
-	nop			;212d	00 	. 
-	nop			;212e	00 	. 
-	nop			;212f	00 	. 
-	nop			;2130	00 	. 
-	nop			;2131	00 	. 
-	nop			;2132	00 	. 
-	nop			;2133	00 	. 
-	nop			;2134	00 	. 
-	nop			;2135	00 	. 
-	nop			;2136	00 	. 
-	nop			;2137	00 	. 
-	nop			;2138	00 	. 
-	nop			;2139	00 	. 
-	nop			;213a	00 	. 
-	nop			;213b	00 	. 
-	nop			;213c	00 	. 
-	nop			;213d	00 	. 
-	nop			;213e	00 	. 
-	nop			;213f	00 	. 
-	nop			;2140	00 	. 
-	nop			;2141	00 	. 
-	nop			;2142	00 	. 
-	nop			;2143	00 	. 
-	nop			;2144	00 	. 
-	nop			;2145	00 	. 
-	nop			;2146	00 	. 
-	nop			;2147	00 	. 
-	nop			;2148	00 	. 
-	nop			;2149	00 	. 
-	nop			;214a	00 	. 
-	nop			;214b	00 	. 
-	nop			;214c	00 	. 
-	nop			;214d	00 	. 
-	nop			;214e	00 	. 
-	nop			;214f	00 	. 
-	nop			;2150	00 	. 
-	nop			;2151	00 	. 
-	nop			;2152	00 	. 
-	nop			;2153	00 	. 
-	nop			;2154	00 	. 
-	nop			;2155	00 	. 
-	nop			;2156	00 	. 
-	nop			;2157	00 	. 
-	nop			;2158	00 	. 
-	nop			;2159	00 	. 
-	nop			;215a	00 	. 
-	nop			;215b	00 	. 
-	nop			;215c	00 	. 
-	nop			;215d	00 	. 
-	nop			;215e	00 	. 
-	nop			;215f	00 	. 
-	nop			;2160	00 	. 
-	nop			;2161	00 	. 
-	nop			;2162	00 	. 
-	nop			;2163	00 	. 
-	nop			;2164	00 	. 
-	nop			;2165	00 	. 
-	nop			;2166	00 	. 
-	nop			;2167	00 	. 
-	nop			;2168	00 	. 
-	nop			;2169	00 	. 
-	nop			;216a	00 	. 
-	nop			;216b	00 	. 
-	nop			;216c	00 	. 
-	nop			;216d	00 	. 
-	nop			;216e	00 	. 
-	nop			;216f	00 	. 
-	nop			;2170	00 	. 
-	nop			;2171	00 	. 
-	nop			;2172	00 	. 
-	nop			;2173	00 	. 
-	nop			;2174	00 	. 
-	nop			;2175	00 	. 
-	nop			;2176	00 	. 
-	nop			;2177	00 	. 
-	nop			;2178	00 	. 
-	nop			;2179	00 	. 
-	nop			;217a	00 	. 
-	nop			;217b	00 	. 
-	nop			;217c	00 	. 
-	nop			;217d	00 	. 
-	nop			;217e	00 	. 
-	nop			;217f	00 	. 
-	nop			;2180	00 	. 
-	nop			;2181	00 	. 
-	nop			;2182	00 	. 
-	nop			;2183	00 	. 
-	nop			;2184	00 	. 
-	nop			;2185	00 	. 
-	nop			;2186	00 	. 
-	nop			;2187	00 	. 
-	nop			;2188	00 	. 
-	nop			;2189	00 	. 
-	nop			;218a	00 	. 
-	nop			;218b	00 	. 
-	nop			;218c	00 	. 
-	nop			;218d	00 	. 
-	nop			;218e	00 	. 
-	nop			;218f	00 	. 
-	nop			;2190	00 	. 
-	nop			;2191	00 	. 
-	nop			;2192	00 	. 
-	nop			;2193	00 	. 
-	nop			;2194	00 	. 
-	nop			;2195	00 	. 
-	nop			;2196	00 	. 
-	nop			;2197	00 	. 
-	nop			;2198	00 	. 
-	nop			;2199	00 	. 
-	nop			;219a	00 	. 
-	nop			;219b	00 	. 
-	nop			;219c	00 	. 
-	nop			;219d	00 	. 
-	nop			;219e	00 	. 
-	nop			;219f	00 	. 
-	nop			;21a0	00 	. 
-	nop			;21a1	00 	. 
-	nop			;21a2	00 	. 
-	nop			;21a3	00 	. 
-	nop			;21a4	00 	. 
-	nop			;21a5	00 	. 
-	nop			;21a6	00 	. 
-	nop			;21a7	00 	. 
-	nop			;21a8	00 	. 
-	nop			;21a9	00 	. 
-	nop			;21aa	00 	. 
-	nop			;21ab	00 	. 
-	nop			;21ac	00 	. 
-	nop			;21ad	00 	. 
-	nop			;21ae	00 	. 
-	nop			;21af	00 	. 
-	nop			;21b0	00 	. 
-	nop			;21b1	00 	. 
-	nop			;21b2	00 	. 
-	nop			;21b3	00 	. 
-	nop			;21b4	00 	. 
-	nop			;21b5	00 	. 
-	nop			;21b6	00 	. 
-l21b7h:
-	nop			;21b7	00 	. 
-	nop			;21b8	00 	. 
-	nop			;21b9	00 	. 
-	nop			;21ba	00 	. 
-	nop			;21bb	00 	. 
-	nop			;21bc	00 	. 
-	nop			;21bd	00 	. 
-	nop			;21be	00 	. 
-	nop			;21bf	00 	. 
-	nop			;21c0	00 	. 
-	nop			;21c1	00 	. 
-	nop			;21c2	00 	. 
-	nop			;21c3	00 	. 
-	nop			;21c4	00 	. 
-	nop			;21c5	00 	. 
-	nop			;21c6	00 	. 
-	nop			;21c7	00 	. 
-	nop			;21c8	00 	. 
-	nop			;21c9	00 	. 
-	nop			;21ca	00 	. 
-	nop			;21cb	00 	. 
-	nop			;21cc	00 	. 
-	nop			;21cd	00 	. 
-	nop			;21ce	00 	. 
-	nop			;21cf	00 	. 
-	nop			;21d0	00 	. 
-	nop			;21d1	00 	. 
-	nop			;21d2	00 	. 
-	nop			;21d3	00 	. 
-	nop			;21d4	00 	. 
-	nop			;21d5	00 	. 
-	nop			;21d6	00 	. 
-	nop			;21d7	00 	. 
-	nop			;21d8	00 	. 
-	nop			;21d9	00 	. 
-	nop			;21da	00 	. 
-	nop			;21db	00 	. 
-	nop			;21dc	00 	. 
-	nop			;21dd	00 	. 
-	nop			;21de	00 	. 
-	nop			;21df	00 	. 
-	nop			;21e0	00 	. 
-	nop			;21e1	00 	. 
-	nop			;21e2	00 	. 
-	nop			;21e3	00 	. 
-	nop			;21e4	00 	. 
-	nop			;21e5	00 	. 
-	nop			;21e6	00 	. 
-	nop			;21e7	00 	. 
-	nop			;21e8	00 	. 
-	nop			;21e9	00 	. 
-	nop			;21ea	00 	. 
-	nop			;21eb	00 	. 
-	nop			;21ec	00 	. 
-	nop			;21ed	00 	. 
-	nop			;21ee	00 	. 
-	nop			;21ef	00 	. 
-	nop			;21f0	00 	. 
-	nop			;21f1	00 	. 
-	nop			;21f2	00 	. 
-	nop			;21f3	00 	. 
-	nop			;21f4	00 	. 
-	nop			;21f5	00 	. 
-	nop			;21f6	00 	. 
-	nop			;21f7	00 	. 
-	nop			;21f8	00 	. 
-	nop			;21f9	00 	. 
-	nop			;21fa	00 	. 
-	nop			;21fb	00 	. 
-	nop			;21fc	00 	. 
-	nop			;21fd	00 	. 
-	nop			;21fe	00 	. 
-	nop			;21ff	00 	. 
-	nop			;2200	00 	. 
-	nop			;2201	00 	. 
-	nop			;2202	00 	. 
-	nop			;2203	00 	. 
-	nop			;2204	00 	. 
-	nop			;2205	00 	. 
-	nop			;2206	00 	. 
-	nop			;2207	00 	. 
-	nop			;2208	00 	. 
-	nop			;2209	00 	. 
-	nop			;220a	00 	. 
-	nop			;220b	00 	. 
-	nop			;220c	00 	. 
-	nop			;220d	00 	. 
-	nop			;220e	00 	. 
-	nop			;220f	00 	. 
-	nop			;2210	00 	. 
-	nop			;2211	00 	. 
-	nop			;2212	00 	. 
-	nop			;2213	00 	. 
-	nop			;2214	00 	. 
-	nop			;2215	00 	. 
-	nop			;2216	00 	. 
-	nop			;2217	00 	. 
-	nop			;2218	00 	. 
-	nop			;2219	00 	. 
-	nop			;221a	00 	. 
-	nop			;221b	00 	. 
-	nop			;221c	00 	. 
-	nop			;221d	00 	. 
-	nop			;221e	00 	. 
-	nop			;221f	00 	. 
-	nop			;2220	00 	. 
-	nop			;2221	00 	. 
-	nop			;2222	00 	. 
-	nop			;2223	00 	. 
-	nop			;2224	00 	. 
-	nop			;2225	00 	. 
-	nop			;2226	00 	. 
-	nop			;2227	00 	. 
-	nop			;2228	00 	. 
-	nop			;2229	00 	. 
-	nop			;222a	00 	. 
-	nop			;222b	00 	. 
-	nop			;222c	00 	. 
-	nop			;222d	00 	. 
-	nop			;222e	00 	. 
-	nop			;222f	00 	. 
-	nop			;2230	00 	. 
-	nop			;2231	00 	. 
-	nop			;2232	00 	. 
-	nop			;2233	00 	. 
-	nop			;2234	00 	. 
-	nop			;2235	00 	. 
-	nop			;2236	00 	. 
-	nop			;2237	00 	. 
-	nop			;2238	00 	. 
-	nop			;2239	00 	. 
-	nop			;223a	00 	. 
-	nop			;223b	00 	. 
-	nop			;223c	00 	. 
-	nop			;223d	00 	. 
-	nop			;223e	00 	. 
-	nop			;223f	00 	. 
-	nop			;2240	00 	. 
-	nop			;2241	00 	. 
-	nop			;2242	00 	. 
-	nop			;2243	00 	. 
-	nop			;2244	00 	. 
-	nop			;2245	00 	. 
-	nop			;2246	00 	. 
-	nop			;2247	00 	. 
-	nop			;2248	00 	. 
-	nop			;2249	00 	. 
-	nop			;224a	00 	. 
-	nop			;224b	00 	. 
-	nop			;224c	00 	. 
-	nop			;224d	00 	. 
-	nop			;224e	00 	. 
-	nop			;224f	00 	. 
-	nop			;2250	00 	. 
-	nop			;2251	00 	. 
-	nop			;2252	00 	. 
-	nop			;2253	00 	. 
-	nop			;2254	00 	. 
-	nop			;2255	00 	. 
-	nop			;2256	00 	. 
-	nop			;2257	00 	. 
-	nop			;2258	00 	. 
-	nop			;2259	00 	. 
-	nop			;225a	00 	. 
-	nop			;225b	00 	. 
-	nop			;225c	00 	. 
-	nop			;225d	00 	. 
-	nop			;225e	00 	. 
-	nop			;225f	00 	. 
-	nop			;2260	00 	. 
-	nop			;2261	00 	. 
-	nop			;2262	00 	. 
-	nop			;2263	00 	. 
-	nop			;2264	00 	. 
-	nop			;2265	00 	. 
-	nop			;2266	00 	. 
-	nop			;2267	00 	. 
-	nop			;2268	00 	. 
-	nop			;2269	00 	. 
-	nop			;226a	00 	. 
-	nop			;226b	00 	. 
-	nop			;226c	00 	. 
-	nop			;226d	00 	. 
-	nop			;226e	00 	. 
-	nop			;226f	00 	. 
-	nop			;2270	00 	. 
-	nop			;2271	00 	. 
-	nop			;2272	00 	. 
-	nop			;2273	00 	. 
-	nop			;2274	00 	. 
-	nop			;2275	00 	. 
-	nop			;2276	00 	. 
-	nop			;2277	00 	. 
-	nop			;2278	00 	. 
-	nop			;2279	00 	. 
-	nop			;227a	00 	. 
-	nop			;227b	00 	. 
-	nop			;227c	00 	. 
-	nop			;227d	00 	. 
-	nop			;227e	00 	. 
-	nop			;227f	00 	. 
-	nop			;2280	00 	. 
-	nop			;2281	00 	. 
-	nop			;2282	00 	. 
-	nop			;2283	00 	. 
-	nop			;2284	00 	. 
-	nop			;2285	00 	. 
-	nop			;2286	00 	. 
-	nop			;2287	00 	. 
-	nop			;2288	00 	. 
-	nop			;2289	00 	. 
-	nop			;228a	00 	. 
-	nop			;228b	00 	. 
-	nop			;228c	00 	. 
-	nop			;228d	00 	. 
-	nop			;228e	00 	. 
-	nop			;228f	00 	. 
-	nop			;2290	00 	. 
-	nop			;2291	00 	. 
-	nop			;2292	00 	. 
-	nop			;2293	00 	. 
-	nop			;2294	00 	. 
-	nop			;2295	00 	. 
-	nop			;2296	00 	. 
-	nop			;2297	00 	. 
-	nop			;2298	00 	. 
-	nop			;2299	00 	. 
-	nop			;229a	00 	. 
-	nop			;229b	00 	. 
-	nop			;229c	00 	. 
-	nop			;229d	00 	. 
-	nop			;229e	00 	. 
-	nop			;229f	00 	. 
-	nop			;22a0	00 	. 
-	nop			;22a1	00 	. 
-	nop			;22a2	00 	. 
-	nop			;22a3	00 	. 
-	nop			;22a4	00 	. 
-	nop			;22a5	00 	. 
-	nop			;22a6	00 	. 
-	nop			;22a7	00 	. 
-	nop			;22a8	00 	. 
-	nop			;22a9	00 	. 
-	nop			;22aa	00 	. 
-	nop			;22ab	00 	. 
-	nop			;22ac	00 	. 
-	nop			;22ad	00 	. 
-	nop			;22ae	00 	. 
-	nop			;22af	00 	. 
-	nop			;22b0	00 	. 
-	nop			;22b1	00 	. 
-	nop			;22b2	00 	. 
-	nop			;22b3	00 	. 
-	nop			;22b4	00 	. 
-	nop			;22b5	00 	. 
-	nop			;22b6	00 	. 
-	nop			;22b7	00 	. 
-	nop			;22b8	00 	. 
-	nop			;22b9	00 	. 
-	nop			;22ba	00 	. 
-	nop			;22bb	00 	. 
-	nop			;22bc	00 	. 
-	nop			;22bd	00 	. 
-	nop			;22be	00 	. 
-	nop			;22bf	00 	. 
-	nop			;22c0	00 	. 
-	nop			;22c1	00 	. 
-	nop			;22c2	00 	. 
-	nop			;22c3	00 	. 
-	nop			;22c4	00 	. 
-	nop			;22c5	00 	. 
-	nop			;22c6	00 	. 
-	nop			;22c7	00 	. 
-	nop			;22c8	00 	. 
-	nop			;22c9	00 	. 
-	nop			;22ca	00 	. 
-	nop			;22cb	00 	. 
-	nop			;22cc	00 	. 
-	nop			;22cd	00 	. 
-	nop			;22ce	00 	. 
-	nop			;22cf	00 	. 
-	nop			;22d0	00 	. 
-	nop			;22d1	00 	. 
-	nop			;22d2	00 	. 
-	nop			;22d3	00 	. 
-	nop			;22d4	00 	. 
-	nop			;22d5	00 	. 
-	nop			;22d6	00 	. 
-	nop			;22d7	00 	. 
-	nop			;22d8	00 	. 
-	nop			;22d9	00 	. 
-	nop			;22da	00 	. 
-	nop			;22db	00 	. 
-	nop			;22dc	00 	. 
-	nop			;22dd	00 	. 
-	nop			;22de	00 	. 
-	nop			;22df	00 	. 
-	nop			;22e0	00 	. 
-	nop			;22e1	00 	. 
-	nop			;22e2	00 	. 
-	nop			;22e3	00 	. 
-	nop			;22e4	00 	. 
-	nop			;22e5	00 	. 
-	nop			;22e6	00 	. 
-	nop			;22e7	00 	. 
-	nop			;22e8	00 	. 
-	nop			;22e9	00 	. 
-	nop			;22ea	00 	. 
-	nop			;22eb	00 	. 
-	nop			;22ec	00 	. 
-	nop			;22ed	00 	. 
-	nop			;22ee	00 	. 
-	nop			;22ef	00 	. 
-	nop			;22f0	00 	. 
-	nop			;22f1	00 	. 
-	nop			;22f2	00 	. 
-	nop			;22f3	00 	. 
-	nop			;22f4	00 	. 
-	nop			;22f5	00 	. 
-	nop			;22f6	00 	. 
-	nop			;22f7	00 	. 
-	nop			;22f8	00 	. 
-	nop			;22f9	00 	. 
-	nop			;22fa	00 	. 
-	nop			;22fb	00 	. 
-	nop			;22fc	00 	. 
-	nop			;22fd	00 	. 
-	nop			;22fe	00 	. 
-	nop			;22ff	00 	. 
-	nop			;2300	00 	. 
-	nop			;2301	00 	. 
-	nop			;2302	00 	. 
-	nop			;2303	00 	. 
-	nop			;2304	00 	. 
-	nop			;2305	00 	. 
-	nop			;2306	00 	. 
-	nop			;2307	00 	. 
-	nop			;2308	00 	. 
-	nop			;2309	00 	. 
-	nop			;230a	00 	. 
-	nop			;230b	00 	. 
-	nop			;230c	00 	. 
-	nop			;230d	00 	. 
-	nop			;230e	00 	. 
-	nop			;230f	00 	. 
-	nop			;2310	00 	. 
-	nop			;2311	00 	. 
-	nop			;2312	00 	. 
-	nop			;2313	00 	. 
-	nop			;2314	00 	. 
-	nop			;2315	00 	. 
-	nop			;2316	00 	. 
-	nop			;2317	00 	. 
-	nop			;2318	00 	. 
-	nop			;2319	00 	. 
-	nop			;231a	00 	. 
-	nop			;231b	00 	. 
-	nop			;231c	00 	. 
-	nop			;231d	00 	. 
-	nop			;231e	00 	. 
-	nop			;231f	00 	. 
-	nop			;2320	00 	. 
-	nop			;2321	00 	. 
-	nop			;2322	00 	. 
-	nop			;2323	00 	. 
-	nop			;2324	00 	. 
-	nop			;2325	00 	. 
-	nop			;2326	00 	. 
-	nop			;2327	00 	. 
-	nop			;2328	00 	. 
-	nop			;2329	00 	. 
-	nop			;232a	00 	. 
-	nop			;232b	00 	. 
-	nop			;232c	00 	. 
-	nop			;232d	00 	. 
-	nop			;232e	00 	. 
-	nop			;232f	00 	. 
-	nop			;2330	00 	. 
-	nop			;2331	00 	. 
-	nop			;2332	00 	. 
-	nop			;2333	00 	. 
-	nop			;2334	00 	. 
-	nop			;2335	00 	. 
-	nop			;2336	00 	. 
-	nop			;2337	00 	. 
-	nop			;2338	00 	. 
-	nop			;2339	00 	. 
-	nop			;233a	00 	. 
-	nop			;233b	00 	. 
-	nop			;233c	00 	. 
-	nop			;233d	00 	. 
-	nop			;233e	00 	. 
-	nop			;233f	00 	. 
-	nop			;2340	00 	. 
-	nop			;2341	00 	. 
-	nop			;2342	00 	. 
-	nop			;2343	00 	. 
-	nop			;2344	00 	. 
-	nop			;2345	00 	. 
-	nop			;2346	00 	. 
-	nop			;2347	00 	. 
-	nop			;2348	00 	. 
-	nop			;2349	00 	. 
-	nop			;234a	00 	. 
-	nop			;234b	00 	. 
-	nop			;234c	00 	. 
-	nop			;234d	00 	. 
-	nop			;234e	00 	. 
-	nop			;234f	00 	. 
-	nop			;2350	00 	. 
-	nop			;2351	00 	. 
-	nop			;2352	00 	. 
-	nop			;2353	00 	. 
-	nop			;2354	00 	. 
+	defb 000h		;2053	00 	. 
+	defb 000h		;2054	00 	. 
+	defb 000h		;2055	00 	. 
+	defb 000h		;2056	00 	. 
+	defb 000h		;2057	00 	. 
+	defb 000h		;2058	00 	. 
+	defb 000h		;2059	00 	. 
+	defb 000h		;205a	00 	. 
+	defb 000h		;205b	00 	. 
+	defb 000h		;205c	00 	. 
+	defb 000h		;205d	00 	. 
+	defb 000h		;205e	00 	. 
+	defb 000h		;205f	00 	. 
+	defb 000h		;2060	00 	. 
+	defb 000h		;2061	00 	. 
+	defb 000h		;2062	00 	. 
+	defb 000h		;2063	00 	. 
+	defb 000h		;2064	00 	. 
+	defb 000h		;2065	00 	. 
+	defb 000h		;2066	00 	. 
+	defb 000h		;2067	00 	. 
+	defb 000h		;2068	00 	. 
+	defb 000h		;2069	00 	. 
+	defb 000h		;206a	00 	. 
+	defb 000h		;206b	00 	. 
+	defb 000h		;206c	00 	. 
+	defb 000h		;206d	00 	. 
+	defb 000h		;206e	00 	. 
+	defb 000h		;206f	00 	. 
+	defb 000h		;2070	00 	. 
+	defb 000h		;2071	00 	. 
+	defb 000h		;2072	00 	. 
+	defb 000h		;2073	00 	. 
+	defb 000h		;2074	00 	. 
+	defb 000h		;2075	00 	. 
+	defb 000h		;2076	00 	. 
+	defb 000h		;2077	00 	. 
+	defb 000h		;2078	00 	. 
+	defb 000h		;2079	00 	. 
+	defb 000h		;207a	00 	. 
+	defb 000h		;207b	00 	. 
+	defb 000h		;207c	00 	. 
+	defb 000h		;207d	00 	. 
+	defb 000h		;207e	00 	. 
+	defb 000h		;207f	00 	. 
+	defb 000h		;2080	00 	. 
+	defb 000h		;2081	00 	. 
+	defb 000h		;2082	00 	. 
+	defb 000h		;2083	00 	. 
+	defb 000h		;2084	00 	. 
+	defb 000h		;2085	00 	. 
+	defb 000h		;2086	00 	. 
+	defb 000h		;2087	00 	. 
+	defb 000h		;2088	00 	. 
+	defb 000h		;2089	00 	. 
+	defb 000h		;208a	00 	. 
+	defb 000h		;208b	00 	. 
+	defb 000h		;208c	00 	. 
+	defb 000h		;208d	00 	. 
+	defb 000h		;208e	00 	. 
+	defb 000h		;208f	00 	. 
+	defb 000h		;2090	00 	. 
+	defb 000h		;2091	00 	. 
+	defb 000h		;2092	00 	. 
+	defb 000h		;2093	00 	. 
+	defb 000h		;2094	00 	. 
+	defb 000h		;2095	00 	. 
+	defb 000h		;2096	00 	. 
+	defb 000h		;2097	00 	. 
+	defb 000h		;2098	00 	. 
+	defb 000h		;2099	00 	. 
+	defb 000h		;209a	00 	. 
+	defb 000h		;209b	00 	. 
+	defb 000h		;209c	00 	. 
+	defb 000h		;209d	00 	. 
+	defb 000h		;209e	00 	. 
+	defb 000h		;209f	00 	. 
+	defb 000h		;20a0	00 	. 
+	defb 000h		;20a1	00 	. 
+	defb 000h		;20a2	00 	. 
+	defb 000h		;20a3	00 	. 
+	defb 000h		;20a4	00 	. 
+	defb 000h		;20a5	00 	. 
+	defb 000h		;20a6	00 	. 
+	defb 000h		;20a7	00 	. 
+	defb 000h		;20a8	00 	. 
+	defb 000h		;20a9	00 	. 
+	defb 000h		;20aa	00 	. 
+	defb 000h		;20ab	00 	. 
+	defb 000h		;20ac	00 	. 
+	defb 000h		;20ad	00 	. 
+	defb 000h		;20ae	00 	. 
+	defb 000h		;20af	00 	. 
+	defb 000h		;20b0	00 	. 
+	defb 000h		;20b1	00 	. 
+	defb 000h		;20b2	00 	. 
+	defb 000h		;20b3	00 	. 
+	defb 000h		;20b4	00 	. 
+	defb 000h		;20b5	00 	. 
+	defb 000h		;20b6	00 	. 
+	defb 000h		;20b7	00 	. 
+	defb 000h		;20b8	00 	. 
+	defb 000h		;20b9	00 	. 
+	defb 000h		;20ba	00 	. 
+	defb 000h		;20bb	00 	. 
+	defb 000h		;20bc	00 	. 
+	defb 000h		;20bd	00 	. 
+	defb 000h		;20be	00 	. 
+	defb 000h		;20bf	00 	. 
+	defb 000h		;20c0	00 	. 
+	defb 000h		;20c1	00 	. 
+	defb 000h		;20c2	00 	. 
+	defb 000h		;20c3	00 	. 
+	defb 000h		;20c4	00 	. 
+	defb 000h		;20c5	00 	. 
+	defb 000h		;20c6	00 	. 
+	defb 000h		;20c7	00 	. 
+	defb 000h		;20c8	00 	. 
+	defb 000h		;20c9	00 	. 
+	defb 000h		;20ca	00 	. 
+	defb 000h		;20cb	00 	. 
+	defb 000h		;20cc	00 	. 
+	defb 000h		;20cd	00 	. 
+	defb 000h		;20ce	00 	. 
+	defb 000h		;20cf	00 	. 
+	defb 000h		;20d0	00 	. 
+	defb 000h		;20d1	00 	. 
+	defb 000h		;20d2	00 	. 
+	defb 000h		;20d3	00 	. 
+	defb 000h		;20d4	00 	. 
+	defb 000h		;20d5	00 	. 
+	defb 000h		;20d6	00 	. 
+	defb 000h		;20d7	00 	. 
+	defb 000h		;20d8	00 	. 
+	defb 000h		;20d9	00 	. 
+	defb 000h		;20da	00 	. 
+	defb 000h		;20db	00 	. 
+	defb 000h		;20dc	00 	. 
+	defb 000h		;20dd	00 	. 
+	defb 000h		;20de	00 	. 
+	defb 000h		;20df	00 	. 
+	defb 000h		;20e0	00 	. 
+	defb 000h		;20e1	00 	. 
+	defb 000h		;20e2	00 	. 
+	defb 000h		;20e3	00 	. 
+	defb 000h		;20e4	00 	. 
+	defb 000h		;20e5	00 	. 
+	defb 000h		;20e6	00 	. 
+	defb 000h		;20e7	00 	. 
+	defb 000h		;20e8	00 	. 
+	defb 000h		;20e9	00 	. 
+	defb 000h		;20ea	00 	. 
+	defb 000h		;20eb	00 	. 
+	defb 000h		;20ec	00 	. 
+	defb 000h		;20ed	00 	. 
+	defb 000h		;20ee	00 	. 
+	defb 000h		;20ef	00 	. 
+	defb 000h		;20f0	00 	. 
+	defb 000h		;20f1	00 	. 
+	defb 000h		;20f2	00 	. 
+	defb 000h		;20f3	00 	. 
+	defb 000h		;20f4	00 	. 
+	defb 000h		;20f5	00 	. 
+	defb 000h		;20f6	00 	. 
+	defb 000h		;20f7	00 	. 
+	defb 000h		;20f8	00 	. 
+	defb 000h		;20f9	00 	. 
+	defb 000h		;20fa	00 	. 
+	defb 000h		;20fb	00 	. 
+	defb 000h		;20fc	00 	. 
+	defb 000h		;20fd	00 	. 
+	defb 000h		;20fe	00 	. 
+	defb 000h		;20ff	00 	. 
+	defb 000h		;2100	00 	. 
+	defb 000h		;2101	00 	. 
+	defb 000h		;2102	00 	. 
+	defb 000h		;2103	00 	. 
+	defb 000h		;2104	00 	. 
+	defb 000h		;2105	00 	. 
+	defb 000h		;2106	00 	. 
+	defb 000h		;2107	00 	. 
+	defb 000h		;2108	00 	. 
+	defb 000h		;2109	00 	. 
+	defb 000h		;210a	00 	. 
+	defb 000h		;210b	00 	. 
+	defb 000h		;210c	00 	. 
+	defb 000h		;210d	00 	. 
+	defb 000h		;210e	00 	. 
+	defb 000h		;210f	00 	. 
+	defb 000h		;2110	00 	. 
+	defb 000h		;2111	00 	. 
+	defb 000h		;2112	00 	. 
+	defb 000h		;2113	00 	. 
+	defb 000h		;2114	00 	. 
+	defb 000h		;2115	00 	. 
+	defb 000h		;2116	00 	. 
+	defb 000h		;2117	00 	. 
+	defb 000h		;2118	00 	. 
+	defb 000h		;2119	00 	. 
+	defb 000h		;211a	00 	. 
+	defb 000h		;211b	00 	. 
+	defb 000h		;211c	00 	. 
+	defb 000h		;211d	00 	. 
+	defb 000h		;211e	00 	. 
+	defb 000h		;211f	00 	. 
+	defb 000h		;2120	00 	. 
+	defb 000h		;2121	00 	. 
+	defb 000h		;2122	00 	. 
+	defb 000h		;2123	00 	. 
+	defb 000h		;2124	00 	. 
+	defb 000h		;2125	00 	. 
+	defb 000h		;2126	00 	. 
+	defb 000h		;2127	00 	. 
+	defb 000h		;2128	00 	. 
+	defb 000h		;2129	00 	. 
+	defb 000h		;212a	00 	. 
+	defb 000h		;212b	00 	. 
+	defb 000h		;212c	00 	. 
+	defb 000h		;212d	00 	. 
+	defb 000h		;212e	00 	. 
+	defb 000h		;212f	00 	. 
+	defb 000h		;2130	00 	. 
+	defb 000h		;2131	00 	. 
+	defb 000h		;2132	00 	. 
+	defb 000h		;2133	00 	. 
+	defb 000h		;2134	00 	. 
+	defb 000h		;2135	00 	. 
+	defb 000h		;2136	00 	. 
+	defb 000h		;2137	00 	. 
+	defb 000h		;2138	00 	. 
+	defb 000h		;2139	00 	. 
+	defb 000h		;213a	00 	. 
+	defb 000h		;213b	00 	. 
+	defb 000h		;213c	00 	. 
+	defb 000h		;213d	00 	. 
+	defb 000h		;213e	00 	. 
+	defb 000h		;213f	00 	. 
+	defb 000h		;2140	00 	. 
+	defb 000h		;2141	00 	. 
+	defb 000h		;2142	00 	. 
+	defb 000h		;2143	00 	. 
+	defb 000h		;2144	00 	. 
+	defb 000h		;2145	00 	. 
+	defb 000h		;2146	00 	. 
+	defb 000h		;2147	00 	. 
+	defb 000h		;2148	00 	. 
+	defb 000h		;2149	00 	. 
+	defb 000h		;214a	00 	. 
+	defb 000h		;214b	00 	. 
+	defb 000h		;214c	00 	. 
+	defb 000h		;214d	00 	. 
+	defb 000h		;214e	00 	. 
+	defb 000h		;214f	00 	. 
+	defb 000h		;2150	00 	. 
+	defb 000h		;2151	00 	. 
+	defb 000h		;2152	00 	. 
+	defb 000h		;2153	00 	. 
+	defb 000h		;2154	00 	. 
+	defb 000h		;2155	00 	. 
+	defb 000h		;2156	00 	. 
+	defb 000h		;2157	00 	. 
+	defb 000h		;2158	00 	. 
+	defb 000h		;2159	00 	. 
+	defb 000h		;215a	00 	. 
+	defb 000h		;215b	00 	. 
+	defb 000h		;215c	00 	. 
+	defb 000h		;215d	00 	. 
+	defb 000h		;215e	00 	. 
+	defb 000h		;215f	00 	. 
+	defb 000h		;2160	00 	. 
+	defb 000h		;2161	00 	. 
+	defb 000h		;2162	00 	. 
+	defb 000h		;2163	00 	. 
+	defb 000h		;2164	00 	. 
+	defb 000h		;2165	00 	. 
+	defb 000h		;2166	00 	. 
+	defb 000h		;2167	00 	. 
+	defb 000h		;2168	00 	. 
+	defb 000h		;2169	00 	. 
+	defb 000h		;216a	00 	. 
+	defb 000h		;216b	00 	. 
+	defb 000h		;216c	00 	. 
+	defb 000h		;216d	00 	. 
+	defb 000h		;216e	00 	. 
+	defb 000h		;216f	00 	. 
+	defb 000h		;2170	00 	. 
+	defb 000h		;2171	00 	. 
+	defb 000h		;2172	00 	. 
+	defb 000h		;2173	00 	. 
+	defb 000h		;2174	00 	. 
+	defb 000h		;2175	00 	. 
+	defb 000h		;2176	00 	. 
+	defb 000h		;2177	00 	. 
+	defb 000h		;2178	00 	. 
+	defb 000h		;2179	00 	. 
+	defb 000h		;217a	00 	. 
+	defb 000h		;217b	00 	. 
+	defb 000h		;217c	00 	. 
+	defb 000h		;217d	00 	. 
+	defb 000h		;217e	00 	. 
+	defb 000h		;217f	00 	. 
+	defb 000h		;2180	00 	. 
+	defb 000h		;2181	00 	. 
+	defb 000h		;2182	00 	. 
+	defb 000h		;2183	00 	. 
+	defb 000h		;2184	00 	. 
+	defb 000h		;2185	00 	. 
+	defb 000h		;2186	00 	. 
+	defb 000h		;2187	00 	. 
+	defb 000h		;2188	00 	. 
+	defb 000h		;2189	00 	. 
+	defb 000h		;218a	00 	. 
+	defb 000h		;218b	00 	. 
+	defb 000h		;218c	00 	. 
+	defb 000h		;218d	00 	. 
+	defb 000h		;218e	00 	. 
+	defb 000h		;218f	00 	. 
+	defb 000h		;2190	00 	. 
+	defb 000h		;2191	00 	. 
+	defb 000h		;2192	00 	. 
+	defb 000h		;2193	00 	. 
+	defb 000h		;2194	00 	. 
+	defb 000h		;2195	00 	. 
+	defb 000h		;2196	00 	. 
+	defb 000h		;2197	00 	. 
+	defb 000h		;2198	00 	. 
+	defb 000h		;2199	00 	. 
+	defb 000h		;219a	00 	. 
+	defb 000h		;219b	00 	. 
+	defb 000h		;219c	00 	. 
+	defb 000h		;219d	00 	. 
+	defb 000h		;219e	00 	. 
+	defb 000h		;219f	00 	. 
+	defb 000h		;21a0	00 	. 
+	defb 000h		;21a1	00 	. 
+	defb 000h		;21a2	00 	. 
+	defb 000h		;21a3	00 	. 
+	defb 000h		;21a4	00 	. 
+	defb 000h		;21a5	00 	. 
+	defb 000h		;21a6	00 	. 
+	defb 000h		;21a7	00 	. 
+	defb 000h		;21a8	00 	. 
+	defb 000h		;21a9	00 	. 
+	defb 000h		;21aa	00 	. 
+	defb 000h		;21ab	00 	. 
+	defb 000h		;21ac	00 	. 
+	defb 000h		;21ad	00 	. 
+	defb 000h		;21ae	00 	. 
+	defb 000h		;21af	00 	. 
+	defb 000h		;21b0	00 	. 
+	defb 000h		;21b1	00 	. 
+	defb 000h		;21b2	00 	. 
+	defb 000h		;21b3	00 	. 
+	defb 000h		;21b4	00 	. 
+	defb 000h		;21b5	00 	. 
+	defb 000h		;21b6	00 	. 
+	defb 000h		;21b7	00 	. 
+	defb 000h		;21b8	00 	. 
+	defb 000h		;21b9	00 	. 
+	defb 000h		;21ba	00 	. 
+	defb 000h		;21bb	00 	. 
+	defb 000h		;21bc	00 	. 
+	defb 000h		;21bd	00 	. 
+	defb 000h		;21be	00 	. 
+	defb 000h		;21bf	00 	. 
+	defb 000h		;21c0	00 	. 
+	defb 000h		;21c1	00 	. 
+	defb 000h		;21c2	00 	. 
+	defb 000h		;21c3	00 	. 
+	defb 000h		;21c4	00 	. 
+	defb 000h		;21c5	00 	. 
+	defb 000h		;21c6	00 	. 
+	defb 000h		;21c7	00 	. 
+	defb 000h		;21c8	00 	. 
+	defb 000h		;21c9	00 	. 
+	defb 000h		;21ca	00 	. 
+	defb 000h		;21cb	00 	. 
+	defb 000h		;21cc	00 	. 
+	defb 000h		;21cd	00 	. 
+	defb 000h		;21ce	00 	. 
+	defb 000h		;21cf	00 	. 
+	defb 000h		;21d0	00 	. 
+	defb 000h		;21d1	00 	. 
+	defb 000h		;21d2	00 	. 
+	defb 000h		;21d3	00 	. 
+	defb 000h		;21d4	00 	. 
+	defb 000h		;21d5	00 	. 
+	defb 000h		;21d6	00 	. 
+	defb 000h		;21d7	00 	. 
+	defb 000h		;21d8	00 	. 
+	defb 000h		;21d9	00 	. 
+	defb 000h		;21da	00 	. 
+	defb 000h		;21db	00 	. 
+	defb 000h		;21dc	00 	. 
+	defb 000h		;21dd	00 	. 
+	defb 000h		;21de	00 	. 
+	defb 000h		;21df	00 	. 
+	defb 000h		;21e0	00 	. 
+	defb 000h		;21e1	00 	. 
+	defb 000h		;21e2	00 	. 
+	defb 000h		;21e3	00 	. 
+	defb 000h		;21e4	00 	. 
+	defb 000h		;21e5	00 	. 
+	defb 000h		;21e6	00 	. 
+	defb 000h		;21e7	00 	. 
+	defb 000h		;21e8	00 	. 
+	defb 000h		;21e9	00 	. 
+	defb 000h		;21ea	00 	. 
+	defb 000h		;21eb	00 	. 
+	defb 000h		;21ec	00 	. 
+	defb 000h		;21ed	00 	. 
+	defb 000h		;21ee	00 	. 
+	defb 000h		;21ef	00 	. 
+	defb 000h		;21f0	00 	. 
+	defb 000h		;21f1	00 	. 
+	defb 000h		;21f2	00 	. 
+	defb 000h		;21f3	00 	. 
+	defb 000h		;21f4	00 	. 
+	defb 000h		;21f5	00 	. 
+	defb 000h		;21f6	00 	. 
+	defb 000h		;21f7	00 	. 
+	defb 000h		;21f8	00 	. 
+	defb 000h		;21f9	00 	. 
+	defb 000h		;21fa	00 	. 
+	defb 000h		;21fb	00 	. 
+	defb 000h		;21fc	00 	. 
+	defb 000h		;21fd	00 	. 
+	defb 000h		;21fe	00 	. 
+	defb 000h		;21ff	00 	. 
+	defb 000h		;2200	00 	. 
+	defb 000h		;2201	00 	. 
+	defb 000h		;2202	00 	. 
+	defb 000h		;2203	00 	. 
+	defb 000h		;2204	00 	. 
+	defb 000h		;2205	00 	. 
+	defb 000h		;2206	00 	. 
+	defb 000h		;2207	00 	. 
+	defb 000h		;2208	00 	. 
+	defb 000h		;2209	00 	. 
+	defb 000h		;220a	00 	. 
+	defb 000h		;220b	00 	. 
+	defb 000h		;220c	00 	. 
+	defb 000h		;220d	00 	. 
+	defb 000h		;220e	00 	. 
+	defb 000h		;220f	00 	. 
+	defb 000h		;2210	00 	. 
+	defb 000h		;2211	00 	. 
+	defb 000h		;2212	00 	. 
+	defb 000h		;2213	00 	. 
+	defb 000h		;2214	00 	. 
+	defb 000h		;2215	00 	. 
+	defb 000h		;2216	00 	. 
+	defb 000h		;2217	00 	. 
+	defb 000h		;2218	00 	. 
+	defb 000h		;2219	00 	. 
+	defb 000h		;221a	00 	. 
+	defb 000h		;221b	00 	. 
+	defb 000h		;221c	00 	. 
+	defb 000h		;221d	00 	. 
+	defb 000h		;221e	00 	. 
+	defb 000h		;221f	00 	. 
+	defb 000h		;2220	00 	. 
+	defb 000h		;2221	00 	. 
+	defb 000h		;2222	00 	. 
+	defb 000h		;2223	00 	. 
+	defb 000h		;2224	00 	. 
+	defb 000h		;2225	00 	. 
+	defb 000h		;2226	00 	. 
+	defb 000h		;2227	00 	. 
+	defb 000h		;2228	00 	. 
+	defb 000h		;2229	00 	. 
+	defb 000h		;222a	00 	. 
+	defb 000h		;222b	00 	. 
+	defb 000h		;222c	00 	. 
+	defb 000h		;222d	00 	. 
+	defb 000h		;222e	00 	. 
+	defb 000h		;222f	00 	. 
+	defb 000h		;2230	00 	. 
+	defb 000h		;2231	00 	. 
+	defb 000h		;2232	00 	. 
+	defb 000h		;2233	00 	. 
+	defb 000h		;2234	00 	. 
+	defb 000h		;2235	00 	. 
+	defb 000h		;2236	00 	. 
+	defb 000h		;2237	00 	. 
+	defb 000h		;2238	00 	. 
+	defb 000h		;2239	00 	. 
+	defb 000h		;223a	00 	. 
+	defb 000h		;223b	00 	. 
+	defb 000h		;223c	00 	. 
+	defb 000h		;223d	00 	. 
+	defb 000h		;223e	00 	. 
+	defb 000h		;223f	00 	. 
+	defb 000h		;2240	00 	. 
+	defb 000h		;2241	00 	. 
+	defb 000h		;2242	00 	. 
+	defb 000h		;2243	00 	. 
+	defb 000h		;2244	00 	. 
+	defb 000h		;2245	00 	. 
+	defb 000h		;2246	00 	. 
+	defb 000h		;2247	00 	. 
+	defb 000h		;2248	00 	. 
+	defb 000h		;2249	00 	. 
+	defb 000h		;224a	00 	. 
+	defb 000h		;224b	00 	. 
+	defb 000h		;224c	00 	. 
+	defb 000h		;224d	00 	. 
+	defb 000h		;224e	00 	. 
+	defb 000h		;224f	00 	. 
+	defb 000h		;2250	00 	. 
+	defb 000h		;2251	00 	. 
+	defb 000h		;2252	00 	. 
+	defb 000h		;2253	00 	. 
+	defb 000h		;2254	00 	. 
+	defb 000h		;2255	00 	. 
+	defb 000h		;2256	00 	. 
+	defb 000h		;2257	00 	. 
+	defb 000h		;2258	00 	. 
+	defb 000h		;2259	00 	. 
+	defb 000h		;225a	00 	. 
+	defb 000h		;225b	00 	. 
+	defb 000h		;225c	00 	. 
+	defb 000h		;225d	00 	. 
+	defb 000h		;225e	00 	. 
+	defb 000h		;225f	00 	. 
+	defb 000h		;2260	00 	. 
+	defb 000h		;2261	00 	. 
+	defb 000h		;2262	00 	. 
+	defb 000h		;2263	00 	. 
+	defb 000h		;2264	00 	. 
+	defb 000h		;2265	00 	. 
+	defb 000h		;2266	00 	. 
+	defb 000h		;2267	00 	. 
+	defb 000h		;2268	00 	. 
+	defb 000h		;2269	00 	. 
+	defb 000h		;226a	00 	. 
+	defb 000h		;226b	00 	. 
+	defb 000h		;226c	00 	. 
+	defb 000h		;226d	00 	. 
+	defb 000h		;226e	00 	. 
+	defb 000h		;226f	00 	. 
+	defb 000h		;2270	00 	. 
+	defb 000h		;2271	00 	. 
+	defb 000h		;2272	00 	. 
+	defb 000h		;2273	00 	. 
+	defb 000h		;2274	00 	. 
+	defb 000h		;2275	00 	. 
+	defb 000h		;2276	00 	. 
+	defb 000h		;2277	00 	. 
+	defb 000h		;2278	00 	. 
+	defb 000h		;2279	00 	. 
+	defb 000h		;227a	00 	. 
+	defb 000h		;227b	00 	. 
+	defb 000h		;227c	00 	. 
+	defb 000h		;227d	00 	. 
+	defb 000h		;227e	00 	. 
+	defb 000h		;227f	00 	. 
+	defb 000h		;2280	00 	. 
+	defb 000h		;2281	00 	. 
+	defb 000h		;2282	00 	. 
+	defb 000h		;2283	00 	. 
+	defb 000h		;2284	00 	. 
+	defb 000h		;2285	00 	. 
+	defb 000h		;2286	00 	. 
+	defb 000h		;2287	00 	. 
+	defb 000h		;2288	00 	. 
+	defb 000h		;2289	00 	. 
+	defb 000h		;228a	00 	. 
+	defb 000h		;228b	00 	. 
+	defb 000h		;228c	00 	. 
+	defb 000h		;228d	00 	. 
+	defb 000h		;228e	00 	. 
+	defb 000h		;228f	00 	. 
+	defb 000h		;2290	00 	. 
+	defb 000h		;2291	00 	. 
+	defb 000h		;2292	00 	. 
+	defb 000h		;2293	00 	. 
+	defb 000h		;2294	00 	. 
+	defb 000h		;2295	00 	. 
+	defb 000h		;2296	00 	. 
+	defb 000h		;2297	00 	. 
+	defb 000h		;2298	00 	. 
+	defb 000h		;2299	00 	. 
+	defb 000h		;229a	00 	. 
+	defb 000h		;229b	00 	. 
+	defb 000h		;229c	00 	. 
+	defb 000h		;229d	00 	. 
+	defb 000h		;229e	00 	. 
+	defb 000h		;229f	00 	. 
+	defb 000h		;22a0	00 	. 
+	defb 000h		;22a1	00 	. 
+	defb 000h		;22a2	00 	. 
+	defb 000h		;22a3	00 	. 
+	defb 000h		;22a4	00 	. 
+	defb 000h		;22a5	00 	. 
+	defb 000h		;22a6	00 	. 
+	defb 000h		;22a7	00 	. 
+	defb 000h		;22a8	00 	. 
+	defb 000h		;22a9	00 	. 
+	defb 000h		;22aa	00 	. 
+	defb 000h		;22ab	00 	. 
+	defb 000h		;22ac	00 	. 
+	defb 000h		;22ad	00 	. 
+	defb 000h		;22ae	00 	. 
+	defb 000h		;22af	00 	. 
+	defb 000h		;22b0	00 	. 
+	defb 000h		;22b1	00 	. 
+	defb 000h		;22b2	00 	. 
+	defb 000h		;22b3	00 	. 
+	defb 000h		;22b4	00 	. 
+	defb 000h		;22b5	00 	. 
+	defb 000h		;22b6	00 	. 
+	defb 000h		;22b7	00 	. 
+	defb 000h		;22b8	00 	. 
+	defb 000h		;22b9	00 	. 
+	defb 000h		;22ba	00 	. 
+	defb 000h		;22bb	00 	. 
+	defb 000h		;22bc	00 	. 
+	defb 000h		;22bd	00 	. 
+	defb 000h		;22be	00 	. 
+	defb 000h		;22bf	00 	. 
+	defb 000h		;22c0	00 	. 
+	defb 000h		;22c1	00 	. 
+	defb 000h		;22c2	00 	. 
+	defb 000h		;22c3	00 	. 
+	defb 000h		;22c4	00 	. 
+	defb 000h		;22c5	00 	. 
+	defb 000h		;22c6	00 	. 
+	defb 000h		;22c7	00 	. 
+	defb 000h		;22c8	00 	. 
+	defb 000h		;22c9	00 	. 
+	defb 000h		;22ca	00 	. 
+	defb 000h		;22cb	00 	. 
+	defb 000h		;22cc	00 	. 
+	defb 000h		;22cd	00 	. 
+	defb 000h		;22ce	00 	. 
+	defb 000h		;22cf	00 	. 
+	defb 000h		;22d0	00 	. 
+	defb 000h		;22d1	00 	. 
+	defb 000h		;22d2	00 	. 
+	defb 000h		;22d3	00 	. 
+	defb 000h		;22d4	00 	. 
+	defb 000h		;22d5	00 	. 
+	defb 000h		;22d6	00 	. 
+	defb 000h		;22d7	00 	. 
+	defb 000h		;22d8	00 	. 
+	defb 000h		;22d9	00 	. 
+	defb 000h		;22da	00 	. 
+	defb 000h		;22db	00 	. 
+	defb 000h		;22dc	00 	. 
+	defb 000h		;22dd	00 	. 
+	defb 000h		;22de	00 	. 
+	defb 000h		;22df	00 	. 
+	defb 000h		;22e0	00 	. 
+	defb 000h		;22e1	00 	. 
+	defb 000h		;22e2	00 	. 
+	defb 000h		;22e3	00 	. 
+	defb 000h		;22e4	00 	. 
+	defb 000h		;22e5	00 	. 
+	defb 000h		;22e6	00 	. 
+	defb 000h		;22e7	00 	. 
+	defb 000h		;22e8	00 	. 
+	defb 000h		;22e9	00 	. 
+	defb 000h		;22ea	00 	. 
+	defb 000h		;22eb	00 	. 
+	defb 000h		;22ec	00 	. 
+	defb 000h		;22ed	00 	. 
+	defb 000h		;22ee	00 	. 
+	defb 000h		;22ef	00 	. 
+	defb 000h		;22f0	00 	. 
+	defb 000h		;22f1	00 	. 
+	defb 000h		;22f2	00 	. 
+	defb 000h		;22f3	00 	. 
+	defb 000h		;22f4	00 	. 
+	defb 000h		;22f5	00 	. 
+	defb 000h		;22f6	00 	. 
+	defb 000h		;22f7	00 	. 
+	defb 000h		;22f8	00 	. 
+	defb 000h		;22f9	00 	. 
+	defb 000h		;22fa	00 	. 
+	defb 000h		;22fb	00 	. 
+	defb 000h		;22fc	00 	. 
+	defb 000h		;22fd	00 	. 
+	defb 000h		;22fe	00 	. 
+	defb 000h		;22ff	00 	. 
+	defb 000h		;2300	00 	. 
+	defb 000h		;2301	00 	. 
+	defb 000h		;2302	00 	. 
+	defb 000h		;2303	00 	. 
+	defb 000h		;2304	00 	. 
+	defb 000h		;2305	00 	. 
+	defb 000h		;2306	00 	. 
+	defb 000h		;2307	00 	. 
+	defb 000h		;2308	00 	. 
+	defb 000h		;2309	00 	. 
+	defb 000h		;230a	00 	. 
+	defb 000h		;230b	00 	. 
+	defb 000h		;230c	00 	. 
+	defb 000h		;230d	00 	. 
+	defb 000h		;230e	00 	. 
+	defb 000h		;230f	00 	. 
+	defb 000h		;2310	00 	. 
+	defb 000h		;2311	00 	. 
+	defb 000h		;2312	00 	. 
+	defb 000h		;2313	00 	. 
+	defb 000h		;2314	00 	. 
+	defb 000h		;2315	00 	. 
+	defb 000h		;2316	00 	. 
+	defb 000h		;2317	00 	. 
+	defb 000h		;2318	00 	. 
+	defb 000h		;2319	00 	. 
+	defb 000h		;231a	00 	. 
+	defb 000h		;231b	00 	. 
+	defb 000h		;231c	00 	. 
+	defb 000h		;231d	00 	. 
+	defb 000h		;231e	00 	. 
+	defb 000h		;231f	00 	. 
+	defb 000h		;2320	00 	. 
+	defb 000h		;2321	00 	. 
+	defb 000h		;2322	00 	. 
+	defb 000h		;2323	00 	. 
+	defb 000h		;2324	00 	. 
+	defb 000h		;2325	00 	. 
+	defb 000h		;2326	00 	. 
+	defb 000h		;2327	00 	. 
+	defb 000h		;2328	00 	. 
+	defb 000h		;2329	00 	. 
+	defb 000h		;232a	00 	. 
+	defb 000h		;232b	00 	. 
+	defb 000h		;232c	00 	. 
+	defb 000h		;232d	00 	. 
+	defb 000h		;232e	00 	. 
+	defb 000h		;232f	00 	. 
+	defb 000h		;2330	00 	. 
+	defb 000h		;2331	00 	. 
+	defb 000h		;2332	00 	. 
+	defb 000h		;2333	00 	. 
+	defb 000h		;2334	00 	. 
+	defb 000h		;2335	00 	. 
+	defb 000h		;2336	00 	. 
+	defb 000h		;2337	00 	. 
+	defb 000h		;2338	00 	. 
+	defb 000h		;2339	00 	. 
+	defb 000h		;233a	00 	. 
+	defb 000h		;233b	00 	. 
+	defb 000h		;233c	00 	. 
+	defb 000h		;233d	00 	. 
+	defb 000h		;233e	00 	. 
+	defb 000h		;233f	00 	. 
+	defb 000h		;2340	00 	. 
+	defb 000h		;2341	00 	. 
+	defb 000h		;2342	00 	. 
+	defb 000h		;2343	00 	. 
+	defb 000h		;2344	00 	. 
+	defb 000h		;2345	00 	. 
+	defb 000h		;2346	00 	. 
+	defb 000h		;2347	00 	. 
+	defb 000h		;2348	00 	. 
+	defb 000h		;2349	00 	. 
+	defb 000h		;234a	00 	. 
+	defb 000h		;234b	00 	. 
+	defb 000h		;234c	00 	. 
+	defb 000h		;234d	00 	. 
+	defb 000h		;234e	00 	. 
+	defb 000h		;234f	00 	. 
+	defb 000h		;2350	00 	. 
+	defb 000h		;2351	00 	. 
+	defb 000h		;2352	00 	. 
+	defb 000h		;2353	00 	. 
+	defb 000h		;2354	00 	. 
 START_PASCAL:
 	call GetRAMEnd		;2355	cd 7e 06 	. ~ . 
 l2358h:
@@ -8310,7 +8284,6 @@ banner:
 	defb 049h		;2cc5	49 	I 
 	defb 04fh		;2cc6	4f 	O 
 	defb 04eh		;2cc7	4e 	N 
-l2cc8h:
 	defb 020h		;2cc8	20 	  
 	defb 04bh		;2cc9	4b 	K 
 	defb 043h		;2cca	43 	C 
@@ -8318,7 +8291,6 @@ l2cc8h:
 	defb 035h		;2ccc	35 	5 
 	defb 02fh		;2ccd	2f 	/ 
 	defb 034h		;2cce	34 	4 
-l2ccfh:
 	defb 029h		;2ccf	29 	) 
 	defb 00dh		;2cd0	0d 	. 
 	nop			;2cd1	00 	. 
@@ -8332,7 +8304,6 @@ CoVarInitData_start:
 	defb 02bh		;2cd5	2b 	+ 
 	defb 01bh		;2cd6	1b 	. 
 	defb 035h		;2cd7	35 	5 
-l2cd8h:
 	defb 01bh		;2cd8	1b 	. 
 	defb 0f3h		;2cd9	f3 	. 
 	defb 052h		;2cda	52 	R 
@@ -8340,7 +8311,6 @@ l2cd8h:
 	defb 000h		;2cdc	00 	. 
 	defb 006h		;2cdd	06 	. 
 	defb 0efh		;2cde	ef 	. 
-l2cdfh:
 	defb 000h		;2cdf	00 	. 
 	nop			;2ce0	00 	. 
 CoErNumTooBigA:
@@ -8349,7 +8319,6 @@ CoErNumTooBig:
 	ld e,001h		;2ce4	1e 01 	. . 
 l2ce6h:
 	call CompileErr		;2ce6	cd 3a 2f 	. : / 
-l2ce9h:
 	jp l30a8h		;2ce9	c3 a8 30 	. . 0 
 l2cech:
 	set 1,(ix+002h)		;2cec	dd cb 02 ce 	. . . . 
@@ -8357,7 +8326,6 @@ ChkExponent:
 	ld c,d			;2cf0	4a 	J 
 	cp 045h		;2cf1	fe 45 	. E 
 	jr z,GetExp		;2cf3	28 69 	( i 
-l2cf5h:
 	ld (lastChrRead__),a		;2cf5	32 69 2b 	2 i + 
 	xor a			;2cf8	af 	. 
 	cp e			;2cf9	bb 	. 
@@ -9010,7 +8978,7 @@ LxIdAllChrsRead:
 	ld a,(curIdentifier)		;314f	3a 50 2b 	: P + 
 	cp 061h		;3152	fe 61 	. a 
 	jr nc,LxIdSetLxCode		;3154	30 08 	0 . 
-	ld hl,ResWordsEntry2		;3156	21 62 32 	! b 2 
+	ld hl,RL_PROCEDURE		;3156	21 62 32 	! b 2 
 	push de			;3159	d5 	. 
 	call SearchInSymTab__		;315a	cd 69 33 	. i 3 
 	pop de			;315d	d1 	. 
@@ -9037,12 +9005,8 @@ compOptTab_start:
 	defb 010h		;316e	10 	. 
 	defb 041h		;316f	41 	A 
 	defb 020h		;3170	20 	  
-
-; BLOCK 'resWords' (start 0x3171 end 0x326f)
-resWords_start:
-	defb 000h		;3171	00 	. 
-l3172h:
-	defb 000h		;3172	00 	. 
+RL_PACKED:
+	defw 00000h		;3171	00 00 	. . 
 	defb 050h		;3173	50 	P 
 	defb 041h		;3174	41 	A 
 	defb 043h		;3175	43 	C 
@@ -9050,14 +9014,14 @@ l3172h:
 	defb 045h		;3177	45 	E 
 	defb 0c4h		;3178	c4 	. 
 	defb 023h		;3179	23 	# 
-	defb 071h		;317a	71 	q 
-	defb 031h		;317b	31 	1 
+RL_NIL:
+	defw RL_PACKED		;317a	71 31 	q 1 
 	defb 04eh		;317c	4e 	N 
 	defb 049h		;317d	49 	I 
 	defb 0cch		;317e	cc 	. 
 	defb 022h		;317f	22 	" 
-	defb 07ah		;3180	7a 	z 
-	defb 031h		;3181	31 	1 
+RL_FORWARD:
+	defw RL_NIL		;3180	7a 31 	z 1 
 	defb 046h		;3182	46 	F 
 	defb 04fh		;3183	4f 	O 
 	defb 052h		;3184	52 	R 
@@ -9066,8 +9030,8 @@ l3172h:
 	defb 052h		;3187	52 	R 
 	defb 0c4h		;3188	c4 	. 
 	defb 01dh		;3189	1d 	. 
-	defb 080h		;318a	80 	. 
-	defb 031h		;318b	31 	1 
+RL_PROGRAM:
+	defw RL_FORWARD		;318a	80 31 	. 1 
 	defb 050h		;318c	50 	P 
 	defb 052h		;318d	52 	R 
 	defb 04fh		;318e	4f 	O 
@@ -9076,177 +9040,176 @@ l3172h:
 	defb 041h		;3191	41 	A 
 	defb 0cdh		;3192	cd 	. 
 	defb 001h		;3193	01 	. 
-	defb 08ah		;3194	8a 	. 
-	defb 031h		;3195	31 	1 
+RL_IN:
+	defw RL_PROGRAM		;3194	8a 31 	. 1 
 	defb 049h		;3196	49 	I 
 	defb 0ceh		;3197	ce 	. 
 	defb 020h		;3198	20 	  
-	defb 094h		;3199	94 	. 
-	defb 031h		;319a	31 	1 
+RL_OR:
+	defw RL_IN		;3199	94 31 	. 1 
 	defb 04fh		;319b	4f 	O 
 	defb 0d2h		;319c	d2 	. 
 	defb 007h		;319d	07 	. 
-	defb 099h		;319e	99 	. 
-	defb 031h		;319f	31 	1 
+RL_ON:
+	defw RL_OR		;319e	99 31 	. 1 
 	defb 04fh		;31a0	4f 	O 
 	defb 0c6h		;31a1	c6 	. 
 	defb 00bh		;31a2	0b 	. 
-	defb 09eh		;31a3	9e 	. 
-	defb 031h		;31a4	31 	1 
+RL_TO:
+	defw RL_ON		;31a3	9e 31 	. 1 
 	defb 054h		;31a5	54 	T 
 	defb 0cfh		;31a6	cf 	. 
 	defb 00ch		;31a7	0c 	. 
-l31a8h:
-	defb 0a3h		;31a8	a3 	. 
-	defb 031h		;31a9	31 	1 
+RL_DO:
+	defw RL_TO		;31a8	a3 31 	. 1 
 	defb 044h		;31aa	44 	D 
 	defb 0cfh		;31ab	cf 	. 
 	defb 011h		;31ac	11 	. 
-	defb 0a8h		;31ad	a8 	. 
-	defb 031h		;31ae	31 	1 
+RL_IF:
+	defw RL_DO		;31ad	a8 31 	. 1 
 	defb 049h		;31af	49 	I 
 	defb 0c6h		;31b0	c6 	. 
 	defb 017h		;31b1	17 	. 
-	defb 0adh		;31b2	ad 	. 
-	defb 031h		;31b3	31 	1 
+RL_SET:
+	defw RL_IF		;31b2	ad 31 	. 1 
 	defb 053h		;31b4	53 	S 
 	defb 045h		;31b5	45 	E 
 	defb 0d4h		;31b6	d4 	. 
 	defb 01bh		;31b7	1b 	. 
-	defb 0b2h		;31b8	b2 	. 
-	defb 031h		;31b9	31 	1 
+RL_NOT:
+	defw RL_SET		;31b8	b2 31 	. 1 
 	defb 04eh		;31ba	4e 	N 
 	defb 04fh		;31bb	4f 	O 
 	defb 0d4h		;31bc	d4 	. 
 	defb 006h		;31bd	06 	. 
-	defb 0b8h		;31be	b8 	. 
-	defb 031h		;31bf	31 	1 
+RL_MOD:
+	defw RL_NOT		;31be	b8 31 	. 1 
 	defb 04dh		;31c0	4d 	M 
 	defb 04fh		;31c1	4f 	O 
 	defb 0c4h		;31c2	c4 	. 
 	defb 009h		;31c3	09 	. 
-	defb 0beh		;31c4	be 	. 
-	defb 031h		;31c5	31 	1 
+RL_DIV:
+	defw RL_MOD		;31c4	be 31 	. 1 
 	defb 044h		;31c6	44 	D 
 	defb 049h		;31c7	49 	I 
 	defb 0d6h		;31c8	d6 	. 
 	defb 002h		;31c9	02 	. 
-	defb 0c4h		;31ca	c4 	. 
-	defb 031h		;31cb	31 	1 
+RL_VAR:
+	defw RL_DIV		;31ca	c4 31 	. 1 
 	defb 056h		;31cc	56 	V 
 	defb 041h		;31cd	41 	A 
 	defb 0d2h		;31ce	d2 	. 
 	defb 00ah		;31cf	0a 	. 
-	defb 0cah		;31d0	ca 	. 
-	defb 031h		;31d1	31 	1 
+RL_AND:
+	defw RL_VAR		;31d0	ca 31 	. 1 
 	defb 041h		;31d2	41 	A 
 	defb 04eh		;31d3	4e 	N 
 	defb 0c4h		;31d4	c4 	. 
 	defb 008h		;31d5	08 	. 
-	defb 0d0h		;31d6	d0 	. 
-	defb 031h		;31d7	31 	1 
+RL_FOR:
+	defw RL_AND		;31d6	d0 31 	. 1 
 	defb 046h		;31d8	46 	F 
 	defb 04fh		;31d9	4f 	O 
 	defb 0d2h		;31da	d2 	. 
 	defb 016h		;31db	16 	. 
-	defb 0d6h		;31dc	d6 	. 
-	defb 031h		;31dd	31 	1 
+RL_END:
+	defw RL_FOR		;31dc	d6 31 	. 1 
 	defb 045h		;31de	45 	E 
 	defb 04eh		;31df	4e 	N 
 	defb 0c4h		;31e0	c4 	. 
 	defb 010h		;31e1	10 	. 
-	defb 0dch		;31e2	dc 	. 
-	defb 031h		;31e3	31 	1 
+RL_GOTO:
+	defw RL_END		;31e2	dc 31 	. 1 
 	defb 047h		;31e4	47 	G 
 	defb 04fh		;31e5	4f 	O 
 	defb 054h		;31e6	54 	T 
 	defb 0cfh		;31e7	cf 	. 
 	defb 01ah		;31e8	1a 	. 
-	defb 0e2h		;31e9	e2 	. 
-	defb 031h		;31ea	31 	1 
+RL_WITH:
+	defw RL_GOTO		;31e9	e2 31 	. 1 
 	defb 057h		;31eb	57 	W 
 	defb 049h		;31ec	49 	I 
 	defb 054h		;31ed	54 	T 
 	defb 0c8h		;31ee	c8 	. 
 	defb 019h		;31ef	19 	. 
-	defb 0e9h		;31f0	e9 	. 
-	defb 031h		;31f1	31 	1 
+RL_TYPE:
+	defw RL_WITH		;31f0	e9 31 	. 1 
 	defb 054h		;31f2	54 	T 
 	defb 059h		;31f3	59 	Y 
 	defb 050h		;31f4	50 	P 
 	defb 0c5h		;31f5	c5 	. 
 	defb 01fh		;31f6	1f 	. 
-	defb 0f0h		;31f7	f0 	. 
-	defb 031h		;31f8	31 	1 
+RL_CASE:
+	defw RL_TYPE		;31f7	f0 31 	. 1 
 	defb 043h		;31f9	43 	C 
 	defb 041h		;31fa	41 	A 
 	defb 053h		;31fb	53 	S 
 	defb 0c5h		;31fc	c5 	. 
 	defb 014h		;31fd	14 	. 
-	defb 0f7h		;31fe	f7 	. 
-	defb 031h		;31ff	31 	1 
+RL_ELSE:
+	defw RL_CASE		;31fe	f7 31 	. 1 
 	defb 045h		;3200	45 	E 
 	defb 04ch		;3201	4c 	L 
 	defb 053h		;3202	53 	S 
 	defb 0c5h		;3203	c5 	. 
 	defb 012h		;3204	12 	. 
-	defb 0feh		;3205	fe 	. 
-	defb 031h		;3206	31 	1 
+RL_THEN:
+	defw RL_ELSE		;3205	fe 31 	. 1 
 	defb 054h		;3207	54 	T 
 	defb 048h		;3208	48 	H 
 	defb 045h		;3209	45 	E 
 	defb 0ceh		;320a	ce 	. 
 	defb 00eh		;320b	0e 	. 
-	defb 005h		;320c	05 	. 
-	defb 032h		;320d	32 	2 
+RL_LABEL:
+	defw RL_THEN		;320c	05 32 	. 2 
 	defb 04ch		;320e	4c 	L 
 	defb 041h		;320f	41 	A 
 	defb 042h		;3210	42 	B 
 	defb 045h		;3211	45 	E 
 	defb 0cch		;3212	cc 	. 
 	defb 021h		;3213	21 	! 
-	defb 00ch		;3214	0c 	. 
-	defb 032h		;3215	32 	2 
+RL_CONST:
+	defw RL_LABEL		;3214	0c 32 	. 2 
 	defb 043h		;3216	43 	C 
 	defb 04fh		;3217	4f 	O 
 	defb 04eh		;3218	4e 	N 
 	defb 053h		;3219	53 	S 
 	defb 0d4h		;321a	d4 	. 
 	defb 003h		;321b	03 	. 
-	defb 014h		;321c	14 	. 
-	defb 032h		;321d	32 	2 
+RL_ARRAY:
+	defw RL_CONST		;321c	14 32 	. 2 
 	defb 041h		;321e	41 	A 
 	defb 052h		;321f	52 	R 
 	defb 052h		;3220	52 	R 
 	defb 041h		;3221	41 	A 
 	defb 0d9h		;3222	d9 	. 
 	defb 01ch		;3223	1c 	. 
-	defb 01ch		;3224	1c 	. 
-	defb 032h		;3225	32 	2 
+RL_UNTIL:
+	defw RL_ARRAY		;3224	1c 32 	. 2 
 	defb 055h		;3226	55 	U 
 	defb 04eh		;3227	4e 	N 
 	defb 054h		;3228	54 	T 
 	defb 049h		;3229	49 	I 
 	defb 0cch		;322a	cc 	. 
 	defb 00fh		;322b	0f 	. 
-	defb 024h		;322c	24 	$ 
-	defb 032h		;322d	32 	2 
+RL_WHILE:
+	defw RL_UNTIL		;322c	24 32 	$ 2 
 	defb 057h		;322e	57 	W 
 	defb 048h		;322f	48 	H 
 	defb 049h		;3230	49 	I 
 	defb 04ch		;3231	4c 	L 
 	defb 0c5h		;3232	c5 	. 
 	defb 015h		;3233	15 	. 
-	defb 02ch		;3234	2c 	, 
-	defb 032h		;3235	32 	2 
+RL_BEGIN:
+	defw RL_WHILE		;3234	2c 32 	, 2 
 	defb 042h		;3236	42 	B 
 	defb 045h		;3237	45 	E 
 	defb 047h		;3238	47 	G 
 	defb 049h		;3239	49 	I 
 	defb 0ceh		;323a	ce 	. 
 	defb 018h		;323b	18 	. 
-	defb 034h		;323c	34 	4 
-	defb 032h		;323d	32 	2 
+RL_RECORD:
+	defw RL_BEGIN		;323c	34 32 	4 2 
 	defb 052h		;323e	52 	R 
 	defb 045h		;323f	45 	E 
 	defb 043h		;3240	43 	C 
@@ -9254,8 +9217,8 @@ l31a8h:
 	defb 052h		;3242	52 	R 
 	defb 0c4h		;3243	c4 	. 
 	defb 01eh		;3244	1e 	. 
-	defb 03ch		;3245	3c 	< 
-	defb 032h		;3246	32 	2 
+RL_DOWNTO:
+	defw RL_RECORD		;3245	3c 32 	< 2 
 	defb 044h		;3247	44 	D 
 	defb 04fh		;3248	4f 	O 
 	defb 057h		;3249	57 	W 
@@ -9263,8 +9226,8 @@ l31a8h:
 	defb 054h		;324b	54 	T 
 	defb 0cfh		;324c	cf 	. 
 	defb 00dh		;324d	0d 	. 
-	defb 045h		;324e	45 	E 
-	defb 032h		;324f	32 	2 
+RL_REPEAT:
+	defw RL_DOWNTO		;324e	45 32 	E 2 
 	defb 052h		;3250	52 	R 
 	defb 045h		;3251	45 	E 
 	defb 050h		;3252	50 	P 
@@ -9272,8 +9235,8 @@ l31a8h:
 	defb 041h		;3254	41 	A 
 	defb 0d4h		;3255	d4 	. 
 	defb 013h		;3256	13 	. 
-	defb 04eh		;3257	4e 	N 
-	defb 032h		;3258	32 	2 
+RL_FUNCTION:
+	defw RL_REPEAT		;3257	4e 32 	N 2 
 	defb 046h		;3259	46 	F 
 	defb 055h		;325a	55 	U 
 	defb 04eh		;325b	4e 	N 
@@ -9283,9 +9246,9 @@ l31a8h:
 	defb 04fh		;325f	4f 	O 
 	defb 0ceh		;3260	ce 	. 
 	defb 005h		;3261	05 	. 
+RL_PROCEDURE:
 ResWordsEntry2:
-	defb 057h		;3262	57 	W 
-	defb 032h		;3263	32 	2 
+	defw RL_FUNCTION		;3262	57 32 	W 2 
 	defb 050h		;3264	50 	P 
 	defb 052h		;3265	52 	R 
 	defb 04fh		;3266	4f 	O 
@@ -9297,8 +9260,7 @@ ResWordsEntry2:
 	defb 0c5h		;326c	c5 	. 
 	defb 004h		;326d	04 	. 
 ResWordsEntry:
-	defb 062h		;326e	62 	b 
-	defb 032h		;326f	32 	2 
+	defw RL_PROCEDURE		;326e	62 32 	b 2 
 TEadr:
 
 ; BLOCK 'TEadr' (start 0x3270 end 0x327c)
@@ -10985,7 +10947,6 @@ l3c10h:
 l3c18h:
 	ld hl,l3c4bh		;3c18	21 4b 3c 	! K < 
 	call WCode		;3c1b	cd cc 33 	. . 3 
-sub_3c1eh:
 	dec hl			;3c1e	2b 	+ 
 	push hl			;3c1f	e5 	. 
 	ld h,(ix+001h)		;3c20	dd 66 01 	. f . 
@@ -11300,7 +11261,6 @@ l3e48h:
 	call PrDez		;3e4b	cd 0a 08 	. . . 
 l3e4eh:
 	inc b			;3e4e	04 	. 
-l3e4fh:
 	pop de			;3e4f	d1 	. 
 	call PrHex		;3e50	cd aa 08 	. . . 
 l3e53h:
@@ -11763,7 +11723,6 @@ CSq_StorNotDEAndM:
 	call MaskBytes__		;4148	cd 26 0c 	. & . 
 l414bh:
 	inc b			;414b	04 	. 
-l414ch:
 	call NegHL		;414c	cd 11 0a 	. . . 
 	push hl			;414f	e5 	. 
 l4150h:
@@ -12100,7 +12059,6 @@ sub_4336h:
 	dec c			;4346	0d 	. 
 	pop de			;4347	d1 	. 
 	ld (ix+001h),d		;4348	dd 72 01 	. r . 
-l434bh:
 	ret			;434b	c9 	. 
 	call sub_4336h		;434c	cd 36 43 	. 6 C 
 	jr z,l4358h		;434f	28 07 	( . 
@@ -12392,9 +12350,7 @@ l4518h:
 	call sub_4af1h		;454b	cd f1 4a 	. . J 
 	call ChkCloBra_GetLex		;454e	cd 05 33 	. . 3 
 	pop hl			;4551	e1 	. 
-l4552h:
 	ld c,(hl)			;4552	4e 	N 
-l4553h:
 	inc hl			;4553	23 	# 
 	ld b,(hl)			;4554	46 	F 
 	inc hl			;4555	23 	# 
@@ -12978,7 +12934,6 @@ l490eh:
 	or a			;4916	b7 	. 
 	sbc hl,bc		;4917	ed 42 	. B 
 	add hl,bc			;4919	09 	. 
-l491ah:
 	push bc			;491a	c5 	. 
 	jr z,l492dh		;491b	28 10 	( . 
 	ld e,(hl)			;491d	5e 	^ 
@@ -13010,14 +12965,12 @@ l492dh:
 	cp 004h		;493e	fe 04 	. . 
 	pop bc			;4940	c1 	. 
 	jp z,l49d8h		;4941	ca d8 49 	. . I 
-l4944h:
 	pop af			;4944	f1 	. 
 	push bc			;4945	c5 	. 
 	push hl			;4946	e5 	. 
 	ld de,0ba16h		;4947	11 16 ba 	. . . 
 	call ChkLexem_GetLex		;494a	cd 08 33 	. . 3 
 	or a			;494d	b7 	. 
-l494eh:
 	ld e,029h		;494e	1e 29 	. ) 
 	call nz,CompileErr		;4950	c4 3a 2f 	. : / 
 	call GetIdentInfoInABC		;4953	cd 50 33 	. P 3 
@@ -13490,7 +13443,6 @@ l4c36h:
 	ld de,(TopOfHeapAddr__)		;4c3f	ed 5b 6e 2b 	. [ n + 
 	inc de			;4c43	13 	. 
 	inc de			;4c44	13 	. 
-l4c45h:
 	ld (hl),d			;4c45	72 	r 
 	dec hl			;4c46	2b 	+ 
 	ld (hl),e			;4c47	73 	s 
@@ -13840,7 +13792,6 @@ l4e31h:
 	exx			;4e42	d9 	. 
 	inc hl			;4e43	23 	# 
 	exx			;4e44	d9 	. 
-l4e45h:
 	add hl,de			;4e45	19 	. 
 	call sub_3407h		;4e46	cd 07 34 	. . 4 
 	jr l4e52h		;4e49	18 07 	. . 
@@ -13852,7 +13803,6 @@ l4e4bh:
 	call sub_418eh		;4e4f	cd 8e 41 	. . A 
 l4e52h:
 	call JCodeNextByte		;4e52	cd d1 06 	. . . 
-l4e55h:
 	defb 0e5h		;4e55	e5 	. 
 	pop hl			;4e56	e1 	. 
 	call GetLexem		;4e57	cd c3 2f 	. . / 
@@ -14003,17 +13953,14 @@ l4f24h:
 	call sub_33fbh		;4f3a	cd fb 33 	. . 3 
 	ld hl,l5254h		;4f3d	21 54 52 	! T R 
 	call WCode		;4f40	cd cc 33 	. . 3 
-l4f43h:
 	pop hl			;4f43	e1 	. 
 l4f44h:
 	ld bc,00006h		;4f44	01 06 00 	. . . 
-l4f47h:
 	add hl,bc			;4f47	09 	. 
 	ld e,(hl)			;4f48	5e 	^ 
 	inc hl			;4f49	23 	# 
 	ld d,(hl)			;4f4a	56 	V 
 	ld bc,0fff9h		;4f4b	01 f9 ff 	. . . 
-l4f4eh:
 	add hl,bc			;4f4e	09 	. 
 	push hl			;4f4f	e5 	. 
 	ld hl,l5246h		;4f50	21 46 52 	! F R 
