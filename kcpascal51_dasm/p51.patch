@@ -1,0 +1,793 @@
+--- p51.asm	2025-01-19 20:35:50.298928325 +0100
++++ pascal51.asm	2025-01-19 20:43:10.672959679 +0100
+@@ -37,38 +37,16 @@
+ l0200h:
+ 	defw 00000h
+ PasPrgMenuName:
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-l0208h:
+-	defb 000h
+-	defb 000h
++	defb 000h,000h,000h,000h,000h,000h,000h,000h
+ 	defb 000h
+ 	jp PasPrgStart
+ MenuPRec:
+ 	defw 07f7fh
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 052h
+-	defb 045h
+-	defb 043h
+-	defb 000h
++	defb 'RASREC',000h
+ 	jp Recall
+ MenuPEnt:
+ 	defw 07f7fh
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 045h
+-	defb 04eh
+-	defb 054h
+-	defb 052h
+-	defb 059h
+-	defb 000h
++	defb 'PASENTRY',000h
+ 	jp Entry
+ DoNopRET:
+ 	nop	
+@@ -719,18 +697,9 @@
+ JCompileToRuntimeEnd:
+ 	jp SetBinStartToRuntimeEnd
+ fileName:
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defb 000h,000h,000h,000h,000h,000h,000h,000h
+ fileExt:
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defb 000h,000h,000h
+ 	defb 000h
+ l0704h:
+ 	defw 00000h
+@@ -842,13 +811,9 @@
+ 	ld hl,fileExtCOM
+ 	jr SetFileExt
+ fileExtCOM:
+-	defb 043h
+-	defb 04fh
+-	defb 04dh
++	defb 'COM'
+ fileExtPAS:
+-	defb 050h
+-	defb 041h
+-	defb 053h
++	defb 'PAS'
+ SaveSrcFile:
+ 	push ix
+ 	push iy
+@@ -1048,21 +1013,12 @@
+ 
+ ; BLOCK 'TFalse' (start 0x08d4 end 0x08da)
+ TFalse_start:
+-	defb 046h
+-	defb 041h
+-	defb 04ch
+-	defb 053h
+-	defb 045h
+-	defb 000h
++	defb 'FALSE',000h
+ tTrue:
+ 
+ ; BLOCK 'TTrue' (start 0x08da end 0x08df)
+ TTrue_start:
+-	defb 054h
+-	defb 052h
+-	defb 055h
+-	defb 045h
+-	defb 000h
++	defb 'TRUE',000h
+ PrRAM:
+ 	ld de,T_RAM
+ 	jr PrErr2
+@@ -1121,140 +1077,27 @@
+ ; BLOCK 'TErrMsg' (start 0x0934 end 0x09b1)
+ TErrMsg_start:
+ 	defb 00dh
+-	defb 048h
+-	defb 061h
+-	defb 06ch
+-	defb 074h
++	defb 'Halt'
+ T_beiPC:
+-	defb 020h
+-	defb 062h
+-	defb 065h
+-	defb 069h
+-	defb 020h
+-	defb 050h
+-	defb 043h
+-	defb 03dh
+-	defb 000h
++	defb ' bei PC=',000h
+ TUeber:
+-	defb 055h
+-	defb 065h
+-	defb 062h
+-	defb 065h
+-	defb 072h
+-	defb 06ch
+-	defb 061h
+-	defb 075h
+-	defb 066h
+-	defb 000h
++	defb 'Ueberlauf',000h
+ T_RAM:
+-	defb 03eh
+-	defb 03eh
+-	defb 020h
+-	defb 052h
+-	defb 041h
+-	defb 04dh
+-	defb 000h
++	defb '>> RAM',000h
+ TDiv0:
+-	defb 02fh
+-	defb 020h
+-	defb 064h
+-	defb 075h
+-	defb 072h
+-	defb 063h
+-	defb 068h
+-	defb 020h
+-	defb 04eh
+-	defb 075h
+-	defb 06ch
+-	defb 06ch
+-	defb 000h
++	defb '/ durch Null',000h
+ TIdxLow:
+-	defb 049h
+-	defb 06eh
+-	defb 064h
+-	defb 065h
+-	defb 078h
+-	defb 020h
+-	defb 07ah
+-	defb 075h
+-	defb 020h
+-	defb 06eh
+-	defb 069h
+-	defb 065h
+-	defb 064h
+-	defb 072h
+-	defb 069h
+-	defb 067h
+-	defb 000h
++	defb 'Index zu niedrig',000h
+ TIdxHigh:
+-	defb 049h
+-	defb 06eh
+-	defb 064h
+-	defb 065h
+-	defb 078h
+-	defb 020h
+-	defb 07ah
+-	defb 075h
+-	defb 020h
+-	defb 068h
+-	defb 06fh
+-	defb 063h
+-	defb 068h
+-	defb 000h
++	defb 'Index zu hoch',000h
+ TMathErr:
+-	defb 06dh
+-	defb 061h
+-	defb 074h
+-	defb 068h
+-	defb 065h
+-	defb 06dh
+-	defb 061h
+-	defb 074h
+-	defb 069h
+-	defb 073h
+-	defb 063h
+-	defb 068h
+-	defb 065h
+-	defb 072h
+-	defb 020h
+-	defb 046h
+-	defb 065h
+-	defb 068h
+-	defb 06ch
+-	defb 065h
+-	defb 072h
+-	defb 000h
++	defb 'mathematischer Fehler',000h
+ TNumTooBig:
+-	defb 05ah
+-	defb 061h
+-	defb 068h
+-	defb 06ch
+-	defb 020h
+-	defb 07ah
+-	defb 075h
+-	defb 020h
+-	defb 067h
+-	defb 072h
+-	defb 06fh
+-	defb 07eh
+-	defb 000h
++	defb 'Zahl zu gro',07eh,000h
+ TEmpty:
+ 	defb 000h
+ TNumExpected:
+-	defb 05ah
+-	defb 061h
+-	defb 068h
+-	defb 06ch
+-	defb 020h
+-	defb 065h
+-	defb 072h
+-	defb 077h
+-	defb 061h
+-	defb 072h
+-	defb 074h
+-	defb 065h
+-	defb 074h
+-	defb 000h
++	defb 'Zahl erwartet',000h
+ SelListElem__:
+ 	ld d,ixh
+ 	ld e,ixl
+@@ -3554,47 +3397,9 @@
+ 	call RealMul__
+ 	jp l150eh
+ l1761h:
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
++	defs 8
+ l1769h:
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
++	defs 32
+ retAddr__:
+ 	defw 00000h
+ l178bh:
+@@ -3629,175 +3434,11 @@
+ iBufCurChrAddr:
+ 	defw 00000h
+ inputBuf:
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defs 85
+ RuntimeEnd:
+ 	nop	
+ lineBuf:
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-l1819h:
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defs 80
+ lineBufEnd:
+ 	defb 00dh
+ stack_adr:
+@@ -7779,44 +7420,44 @@
+ 	xor a	
+ 	jr SetHLFirstSrcLine
+ cmdTab:
+-	defb 042h
++	defb 'B'
+ 	defw JEndPascal
+-	defb 043h
++	defb 'C'
+ 	defw DoCmdC
+-	defb 044h
++	defb 'D'
+ 	defw DoCmdD
+-	defb 045h
++	defb 'E'
+ 	defw DoCmdE
+-	defb 046h
++	defb 'F'
+ 	defw DoCmdF
+-	defb 047h
++	defb 'G'
+ 	defw DoCmdG
+-	defb 049h
++	defb 'I'
+ 	defw DoCmdI
+-	defb 04ch
++	defb 'L'
+ 	defw DoCmdL
+-	defb 04bh
++	defb 'K'
+ 	defw DoCmdK
+-	defb 04dh
++	defb 'M'
+ 	defw DoCmdM
+-	defb 04eh
++	defb 'N'
+ 	defw DoCmdN
+-	defb 04fh
++	defb 'O'
+ 	defw DoCmdO
+-	defb 050h
++	defb 'P'
+ 	defw DoCmdP
+-	defb 052h
++	defb 'R'
+ cmdTabRunAddr:
+ 	defw PasPrgStart
+-	defb 053h
++	defb 'S'
+ 	defw DoCmdS
+-	defb 054h
++	defb 'T'
+ 	defw DoCmdT
+-	defb 056h
++	defb 'V'
+ 	defw DoCmdV
+-	defb 058h
++	defb 'X'
+ 	defw DoCmdX
+-	defb 05ah
++	defb 'Z'
+ 	defw DoCmdZ
+ l2ad6h:
+ 	dec bc	
+@@ -7947,16 +7588,7 @@
+ GetSrcChr:
+ 	jp l5491h
+ curIdentifier:
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defs 10
+ SP_safe:
+ 	defb 0f0h
+ 	defb 07fh
+@@ -9202,89 +8834,20 @@
+ RL_PROCEDURE:
+ ResWordsEntry2:
+ 	defw RL_FUNCTION
+-	defb 050h
+-	defb 052h
+-	defb 04fh
+-	defb 043h
+-	defb 045h
+-	defb 044h
+-	defb 055h
+-	defb 052h
+-	defb 0c5h
++	defb 'PROCEDUR','E'+080h
+ 	defb 004h
+ ResWordsEntry:
+ 	defw RL_PROCEDURE
+ tEadr:
+-	defb 045h
+-	defb 06eh
+-	defb 064h
+-	defb 061h
+-	defb 064h
+-	defb 072h
+-	defb 065h
+-	defb 073h
+-	defb 073h
+-	defb 065h
+-	defb 03ah
+-	defb 020h
+-	defb 000h
++	defb 'Endadresse: ',000h
+ tFeh1:
+-	defb 046h
+-	defb 065h
+-	defb 068h
+-	defb 06ch
+-	defb 065h
+-	defb 072h
+-	defb 03ah
+-	defb 000h
++	defb 'Fehler:',000h
+ tFeh2:
+-	defb 02ah
+-	defb 046h
+-	defb 045h
+-	defb 048h
+-	defb 04ch
+-	defb 045h
+-	defb 052h
+-	defb 02ah
+-	defb 000h
++	defb '*FEHLER*',000h
+ tKeTx:
+-	defb 00dh
+-	defb 04bh
+-	defb 065h
+-	defb 069h
+-	defb 06eh
+-	defb 020h
+-	defb 054h
+-	defb 065h
+-	defb 078h
+-	defb 074h
+-	defb 020h
+-	defb 06dh
+-	defb 065h
+-	defb 068h
+-	defb 072h
+-	defb 021h
+-	defb 000h
++	defb 'Kein Text mehr!',000h
+ tTabU:
+-	defb 054h
+-	defb 061h
+-	defb 062h
+-	defb 065h
+-	defb 06ch
+-	defb 06ch
+-	defb 065h
+-	defb 06eh
+-	defb 075h
+-	defb 065h
+-	defb 062h
+-	defb 065h
+-	defb 072h
+-	defb 06ch
+-	defb 061h
+-	defb 075h
+-	defb 066h
+-	defb 021h
+-	defb 000h
++	defb 'Tabellenueberlauf!',000h
+ ChkType0004:
+ 	ld de,00004h
+ 	jr ChkType__
+@@ -14712,116 +14275,17 @@
+ 
+ ; BLOCK 'Rest' (start 0x5490 end 0x5500)
+ Rest_first:
+-	defb 00dh
+-l5491h:
+-	defb 00ah
+-	defb 009h
+-	defb 043h
+-	defb 050h
+-	defb 009h
+-	defb 037h
+-	defb 046h
+-	defb 048h
+-	defb 009h
+-	defb 03bh
+-	defb 054h
+-	defb 065h
+-	defb 073h
+-	defb 074h
+-	defb 020h
+-	defb 050h
+-	defb 072h
+-	defb 06fh
+-	defb 06ch
+-	defb 06fh
+-	defb 067h
+-	defb 03fh
+-	defb 00dh
+-	defb 00ah
+-	defb 009h
+-	defb 049h
+-	defb 04eh
+-	defb 043h
+-	defb 009h
+-	defb 048h
+-	defb 04ch
+-	defb 00dh
+-	defb 00ah
+-	defb 009h
+-	defb 04ah
+-	defb 052h
+-	defb 009h
+-	defb 05ah
+-	defb 02ch
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 030h
+-	defb 031h
+-	defb 00dh
+-	defb 00ah
+-	defb 009h
+-	defb 044h
+-	defb 04ah
+-	defb 04eh
+-	defb 05ah
+-	defb 009h
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 030h
+-	defb 032h
+-	defb 00dh
+-	defb 00ah
+-	defb 009h
+-	defb 04ah
+-	defb 052h
+-	defb 009h
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 030h
+-	defb 033h
+-	defb 00dh
+-	defb 00ah
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 030h
+-	defb 031h
+-	defb 009h
+-	defb 04ch
+-	defb 044h
+-	defb 009h
+-	defb 04dh
+-	defb 02ch
+-	defb 030h
+-	defb 009h
+-	defb 03bh
+-	defb 06ch
+-	defb 07ch
+-	defb 073h
+-	defb 063h
+-	defb 068h
+-	defb 065h
+-	defb 06eh
+-	defb 00dh
+-	defb 00ah
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 030h
+-	defb 033h
+-	defb 009h
+-	defb 04ch
+-	defb 044h
+-	defb 009h
+-	defb 048h
+-	defb 04ch
+-	defb 02ch
+-	defb 028h
+-	defb 043h
+-	defb 043h
+-	defb 054h
+-	defb 04ch
+-	defb 030h
++	defb 00dh,00ah,009h,043h,050h,009h,037h,046h ; ...CP.7F 
++	defb 048h,009h,03bh,054h,065h,073h,074h,020h ; H.;Test  
++	defb 050h,072h,06fh,06ch,06fh,067h,03fh,00dh ; Prolog?. 
++	defb 00ah,009h,049h,04eh,043h,009h,048h,04ch ; ..INC.HL 
++	defb 00dh,00ah,009h,04ah,052h,009h,05ah,02ch ; ...JR.Z, 
++	defb 050h,041h,053h,030h,031h,00dh,00ah,009h ; PAS01... 
++	defb 044h,04ah,04eh,05ah,009h,050h,041h,053h ; DJNZ.PAS 
++	defb 030h,032h,00dh,00ah,009h,04ah,052h,009h ; 02...JR. 
++	defb 050h,041h,053h,030h,033h,00dh,00ah,050h ; PAS03..P 
++	defb 041h,053h,030h,031h,009h,04ch,044h,009h ; AS01.LD. 
++	defb 04dh,02ch,030h,009h,03bh,06ch,07ch,073h ; M,0.;l|s 
++	defb 063h,068h,065h,06eh,00dh,00ah,050h,041h ; chen..PA 
++	defb 053h,030h,033h,009h,04ch,044h,009h,048h ; S03.LD.H 
++	defb 04ch,02ch,028h,043h,043h,054h,04ch,030h ; L,(CCTL0 
