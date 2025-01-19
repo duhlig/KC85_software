@@ -1079,12 +1079,12 @@ TNumExpected:	equ 0x09a3
 ; Used at following locations:
 ; 0x08e6	(immediate value)
 
-sub_09b1h:	equ 0x09b1
+SelListElem__:	equ 0x09b1
 ; Used at following locations:
 ; 0x396c	(call destination)
 ; 0x3535	(call destination)
 
-l09b5h:	equ 0x09b5
+NxtListElem:	equ 0x09b5
 ; Used at following locations:
 ; 0x09b9	(djnz destination)
 
@@ -2548,11 +2548,7 @@ lineBuf:	equ 0x1801
 ; 0x23f7	(immediate value)
 ; 0x0aac	(immediate value)
 
-l1819h:	equ 0x1819
-; Used at following locations:
-; 0x4ab0	(immediate value)
-
-l1851h:	equ 0x1851
+lineBufEnd:	equ 0x1851
 ; Used at following locations:
 ; 0x2923	(immediate value)
 ; 0x263d	(immediate value)
@@ -4401,15 +4397,19 @@ ResWordsEntry:	equ 0x326e
 ; Used at following locations:
 ; 0x2bd1	(immediate value)
 
-TEadr: equ 0x3270
+tEadr: equ 0x3270
 ; Used at following locations:
 ; 0x2e6b	(immediate value)
 
-TFeh1:	equ 0x327d
+tFeh1:	equ 0x327d
 ; Used at following locations:
 ; 0x2e95	(immediate value)
 
-sub_32b2h:	equ 0x32b2
+tFeh2: equ 0x3285
+tKeTx: equ 0x328e
+tTabU: equ 0x329f
+
+ChkType0004:	equ 0x32b2
 ; Used at following locations:
 ; 0x43a3	(call destination)
 ; 0x41f1	(call destination)
@@ -4418,7 +4418,7 @@ sub_32b2h:	equ 0x32b2
 ; 0x4094	(call destination)
 ; 0x3716	(call destination)
 
-sub_32b7h:	equ 0x32b7
+ChkType0001:	equ 0x32b7
 ; Used at following locations:
 ; 0x4203	(call destination)
 ; 0x41fc	(call destination)
@@ -4634,7 +4634,7 @@ l33beh:	equ 0x33be
 ; 0x3e10	(call destination)
 ; 0x383b	(jp destination)
 
-sub_33c4h:	equ 0x33c4
+WCodeOverLastByte:	equ 0x33c4
 ; Used at following locations:
 ; 0x52a5	(jp destination)
 ; 0x51d6	(jp destination)
@@ -4791,26 +4791,26 @@ CodeNextByte:	equ 0x33ee
 ; 0x2c30	(immediate value)
 ; 0x06d1	(jp destination)
 
-sub_33fah:	equ 0x33fa
+WLdDEnnIsHL:	equ 0x33fa
 ; Used at following locations:
 ; 0x4453	(call destination)
 ; 0x41ac	(call destination)
 ; 0x39c4	(call destination)
 
-sub_33fbh:	equ 0x33fb
+WLdDEnnIsDE:	equ 0x33fb
 ; Used at following locations:
 ; 0x4f3a	(call destination)
 ; 0x42c6	(call destination)
 ; 0x3c45	(call destination)
 
-sub_3401h:	equ 0x3401
+WLdHLfromMemIsDE:	equ 0x3401
 ; Used at following locations:
 ; 0x4e08	(call destination)
 ; 0x45b9	(call destination)
 ; 0x4598	(call destination)
 ; 0x3be5	(call destination)
 
-sub_3407h:	equ 0x3407
+WLdHLnnIsHL:	equ 0x3407
 ; Used at following locations:
 ; 0x4e46	(call destination)
 ; 0x4a98	(call destination)
@@ -4985,7 +4985,7 @@ sub_34fah:	equ 0x34fa
 ; 0x3b81	(call destination)
 ; 0x3a71	(call destination)
 
-sub_3509h:	equ 0x3509
+WSelListEl_byA:	equ 0x3509
 ; Used at following locations:
 ; 0x4faf	(call destination)
 ; 0x4eac	(call destination)
@@ -4993,7 +4993,7 @@ sub_3509h:	equ 0x3509
 ; 0x3a88	(call destination)
 ; 0x3a7c	(call destination)
 
-sub_3518h:	equ 0x3518
+WAddConstHLIX:	equ 0x3518
 ; Used at following locations:
 ; 0x5038	(call destination)
 ; 0x4fc5	(call destination)
@@ -5002,7 +5002,7 @@ sub_3518h:	equ 0x3518
 ; 0x3aa6	(call destination)
 ; 0x3a9d	(call destination)
 
-l351eh:	equ 0x351e
+WAddConstHLDE:	equ 0x351e
 ; Used at following locations:
 ; 0x3516	(jr destination)
 
@@ -5016,11 +5016,11 @@ l352eh:	equ 0x352e
 ; Used at following locations:
 ; 0x3529	(jr destination)
 
-l3534h:	equ 0x3534
+CSq_SelListEl:	equ 0x3534
 ; Used at following locations:
 ; 0x3510	(immediate value)
 
-l3538h:	equ 0x3538
+CSq_CpIXtoDE:	equ 0x3538
 ; Used at following locations:
 ; 0x3518	(immediate value)
 
@@ -5285,7 +5285,7 @@ l389fh:	equ 0x389f
 ; Used at following locations:
 ; 0x3832	(immediate value)
 
-l38a5h:	equ 0x38a5
+CSq_PopDELdir:	equ 0x38a5
 ; Used at following locations:
 ; 0x3877	(immediate value)
 
@@ -5339,14 +5339,16 @@ l395ah:	equ 0x395a
 ; Used at following locations:
 ; 0x3944	(jp destination)
 
-l395fh:	equ 0x395f
+CSq_PushValuesToStack:	equ 0x395f
 ; Used at following locations:
 ; 0x4568	(immediate value)
 ; 0x390e	(immediate value)
 
-l396bh:	equ 0x396b
+CSq_PushListEl_CallX:	equ 0x396b
 ; Used at following locations:
 ; 0x3950	(immediate value)
+
+CSq_PushIX_CallX: equ 0x3971
 
 l3999h:	equ 0x3999
 ; Used at following locations:
@@ -5409,7 +5411,7 @@ sub_3a6eh:	equ 0x3a6e
 ; Used at following locations:
 ; 0x3a69	(call destination)
 
-l3a7fh:	equ 0x3a7f
+WLdM_A:	equ 0x3a7f
 ; Used at following locations:
 ; 0x3aa0	(jr destination)
 
@@ -5441,7 +5443,7 @@ l3aafh:	equ 0x3aaf
 ; Used at following locations:
 ; 0x37c8	(jp destination)
 
-l3ab6h:	equ 0x3ab6
+CSq_NxtListEl:	equ 0x3ab6
 ; Used at following locations:
 ; 0x3a8b	(immediate value)
 
@@ -6195,11 +6197,11 @@ l42bdh:	equ 0x42bd
 ; Used at following locations:
 ; 0x42b0	(jr destination)
 
-l42c3h:	equ 0x42c3
+WCodeFromSOStoTOS:	equ 0x42c3
 ; Used at following locations:
 ; 0x42b3	(jr destination)
 
-l42c6h:	equ 0x42c6
+WCodeFromTOS:	equ 0x42c6
 ; Used at following locations:
 ; 0x42a0	(jr destination)
 ; 0x429d	(jr destination)

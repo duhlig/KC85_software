@@ -1,20 +1,25 @@
 PasPrgMenuHdr: unlabeled start 0x0200 unlabeled last 0x202 type worddata
 PasPrgMenuName: unlabeled start 0x0203 unlabeled last 0x20a type bytedata
-MenuPRec: unlabeled start 0x020e unlabeled last 0x0216 type bytedata
-MenuPEnt: unlabeled start 0x021a unlabeled last 0x0224 type bytedata
+PRecMenuHdr: unlabeled start 0x020e unlabeled last 0x020f type worddata
+PRecMenuName: unlabeled start 0x0210 unlabeled last 0x0216 type bytedata
+PEntMenuHdr: unlabeled start 0x021a unlabeled last 0x021b type worddata
+PEntMenuName: unlabeled start 0x021c unlabeled last 0x0224 type bytedata
 OSPrc: unlabeled start 0x0255 unlabeled last 0x0255 type bytedata
 ptr: unlabeled start 0x06b0 unlabeled end 0x06bc type pointers
 nextBlkNum: unlabeled start 0x06bc unlabeled last 0x06bc type bytedata
 fNameExt: unlabeled start 0x06f8 unlabeled last 0x0703 type bytedata
 ptr: unlabeled start 0x0704 unlabeled end 0x0712 type pointers
 printFlag: unlabeled start 0x0712 unlabeled last 0x0712 type bytedata
-HexDezTab: start 0x0870 unlabeled end 0x0879 type bytedata
-TFalse: start 0x08d4 unlabeled end 0x08d9 type bytedata
-TTrue: start 0x08da unlabeled end 0x08de type bytedata
+HexDezTab: unlabeled start 0x0870 unlabeled last 0x0879 type bytedata
+TFalse: start 0x08d4 unlabeled last 0x08d9 type bytedata
+TTrue: start 0x08da unlabeled last 0x08de type bytedata
 TErrMsg: start 0x0934 unlabeled end 0x09b1 type bytedata
 realTab1__: start 0x0f24 end 0x0f2f type bytedata
 xxTab__: start 0x1597 end 0x15a7 type bytedata
-LineBuf: start 0x1801 unlabeled end 0x1851 type bytedata
+addrs: unlabeled start 0x1789 unlabeled last 0x17aa type worddata
+inputBuf: unlabeled start 0x17ab unlabeled last 0x17ff type bytedata
+LineBuf: unlabeled start 0x1801 unlabeled end 0x1851 type bytedata
+lineBufEnd: unlabeled start 0x1851 unlabeled last 0x1851 type bytedata
 HeapEndAddr: start 0x1856 unlabeled last 0x1857 type pointers
 
 ;PrcFncTab: start 0x1858 unlabeled end 0x1b35 type bytedata
@@ -155,7 +160,45 @@ RN_WRITE: unlabeled start 0x1b2d unlabeled last 0x1b34 type bytedata
 
 Symtab_open: start 0x1b35 unlabeled last 0x2354 type bytedata
 
-CmdTab: start 0x2a9d unlabeled end 0x2ad6 type bytedata
+Cmd: unlabeled start 0x2a9d unlabeled last 0x2a9d type bytedata
+CmdAddr: unlabeled start 0x2a9e unlabeled last 0x2a9f type pointers
+Cmd: unlabeled start 0x2aa0 unlabeled last 0x2aa0 type bytedata
+CmdAddr: unlabeled start 0x2aa1 unlabeled last 0x2aa2 type pointers
+Cmd: unlabeled start 0x2aa3 unlabeled last 0x2aa3 type bytedata
+CmdAddr: unlabeled start 0x2aa4 unlabeled last 0x2aa5 type pointers
+Cmd: unlabeled start 0x2aa6 unlabeled last 0x2aa6 type bytedata
+CmdAddr: unlabeled start 0x2aa7 unlabeled last 0x2aa8 type pointers
+Cmd: unlabeled start 0x2aa9 unlabeled last 0x2aa9 type bytedata
+CmdAddr: unlabeled start 0x2aaa unlabeled last 0x2aab type pointers
+Cmd: unlabeled start 0x2aac unlabeled last 0x2aac type bytedata
+CmdAddr: unlabeled start 0x2aad unlabeled last 0x2aae type pointers
+Cmd: unlabeled start 0x2aaf unlabeled last 0x2aaf type bytedata
+CmdAddr: unlabeled start 0x2ab0 unlabeled last 0x2ab1 type pointers
+Cmd: unlabeled start 0x2ab2 unlabeled last 0x2ab2 type bytedata
+CmdAddr: unlabeled start 0x2ab3 unlabeled last 0x2ab4 type pointers
+Cmd: unlabeled start 0x2ab5 unlabeled last 0x2ab5 type bytedata
+CmdAddr: unlabeled start 0x2ab6 unlabeled last 0x2ab7 type pointers
+Cmd: unlabeled start 0x2ab8 unlabeled last 0x2ab8 type bytedata
+CmdAddr: unlabeled start 0x2ab9 unlabeled last 0x2aba type pointers
+Cmd: unlabeled start 0x2abb unlabeled last 0x2abb type bytedata
+CmdAddr: unlabeled start 0x2abc unlabeled last 0x2abd type pointers
+Cmd: unlabeled start 0x2abe unlabeled last 0x2abe type bytedata
+CmdAddr: unlabeled start 0x2abf unlabeled last 0x2ac0 type pointers
+Cmd: unlabeled start 0x2ac1 unlabeled last 0x2ac1 type bytedata
+CmdAddr: unlabeled start 0x2ac2 unlabeled last 0x2ac3 type pointers
+Cmd: unlabeled start 0x2ac4 unlabeled last 0x2ac4 type bytedata
+CmdAddr: unlabeled start 0x2ac5 unlabeled last 0x2ac6 type pointers
+Cmd: unlabeled start 0x2ac7 unlabeled last 0x2ac7 type bytedata
+CmdAddr: unlabeled start 0x2ac8 unlabeled last 0x2ac9 type pointers
+Cmd: unlabeled start 0x2aca unlabeled last 0x2aca type bytedata
+CmdAddr: unlabeled start 0x2acb unlabeled last 0x2acc type pointers
+Cmd: unlabeled start 0x2acd unlabeled last 0x2acd type bytedata
+CmdAddr: unlabeled start 0x2ace unlabeled last 0x2acf type pointers
+Cmd: unlabeled start 0x2ad0 unlabeled last 0x2ad0 type bytedata
+CmdAddr: unlabeled start 0x2ad1 unlabeled last 0x2ad2 type pointers
+Cmd: unlabeled start 0x2ad3 unlabeled last 0x2ad3 type bytedata
+CmdAddr: unlabeled start 0x2ad4 unlabeled last 0x2ad5 type pointers
+
 TPdParam: unlabeled start 0x2b00 unlabeled last 0x2b32 type bytedata
 CompVar1: unlabeled start 0x2b50 unlabeled end 0x2b5d type bytedata
 CompVar2: unlabeled start 0x2b5d unlabeled end 0x2b69 type worddata
@@ -242,11 +285,11 @@ RL_PROCEDURE: unlabeled start 0x3262 unlabeled last 0x3263 type pointers
 RN_PROCEDURE: unlabeled start 0x3264 unlabeled last 0x326d type bytedata
 RL_Entry: unlabeled start 0x326e unlabeled last 0x326f type pointers
 
-TEadr: start 0x3270 unlabeled end 0x327c type bytedata
-TFeh1: start 0x327d unlabeled end 0x3284 type bytedata
-TFeh2: start 0x3285 unlabeled end 0x328d type bytedata
-TKeTx: start 0x328e unlabeled end 0x329e type bytedata
-TTabU: start 0x329f unlabeled end 0x32b1 type bytedata
+TEadr: unlabeled start 0x3270 unlabeled last 0x327c type bytedata
+TFeh1: unlabeled start 0x327d unlabeled last 0x3284 type bytedata
+TFeh2: unlabeled start 0x3285 unlabeled last 0x328d type bytedata
+TKeTx: unlabeled start 0x328e unlabeled last 0x329e type bytedata
+TTabU: unlabeled start 0x329f unlabeled last 0x32b1 type bytedata
 ExtCOM: unlabeled start 0x079f unlabeled last 0x07a1 type bytedata
 ExtPAS: unlabeled start 0x07a2 unlabeled last 0x07a4 type bytedata
 
@@ -359,7 +402,19 @@ CSq: unlabeled first 0x2e67 unlabeled last 0x2e67 type bytedata
 CSq: unlabeled first 0x2f2e unlabeled last 0x2f2e type bytedata
 CSq: unlabeled first 0x2f32 unlabeled last 0x2f32 type bytedata
 CSq: unlabeled first 0x3449 unlabeled last 0x3449 type bytedata
+CSq: unlabeled first 0x3534 unlabeled last 0x3534 type bytedata
+CSq: unlabeled first 0x3538 unlabeled last 0x3538 type bytedata
 CSq: unlabeled first 0x3547 unlabeled last 0x3547 type bytedata
+TabEnd: unlabeled first 0x36c8 unlabeled last 0x370f type worddata
+CSq: unlabeled first 0x3722 unlabeled last 0x3722 type bytedata
+CSqP: unlabeled first 0x3724 unlabeled last 0x3724 type bytedata
+CSq: unlabeled first 0x38a5 unlabeled last 0x38a5 type bytedata
+CSq: unlabeled first 0x395f unlabeled last 0x395f type bytedata
+CSq: unlabeled first 0x396b unlabeled last 0x396b type bytedata
+CSqP: unlabeled first 0x3970 unlabeled last 0x3970 type bytedata
+CSq: unlabeled first 0x3971 unlabeled last 0x3971 type bytedata
+CSqP: unlabeled first 0x3974 unlabeled last 0x3974 type bytedata
+CSq: unlabeled first 0x3ab6 unlabeled last 0x3ab6 type bytedata
 CSq: unlabeled first 0x4137 unlabeled last 0x4137 type bytedata
 CSq: unlabeled first 0x4141 unlabeled last 0x4141 type bytedata
 CSq: unlabeled first 0x468e unlabeled last 0x468e type bytedata

@@ -63,6 +63,13 @@ GetLexem:
       0dbh: "["
       0ddh: "]"
 
+SearchInSymTab__:
+  Parameter:
+    HL: erstes Listenelement
+  Return:
+    C-Flag=1: gefunden
+    HL: wenn gefunden, dann Adr. hinter dem gefundenen Namen
+    
 Save:
   Parameter:
     HL: Anfangsadresse
