@@ -9327,7 +9327,8 @@ CErrScalarExpected:
 l355bh:
 	pop af	
 	ret	
-	ex af,af'	
+l355dh:
+	defb 008h
 	pop bc	
 	sub b	
 	ld a,001h
@@ -9335,26 +9336,31 @@ l355bh:
 	xor a	
 l3565h:
 	push af	
-	rlca	
+l3566h:
+	defb 007h
 	pop bc	
 	sub b	
 	jr z,l356dh
 	ld a,001h
 l356dh:
 	push af	
-	ld b,0c1h
+l356eh:
+	defb 006h
+	pop bc	
 	sub b	
 	ld a,000h
 	rla	
 	push af	
-	rlca	
+l3575h:
+	defb 007h
 	ld b,a	
 	pop af	
 	sub b	
 	ld a,000h
 	rla	
 	push af	
-	ex af,af'	
+l357dh:
+	defb 008h
 	ld b,a	
 	pop af	
 	sub b	
@@ -9362,14 +9368,16 @@ l356dh:
 	ld a,000h
 	rla	
 	push af	
-	rlca	
+l3586h:
+	defb 007h
 	pop bc	
 	sub b	
 	ccf	
 	ld a,000h
 	rla	
 	push af	
-	ex af,af'	
+l358eh:
+	defb 008h
 	pop de	
 	xor a	
 	sbc hl,de
@@ -9377,7 +9385,8 @@ l356dh:
 	inc a	
 l3596h:
 	push af	
-	ex af,af'	
+l3597h:
+	defb 008h
 	pop de	
 	xor a	
 	sbc hl,de
@@ -9385,7 +9394,8 @@ l3596h:
 	inc a	
 l359fh:
 	push af	
-	add hl,bc	
+l35a0h:
+	defb 009h
 	pop de	
 	or a	
 	sbc hl,de
@@ -9393,11 +9403,13 @@ l359fh:
 	and h	
 	rlca	
 	push af	
-	dec b	
+l35aah:
+	defb 005h
 	pop de	
 	call sub_0c6fh
 	push af	
-	ld a,(bc)	
+l35b0h:
+	defb 00ah
 	ex de,hl	
 	pop hl	
 	or a	
@@ -9406,11 +9418,14 @@ l359fh:
 	and h	
 	rlca	
 	push af	
-	ld b,0ebh
+l35bbh:
+	defb 006h
+	ex de,hl	
 	pop hl	
 	call sub_0c6fh
 	push af	
-	inc c	
+l35c2h:
+	defb 00ch
 	ex de,hl	
 	pop hl	
 	or a	
@@ -9420,11 +9435,14 @@ l359fh:
 	rlca	
 	xor 001h
 	push af	
-	ld b,0ebh
+l35cfh:
+	defb 006h
+	ex de,hl	
 	pop hl	
 	call sub_0c7ah
 	push af	
-	dec bc	
+l35d6h:
+	defb 00bh
 	pop de	
 	or a	
 	sbc hl,de
@@ -9433,7 +9451,8 @@ l359fh:
 	rlca	
 	xor 001h
 	push af	
-	dec b	
+l35e2h:
+	defb 005h
 	pop de	
 	call sub_0c7ah
 	push af	
@@ -9447,7 +9466,7 @@ l35ech:
 	inc de	
 	jr nz,l35f0h
 l35f0h:
-	ex af,af'	
+	defb 008h
 	dec b	
 l35f2h:
 	djnz l35ech
@@ -9457,7 +9476,8 @@ l35f5h:
 	xor a	
 l35f8h:
 	push af	
-	ex af,af'	
+l35f9h:
+	defb 008h
 	inc b	
 	djnz l35f5h
 	jr l3601h
@@ -9474,7 +9494,8 @@ l360ah:
 	inc a	
 l360dh:
 	push af	
-	dec bc	
+l360eh:
+	defb 00bh
 	inc b	
 	djnz l360ah
 	jr l3619h
@@ -9484,7 +9505,8 @@ l3616h:
 	inc a	
 l3619h:
 	push af	
-	dec bc	
+l361ah:
+	defb 00bh
 	inc b	
 	djnz l3616h
 	jr l3624h
@@ -9495,7 +9517,8 @@ l3624h:
 	inc a	
 l3625h:
 	push af	
-	dec bc	
+l3626h:
+	defb 00bh
 	inc b	
 	djnz l3622h
 	jr l3630h
@@ -9505,7 +9528,8 @@ l3630h:
 	inc a	
 l3631h:
 	push af	
-	rrca	
+l3632h:
+	defb 00fh
 	ex de,hl	
 	pop bc	
 	xor a	
@@ -9518,7 +9542,8 @@ l3631h:
 	inc a	
 l3641h:
 	push af	
-	rrca	
+l3642h:
+	defb 00fh
 	ex de,hl	
 	pop bc	
 	xor a	
@@ -9532,7 +9557,8 @@ l3650h:
 	inc a	
 l3651h:
 	push af	
-	inc c	
+l3652h:
+	defb 00ch
 	ld a,080h
 	xor h	
 	ld h,a	
@@ -9541,7 +9567,8 @@ l3651h:
 	and h	
 	rlca	
 	push af	
-	inc d	
+l365fh:
+	defb 014h
 	pop bc	
 	ex (sp),hl	
 	bit 6,h
@@ -9557,7 +9584,9 @@ l366ah:
 	and h	
 	rlca	
 	push af	
-	ld d,0c1h
+l3674h:
+	defb 016h
+	pop bc	
 	ex (sp),hl	
 	bit 6,h
 	jr z,l367fh
@@ -9566,15 +9595,17 @@ l366ah:
 	ld h,a	
 l367fh:
 	ex (sp),hl	
-	push bc	
+l3680h:
+	defb 0c5h
 	call sub_0ca1h
 	ld a,080h
 	and h	
 	rlca	
 	xor 001h
 	push af	
-	ld c,03eh
-	add a,b	
+l368bh:
+	defb 00eh
+	ld a,080h
 	xor h	
 	ld h,a	
 	call sub_0ca1h
@@ -9583,63 +9614,67 @@ l367fh:
 	rlca	
 	xor 001h
 	push af	
-	ld a,(bc)	
+l369ah:
+	defb 00ah
 	ld hl,l0c5ah
 	ld (l0c4ch+1),hl
 	call sub_0c40h
 	push af	
-	inc c	
+l36a5h:
+	defb 00ch
 	ld hl,l0c5ah
 	ld (l0c4ch+1),hl
 	call sub_0c40h
 	xor 001h
 	push af	
-	ld a,(bc)	
+l36b2h:
+	defb 00ah
 	ld hl,l0c63h
 	ld (l0c4ch+1),hl
 	call sub_0c40h
 	push af	
-	ld a,(bc)	
+l36bdh:
+	defb 00ah
 	ld hl,l0c68h
 	ld (l0c4ch+1),hl
 	call sub_0c40h
 	push af	
-	defw 03597h
-	defw 0358eh
-	defw 035a0h
-	defw 035b0h
-	defw 035c2h
-	defw 035d6h
-	defw 03597h
-	defw 0358eh
-	defw 035aah
-	defw 035bbh
-	defw 035cfh
-	defw 035e2h
-	defw 03566h
-	defw 0355dh
-	defw 0356eh
-	defw 03575h
-	defw 0357dh
-	defw 03586h
-	defw 035f9h
-	defw 035f0h
-	defw 03680h
-	defw 0360eh
-	defw 0361ah
-	defw 03626h
-	defw 03642h
-	defw 03632h
-	defw 0365fh
-	defw 03652h
-	defw 0368bh
-	defw 03674h
-	defw 036a5h
-	defw 0369ah
+	defw l3597h
+	defw l358eh
+	defw l35a0h
+	defw l35b0h
+	defw l35c2h
+	defw l35d6h
+	defw l3597h
+	defw l358eh
+	defw l35aah
+	defw l35bbh
+	defw l35cfh
+	defw l35e2h
+	defw l3566h
+	defw l355dh
+	defw l356eh
+	defw l3575h
+	defw l357dh
+	defw l3586h
+	defw l35f9h
+	defw l35f0h
+	defw l3680h
+	defw l360eh
+	defw l361ah
+	defw l3626h
+	defw l3642h
+	defw l3632h
+	defw l365fh
+	defw l3652h
+	defw l368bh
+	defw l3674h
+	defw l36a5h
+	defw l369ah
 	defw 00000h
 	defw 00000h
-	defw 036bdh
-	defw 036b2h
+	defw l36bdh
+	defw l36b2h
 sub_3710h:
 	call GetLexem
 	call sub_3f3fh
