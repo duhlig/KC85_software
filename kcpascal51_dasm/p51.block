@@ -20,7 +20,8 @@ addrs: unlabeled start 0x1789 unlabeled last 0x17aa type worddata
 inputBuf: unlabeled start 0x17ab unlabeled last 0x17ff type bytedata
 LineBuf: unlabeled start 0x1801 unlabeled end 0x1851 type bytedata
 lineBufEnd: unlabeled start 0x1851 unlabeled last 0x1851 type bytedata
-HeapEndAddr: start 0x1856 unlabeled last 0x1857 type pointers
+StkRamAddr: unlabeled start 0x1852 unlabeled last 0x1855 type worddata
+HeapEndAddr: unlabeled start 0x1856 unlabeled last 0x1857 type pointers
 
 ;PrcFncTab: start 0x1858 unlabeled end 0x1b35 type bytedata
 RL_SETSYS: unlabeled start 0x1858 unlabeled last 0x1859 type worddata

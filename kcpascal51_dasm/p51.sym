@@ -2,20 +2,6 @@
 ;; Markennamen mit "__" am Ende sind unsicher, ihre Bedeutung also geraten.
 
 ; aus PasEx:
-CCTL0: equ 0x0b7a6
-SUTAB: equ 0x0b7b0
-SUBALT: equ 0x0b7fe  ;SUTAB merken
-SUBNEU: equ 0xbcee ; 1. Byte nach PasEx auf 0xbc00
-SUBNEU+2: equ 0xbcf0
-SUBNEU+10: equ 0xbcf8
-SUBNEU+16: equ 0xbcfe
-MBO: equ 0xbc80
-MBI: equ 0xbcD0
-PV1: equ 0x0f003
-ISRO: equ 0x0bc2f
-CSRO: equ 0x0bc96
-ISRI: equ 0x0bc9e
-CSRI: equ 0x0bce9
 ; Hinweis zu PasEx-Marken: Im Original beginnt PasEx mit "ORG BC00H".
 ; Das kann der z80dasm nicht, zumindest nicht mitten im Programm. Deshalb
 ; gibt es Marken mit _s am Ende, die auf Adressen im Ladebereich zeigen
@@ -175,11 +161,12 @@ SaveBlock:	equ 0x0378
 ; Used at following locations:
 ; 0x03b2	(jr destination)
 
-C_CSRO:	equ 0x03b4
-
 l0390h:	equ 0x0390
 ; Used at following locations:
 ; 0x13ce	(immediate value)
+
+C_CSRO:	equ 0x03b4
+; Used at following locations:
 
 TestBreak:	equ 0x03c1
 ; Used at following locations:
@@ -395,12 +382,14 @@ PasPrgStart:	equ 0x06c8
 ; Used at following locations:
 ; 0x2f21	(jp destination)
 ; 0x2ebc	(immediate value)
+; 0x2ac5	(defw directive)
 ; 0x2a7a	(immediate value)
 ; 0x020b	(jp destination)
 
 JEndPascal:	equ 0x06cb
 ; Used at following locations:
 ; 0x2f37	(jp destination)
+; 0x2a9e	(defw directive)
 ; 0x07de	(jp destination)
 
 JReadEditIBuf__:	equ 0x06ce
@@ -2548,6 +2537,10 @@ lineBuf:	equ 0x1801
 ; 0x23f7	(immediate value)
 ; 0x0aac	(immediate value)
 
+l1819h:	equ 0x1819
+; Used at following locations:
+; 0x4ab0	(immediate value)
+
 lineBufEnd:	equ 0x1851
 ; Used at following locations:
 ; 0x2923	(immediate value)
@@ -2570,77 +2563,278 @@ ram_end:	equ 0x1854
 ; 0x2a16	(word load pointer)
 ; 0x2358	(word load pointer)
 
+heapEndAddr:	equ 0x1856
 PasIDEStartAddr:	equ 0x1856
 ; Used at following locations:
 ; 0x3334	(word load pointer)
 
-RL_SETSYS: equ 0x1858
-RL_GETSYS: equ 0x1863
-RL_PLOT: equ 0x1871
-RL_CLRPLOT: equ 0x187a
-RL_PTEST: equ 0x1886
-RL_GETC: equ 0x1893
-RL_SETC: equ 0x189f
-RL_LINEPLOT: equ 0x18a8
-RL_CIRCLE: equ 0x18b5
-RL_GOTOXY: equ 0x18c0
-RL_PI: equ 0x18cb
-RL_FRAC: equ 0x18d6
-RL_READKBD: equ 0x18df
-RL_SHR: equ 0x18ee
-RL_SHL: equ 0x18f9
-RL_LO: equ 0x1904
-RL_HI: equ 0x190e
-RL_SWAP: equ 0x1918
-RL_BXOR: equ 0x1924
-RL_BOR: equ 0x1930
-RL_BAND: equ 0x193b
-RL_EXP: equ 0x1947
-RL_LN: equ 0x194f
-RL_ARCTAN: equ 0x1956
-RL_TAN: equ 0x1961
-RL_COS: equ 0x1969
-RL_SIN: equ 0x1971
-RL_INP: equ 0x1979
-RL_OUT: equ 0x1984
-RL_SIZE: equ 0x198c
-RL_ADDR: equ 0x1995
-RL_INLINE: equ 0x199e
-RL_ENTIER: equ 0x19a9
-RL_USER: equ 0x19b4
-RL_RANDOM: equ 0x19c0
-RL_KEYPRESSED: equ 0x19ce
-RL_HALT: equ 0x19e0
-RL_EOLN: equ 0x19ec
-RL_PAGE: equ 0x19f8
-RL_SQRT: equ 0x1a04
-RL_ROUND: equ 0x1a0d
-RL_TRUNC: equ 0x1a17
-RL_MAXINT: equ 0x1a21
-RL_SUCC: equ 0x1a2e
-RL_PRED: equ 0x1a37
-RL_ORD: equ 0x1a40
-RL_PEEK: equ 0x1a48
-RL_POKE: equ 0x1a51
-RL_RELEASE: equ 0x1a5a
-RL_MARK: equ 0x1a66
-RL_NEW: equ 0x1a6f
-RL_TOUT: equ 0x1a77
-RL_TIN: equ 0x1a80
-RL_CHR: equ 0x1a88
-RL_ODD: equ 0x1a93
-RL_ABS: equ 0x1a9e
-RL_SQR: equ 0x1aa8
-RL_FALSE: equ 0x1ab2
-RL_TRUE: equ 0x1abe
-RL_BOOLEAN: equ 0x1ac9
-RL_CHAR: equ 0x1adb
-RL_REAL: equ 0x1aea
-RL_INTEGER: equ 0x1af9
-RL_READLN: equ 0x1b0b
-RL_READ: equ 0x1b16
-RL_WRITELN: equ 0x1b1f
-RL_WRITE: equ 0x1b2b
+RL_SETSYS:	equ 0x1858
+; Used at following locations:
+; 0x1863	(defw directive)
+; 0x070a	(defw directive)
+
+RL_GETSYS:	equ 0x1863
+; Used at following locations:
+; 0x1871	(defw directive)
+
+RL_PLOT:	equ 0x1871
+; Used at following locations:
+; 0x187a	(defw directive)
+
+RL_CLRPLOT:	equ 0x187a
+; Used at following locations:
+; 0x1886	(defw directive)
+
+RL_PTEST:	equ 0x1886
+; Used at following locations:
+; 0x1893	(defw directive)
+
+RL_GETC:	equ 0x1893
+; Used at following locations:
+; 0x189f	(defw directive)
+
+RL_SETC:	equ 0x189f
+; Used at following locations:
+; 0x18a8	(defw directive)
+
+RL_LINEPLOT:	equ 0x18a8
+; Used at following locations:
+; 0x18b5	(defw directive)
+
+RL_CIRCLE:	equ 0x18b5
+; Used at following locations:
+; 0x18c0	(defw directive)
+
+RL_GOTOXY:	equ 0x18c0
+; Used at following locations:
+; 0x18cb	(defw directive)
+
+RL_PI:	equ 0x18cb
+; Used at following locations:
+; 0x18d6	(defw directive)
+
+RL_FRAC:	equ 0x18d6
+; Used at following locations:
+; 0x18df	(defw directive)
+
+RL_READKBD:	equ 0x18df
+; Used at following locations:
+; 0x18ee	(defw directive)
+
+RL_SHR:	equ 0x18ee
+; Used at following locations:
+; 0x18f9	(defw directive)
+
+RL_SHL:	equ 0x18f9
+; Used at following locations:
+; 0x1904	(defw directive)
+
+RL_LO:	equ 0x1904
+; Used at following locations:
+; 0x190e	(defw directive)
+
+RL_HI:	equ 0x190e
+; Used at following locations:
+; 0x1918	(defw directive)
+
+RL_SWAP:	equ 0x1918
+; Used at following locations:
+; 0x1924	(defw directive)
+
+RL_BXOR:	equ 0x1924
+; Used at following locations:
+; 0x1930	(defw directive)
+
+RL_BOR:	equ 0x1930
+; Used at following locations:
+; 0x193b	(defw directive)
+
+RL_BAND:	equ 0x193b
+; Used at following locations:
+; 0x1947	(defw directive)
+
+RL_EXP:	equ 0x1947
+; Used at following locations:
+; 0x194f	(defw directive)
+
+RL_LN:	equ 0x194f
+; Used at following locations:
+; 0x1956	(defw directive)
+
+RL_ARCTAN:	equ 0x1956
+; Used at following locations:
+; 0x1961	(defw directive)
+
+RL_TAN:	equ 0x1961
+; Used at following locations:
+; 0x1969	(defw directive)
+
+RL_COS:	equ 0x1969
+; Used at following locations:
+; 0x1971	(defw directive)
+
+RL_SIN:	equ 0x1971
+; Used at following locations:
+; 0x1979	(defw directive)
+
+RL_INP:	equ 0x1979
+; Used at following locations:
+; 0x1984	(defw directive)
+
+RL_OUT:	equ 0x1984
+; Used at following locations:
+; 0x198c	(defw directive)
+
+RL_SIZE:	equ 0x198c
+; Used at following locations:
+; 0x1995	(defw directive)
+
+RL_ADDR:	equ 0x1995
+; Used at following locations:
+; 0x199e	(defw directive)
+
+RL_INLINE:	equ 0x199e
+; Used at following locations:
+; 0x19a9	(defw directive)
+
+RL_ENTIER:	equ 0x19a9
+; Used at following locations:
+; 0x19b4	(defw directive)
+
+RL_USER:	equ 0x19b4
+; Used at following locations:
+; 0x19c0	(defw directive)
+
+RL_RANDOM:	equ 0x19c0
+; Used at following locations:
+; 0x19ce	(defw directive)
+
+RL_KEYPRESSED:	equ 0x19ce
+; Used at following locations:
+; 0x19e0	(defw directive)
+
+RL_HALT:	equ 0x19e0
+; Used at following locations:
+; 0x19ec	(defw directive)
+
+RL_EOLN:	equ 0x19ec
+; Used at following locations:
+; 0x19f8	(defw directive)
+
+RL_PAGE:	equ 0x19f8
+; Used at following locations:
+; 0x1a04	(defw directive)
+
+RL_SQRT:	equ 0x1a04
+; Used at following locations:
+; 0x1a0d	(defw directive)
+
+RL_ROUND:	equ 0x1a0d
+; Used at following locations:
+; 0x1a17	(defw directive)
+
+RL_TRUNC:	equ 0x1a17
+; Used at following locations:
+; 0x1a21	(defw directive)
+
+RL_MAXINT:	equ 0x1a21
+; Used at following locations:
+; 0x1a2e	(defw directive)
+
+RL_SUCC:	equ 0x1a2e
+; Used at following locations:
+; 0x1a37	(defw directive)
+
+RL_PRED:	equ 0x1a37
+; Used at following locations:
+; 0x1a40	(defw directive)
+
+RL_ORD:	equ 0x1a40
+; Used at following locations:
+; 0x1a48	(defw directive)
+
+RL_PEEK:	equ 0x1a48
+; Used at following locations:
+; 0x1a51	(defw directive)
+
+RL_POKE:	equ 0x1a51
+; Used at following locations:
+; 0x1a5a	(defw directive)
+
+RL_RELEASE:	equ 0x1a5a
+; Used at following locations:
+; 0x1a66	(defw directive)
+
+RL_MARK:	equ 0x1a66
+; Used at following locations:
+; 0x1a6f	(defw directive)
+
+RL_NEW:	equ 0x1a6f
+; Used at following locations:
+; 0x1a77	(defw directive)
+
+RL_TOUT:	equ 0x1a77
+; Used at following locations:
+; 0x1a80	(defw directive)
+
+RL_TIN:	equ 0x1a80
+; Used at following locations:
+; 0x1a88	(defw directive)
+
+RL_CHR:	equ 0x1a88
+; Used at following locations:
+; 0x1a93	(defw directive)
+
+RL_ODD:	equ 0x1a93
+; Used at following locations:
+; 0x1a9e	(defw directive)
+
+RL_ABS:	equ 0x1a9e
+; Used at following locations:
+; 0x1aa8	(defw directive)
+
+RL_SQR:	equ 0x1aa8
+; Used at following locations:
+; 0x1ab2	(defw directive)
+
+RL_FALSE:	equ 0x1ab2
+; Used at following locations:
+; 0x1abe	(defw directive)
+
+RL_TRUE:	equ 0x1abe
+; Used at following locations:
+; 0x1ac9	(defw directive)
+
+RL_BOOLEAN:	equ 0x1ac9
+; Used at following locations:
+; 0x1adb	(defw directive)
+
+RL_CHAR:	equ 0x1adb
+; Used at following locations:
+; 0x1aea	(defw directive)
+
+RL_REAL:	equ 0x1aea
+; Used at following locations:
+; 0x1af9	(defw directive)
+
+RL_INTEGER:	equ 0x1af9
+; Used at following locations:
+; 0x1b0b	(defw directive)
+
+RL_READLN:	equ 0x1b0b
+; Used at following locations:
+; 0x1b16	(defw directive)
+
+RL_READ:	equ 0x1b16
+; Used at following locations:
+; 0x1b1f	(defw directive)
+
+RL_WRITELN:	equ 0x1b1f
+; Used at following locations:
+; 0x1b2b	(defw directive)
+
+RL_WRITE:	equ 0x1b2b
+; Used at following locations:
 
 l1f40h:	equ 0x1f40
 ; Used at following locations:
@@ -2797,6 +2991,7 @@ l24c7h:	equ 0x24c7
 
 DoCmdI:	equ 0x24c9
 ; Used at following locations:
+; 0x2ab0	(defw directive)
 
 InsNextLine:	equ 0x24cc
 ; Used at following locations:
@@ -2809,6 +3004,7 @@ GetParams:	equ 0x24e6
 
 DoCmdD:	equ 0x24f3
 ; Used at following locations:
+; 0x2aa4	(defw directive)
 ; 0x242a	(call destination)
 
 MoveSrcLines:	equ 0x2517
@@ -2826,6 +3022,7 @@ MoveSrcLinesUp:	equ 0x2531
 
 DoCmdS:	equ 0x2536
 ; Used at following locations:
+; 0x2ac8	(defw directive)
 
 StartEditPrevLine:	equ 0x2540
 ; Used at following locations:
@@ -2847,6 +3044,7 @@ PrevLineFound:	equ 0x2551
 
 DoCmdE:	equ 0x2565
 ; Used at following locations:
+; 0x2aa7	(defw directive)
 
 l2578h:	equ 0x2578
 ; Used at following locations:
@@ -2961,6 +3159,7 @@ l26e8h:	equ 0x26e8
 
 DoCmdL:	equ 0x26ef
 ; Used at following locations:
+; 0x2ab3	(defw directive)
 
 l26f8h:	equ 0x26f8
 ; Used at following locations:
@@ -2980,6 +3179,7 @@ l2712h:	equ 0x2712
 
 DoCmdK:	equ 0x273a
 ; Used at following locations:
+; 0x2ab6	(defw directive)
 
 l2742h:	equ 0x2742
 ; Used at following locations:
@@ -2995,6 +3195,7 @@ sub_2749h:	equ 0x2749
 
 DoCmdF:	equ 0x275a
 ; Used at following locations:
+; 0x2aaa	(defw directive)
 
 l275eh:	equ 0x275e
 ; Used at following locations:
@@ -3027,6 +3228,7 @@ l27b7h:	equ 0x27b7
 
 DoCmdP:	equ 0x27c0
 ; Used at following locations:
+; 0x2ac2	(defw directive)
 
 CmdPGotoEOL:	equ 0x27de
 ; Used at following locations:
@@ -3035,6 +3237,7 @@ CmdPGotoEOL:	equ 0x27de
 
 DoCmdG:	equ 0x27ef
 ; Used at following locations:
+; 0x2aad	(defw directive)
 
 l27f9h:	equ 0x27f9
 ; Used at following locations:
@@ -3042,6 +3245,7 @@ l27f9h:	equ 0x27f9
 
 DoCmdN:	equ 0x2814
 ; Used at following locations:
+; 0x2abc	(defw directive)
 
 sub_2820h:	equ 0x2820
 ; Used at following locations:
@@ -3057,6 +3261,7 @@ l2836h:	equ 0x2836
 
 DoCmdO:	equ 0x2846
 ; Used at following locations:
+; 0x2abf	(defw directive)
 
 l285ch:	equ 0x285c
 ; Used at following locations:
@@ -3092,6 +3297,7 @@ l28c8h:	equ 0x28c8
 
 DoCmdM:	equ 0x28d6
 ; Used at following locations:
+; 0x2ab9	(defw directive)
 
 CompriLineBuf__:	equ 0x28f2
 ; Used at following locations:
@@ -3205,12 +3411,15 @@ PrSrcLiNum:	equ 0x29ed
 
 DoCmdX:	equ 0x29f9
 ; Used at following locations:
+; 0x2ad1	(defw directive)
 
 DoCmdV:	equ 0x2a20
 ; Used at following locations:
+; 0x2ace	(defw directive)
 
 DoCmdZ:	equ 0x2a48
 ; Used at following locations:
+; 0x2ad4	(defw directive)
 
 l2a5eh:	equ 0x2a5e
 ; Used at following locations:
@@ -3230,9 +3439,11 @@ sub_2a6eh:	equ 0x2a6e
 
 DoCmdT:	equ 0x2a74
 ; Used at following locations:
+; 0x2acb	(defw directive)
 
 DoCmdC:	equ 0x2a7a
 ; Used at following locations:
+; 0x2aa1	(defw directive)
 
 GotoSrcLinePar1:	equ 0x2a8c
 ; Used at following locations:
@@ -4162,6 +4373,7 @@ GetLexem:	equ 0x2fc3
 ; 0x38c7	(call destination)
 ; 0x3739	(call destination)
 ; 0x3728	(jp destination)
+; 0x3710	(call destination)
 ; 0x34e0	(call destination)
 ; 0x34d5	(jp destination)
 ; 0x3459	(call destination)
@@ -4352,52 +4564,155 @@ compOptTab:	equ 0x3165
 ; Used at following locations:
 ; 0x2e29	(immediate value)
 
-RL_PACKED: equ 0x3171
-RL_NIL: equ 0x317a
-RL_FORWARD: equ 0x3180
-RL_PROGRAM: equ 0x318a
-RL_IN: equ 0x3194
-RL_OR: equ 0x3199
-RL_ON: equ 0x319e
-RL_TO: equ 0x31a3
-RL_DO: equ 0x31a8
-RL_IF: equ 0x31ad
-RL_SET: equ 0x31b2
-RL_NOT: equ 0x31b8
-RL_MOD: equ 0x31be
-RL_DIV: equ 0x31c4
-RL_VAR: equ 0x31ca
-RL_AND: equ 0x31d0
-RL_FOR: equ 0x31d6
-RL_END: equ 0x31dc
-RL_GOTO: equ 0x31e2
-RL_WITH: equ 0x31e9
-RL_TYPE: equ 0x31f0
-RL_CASE: equ 0x31f7
-RL_ELSE: equ 0x31fe
-RL_THEN: equ 0x3205
-RL_LABEL: equ 0x320c
-RL_CONST: equ 0x3214
-RL_ARRAY: equ 0x321c
-RL_UNTIL: equ 0x3224
-RL_WHILE: equ 0x322c
-RL_BEGIN: equ 0x3234
-RL_RECORD: equ 0x323c
-RL_DOWNTO: equ 0x3245
-RL_REPEAT: equ 0x324e
-RL_FUNCTION: equ 0x3257
-RL_PROCEDURE: equ 0x3262
-;RL_Entry: equ 0x326e
+RL_PACKED:	equ 0x3171
+; Used at following locations:
+; 0x317a	(defw directive)
+
+RL_NIL:	equ 0x317a
+; Used at following locations:
+; 0x3180	(defw directive)
+
+RL_FORWARD:	equ 0x3180
+; Used at following locations:
+; 0x318a	(defw directive)
+
+RL_PROGRAM:	equ 0x318a
+; Used at following locations:
+; 0x3194	(defw directive)
+
+RL_IN:	equ 0x3194
+; Used at following locations:
+; 0x3199	(defw directive)
+
+RL_OR:	equ 0x3199
+; Used at following locations:
+; 0x319e	(defw directive)
+
+RL_ON:	equ 0x319e
+; Used at following locations:
+; 0x31a3	(defw directive)
+
+RL_TO:	equ 0x31a3
+; Used at following locations:
+; 0x31a8	(defw directive)
+
+RL_DO:	equ 0x31a8
+; Used at following locations:
+; 0x31ad	(defw directive)
+
+RL_IF:	equ 0x31ad
+; Used at following locations:
+; 0x31b2	(defw directive)
+
+RL_SET:	equ 0x31b2
+; Used at following locations:
+; 0x31b8	(defw directive)
+
+RL_NOT:	equ 0x31b8
+; Used at following locations:
+; 0x31be	(defw directive)
+
+RL_MOD:	equ 0x31be
+; Used at following locations:
+; 0x31c4	(defw directive)
+
+RL_DIV:	equ 0x31c4
+; Used at following locations:
+; 0x31ca	(defw directive)
+
+RL_VAR:	equ 0x31ca
+; Used at following locations:
+; 0x31d0	(defw directive)
+
+RL_AND:	equ 0x31d0
+; Used at following locations:
+; 0x31d6	(defw directive)
+
+RL_FOR:	equ 0x31d6
+; Used at following locations:
+; 0x31dc	(defw directive)
+
+RL_END:	equ 0x31dc
+; Used at following locations:
+; 0x31e2	(defw directive)
+
+RL_GOTO:	equ 0x31e2
+; Used at following locations:
+; 0x31e9	(defw directive)
+
+RL_WITH:	equ 0x31e9
+; Used at following locations:
+; 0x31f0	(defw directive)
+
+RL_TYPE:	equ 0x31f0
+; Used at following locations:
+; 0x31f7	(defw directive)
+
+RL_CASE:	equ 0x31f7
+; Used at following locations:
+; 0x31fe	(defw directive)
+
+RL_ELSE:	equ 0x31fe
+; Used at following locations:
+; 0x3205	(defw directive)
+
+RL_THEN:	equ 0x3205
+; Used at following locations:
+; 0x320c	(defw directive)
+
+RL_LABEL:	equ 0x320c
+; Used at following locations:
+; 0x3214	(defw directive)
+
+RL_CONST:	equ 0x3214
+; Used at following locations:
+; 0x321c	(defw directive)
+
+RL_ARRAY:	equ 0x321c
+; Used at following locations:
+; 0x3224	(defw directive)
+
+RL_UNTIL:	equ 0x3224
+; Used at following locations:
+; 0x322c	(defw directive)
+
+RL_WHILE:	equ 0x322c
+; Used at following locations:
+; 0x3234	(defw directive)
+
+RL_BEGIN:	equ 0x3234
+; Used at following locations:
+; 0x323c	(defw directive)
+
+RL_RECORD:	equ 0x323c
+; Used at following locations:
+; 0x3245	(defw directive)
+
+RL_DOWNTO:	equ 0x3245
+; Used at following locations:
+; 0x324e	(defw directive)
+
+RL_REPEAT:	equ 0x324e
+; Used at following locations:
+; 0x3257	(defw directive)
+
+RL_FUNCTION:	equ 0x3257
+; Used at following locations:
+; 0x3262	(defw directive)
+
+RL_PROCEDURE:	equ 0x3262
+; Used at following locations:
+; 0x326e	(defw directive)
+; 0x3156	(immediate value)
 
 ResWordsEntry2:	equ 0x3262
 ; Used at following locations:
-; 0x3156	(immediate value)
 
 ResWordsEntry:	equ 0x326e
 ; Used at following locations:
 ; 0x2bd1	(immediate value)
 
-tEadr: equ 0x3270
+tEadr:	equ 0x3270
 ; Used at following locations:
 ; 0x2e6b	(immediate value)
 
@@ -4405,9 +4720,17 @@ tFeh1:	equ 0x327d
 ; Used at following locations:
 ; 0x2e95	(immediate value)
 
-tFeh2: equ 0x3285
-tKeTx: equ 0x328e
-tTabU: equ 0x329f
+tFeh2:	equ 0x3285
+; Used at following locations:
+; 0x2f4d	(immediate value)
+
+tKeTx:	equ 0x328e
+; Used at following locations:
+; 0x2e1e	(immediate value)
+
+tTabU:	equ 0x329f
+; Used at following locations:
+; 0x333f	(immediate value)
 
 ChkType0004:	equ 0x32b2
 ; Used at following locations:
@@ -4613,6 +4936,7 @@ SiS_CompChr:	equ 0x3370
 ChkLabelList__:	equ 0x337c
 ; Used at following locations:
 ; 0x3d61	(call destination)
+; 0x3725	(call destination)
 
 NextListEntry:	equ 0x337f
 ; Used at following locations:
@@ -4921,6 +5245,7 @@ ParseConstVal:	equ 0x3479
 ; 0x47f2	(call destination)
 ; 0x438d	(call destination)
 ; 0x39be	(call destination)
+; 0x3975	(call destination)
 ; 0x34e3	(call destination)
 ; 0x34bc	(call destination)
 ; 0x345c	(call destination)
@@ -5050,21 +5375,87 @@ l355bh:	equ 0x355b
 ; Used at following locations:
 ; 0x3553	(jr destination)
 
+l355dh:	equ 0x355d
+; Used at following locations:
+; 0x36e2	(defw directive)
+
 l3565h:	equ 0x3565
 ; Used at following locations:
 ; 0x3562	(jr destination)
+
+l3566h:	equ 0x3566
+; Used at following locations:
+; 0x36e0	(defw directive)
 
 l356dh:	equ 0x356d
 ; Used at following locations:
 ; 0x3569	(jr destination)
 
+l356eh:	equ 0x356e
+; Used at following locations:
+; 0x36e4	(defw directive)
+
+l3575h:	equ 0x3575
+; Used at following locations:
+; 0x36e6	(defw directive)
+
+l357dh:	equ 0x357d
+; Used at following locations:
+; 0x36e8	(defw directive)
+
+l3586h:	equ 0x3586
+; Used at following locations:
+; 0x36ea	(defw directive)
+
+l358eh:	equ 0x358e
+; Used at following locations:
+; 0x36d6	(defw directive)
+; 0x36ca	(defw directive)
+
 l3596h:	equ 0x3596
 ; Used at following locations:
 ; 0x3593	(jr destination)
 
+l3597h:	equ 0x3597
+; Used at following locations:
+; 0x36d4	(defw directive)
+; 0x36c8	(defw directive)
+
 l359fh:	equ 0x359f
 ; Used at following locations:
 ; 0x359c	(jr destination)
+
+l35a0h:	equ 0x35a0
+; Used at following locations:
+; 0x36cc	(defw directive)
+
+l35aah:	equ 0x35aa
+; Used at following locations:
+; 0x36d8	(defw directive)
+
+l35b0h:	equ 0x35b0
+; Used at following locations:
+; 0x36ce	(defw directive)
+
+l35bbh:	equ 0x35bb
+; Used at following locations:
+; 0x36da	(defw directive)
+
+l35c2h:	equ 0x35c2
+; Used at following locations:
+; 0x36d0	(defw directive)
+
+l35cfh:	equ 0x35cf
+; Used at following locations:
+; 0x36dc	(defw directive)
+
+l35d6h:	equ 0x35d6
+; Used at following locations:
+; 0x36d2	(defw directive)
+
+l35e2h:	equ 0x35e2
+; Used at following locations:
+; 0x36de	(defw directive)
 
 l35e8h:	equ 0x35e8
 ; Used at following locations:
@@ -5076,6 +5467,7 @@ l35ech:	equ 0x35ec
 
 l35f0h:	equ 0x35f0
 ; Used at following locations:
+; 0x36ee	(defw directive)
 ; 0x35ee	(jr destination)
 
 l35f2h:	equ 0x35f2
@@ -5089,6 +5481,10 @@ l35f5h:	equ 0x35f5
 l35f8h:	equ 0x35f8
 ; Used at following locations:
 ; 0x35f5	(jr destination)
+
+l35f9h:	equ 0x35f9
+; Used at following locations:
+; 0x36ec	(defw directive)
 
 l3601h:	equ 0x3601
 ; Used at following locations:
@@ -5104,6 +5500,10 @@ l360dh:	equ 0x360d
 ; 0x360a	(jr destination)
 ; 0x3606	(jr destination)
 
+l360eh:	equ 0x360e
+; Used at following locations:
+; 0x36f2	(defw directive)
+
 l3616h:	equ 0x3616
 ; Used at following locations:
 ; 0x3fc7	(immediate value)
@@ -5113,6 +5513,10 @@ l3619h:	equ 0x3619
 ; Used at following locations:
 ; 0x3616	(jr destination)
 ; 0x3612	(jr destination)
+
+l361ah:	equ 0x361a
+; Used at following locations:
+; 0x36f4	(defw directive)
 
 l3622h:	equ 0x3622
 ; Used at following locations:
@@ -5126,6 +5530,10 @@ l3625h:	equ 0x3625
 ; Used at following locations:
 ; 0x3622	(jr destination)
 
+l3626h:	equ 0x3626
+; Used at following locations:
+; 0x36f6	(defw directive)
+
 l3630h:	equ 0x3630
 ; Used at following locations:
 ; 0x362a	(jr destination)
@@ -5134,10 +5542,18 @@ l3631h:	equ 0x3631
 ; Used at following locations:
 ; 0x362e	(jr destination)
 
+l3632h:	equ 0x3632
+; Used at following locations:
+; 0x36fa	(defw directive)
+
 l3641h:	equ 0x3641
 ; Used at following locations:
 ; 0x363e	(jr destination)
 ; 0x3639	(jr destination)
+
+l3642h:	equ 0x3642
+; Used at following locations:
+; 0x36f8	(defw directive)
 
 l3650h:	equ 0x3650
 ; Used at following locations:
@@ -5147,17 +5563,63 @@ l3651h:	equ 0x3651
 ; Used at following locations:
 ; 0x364e	(jr destination)
 
+l3652h:	equ 0x3652
+; Used at following locations:
+; 0x36fe	(defw directive)
+
+l365fh:	equ 0x365f
+; Used at following locations:
+; 0x36fc	(defw directive)
+
 l366ah:	equ 0x366a
 ; Used at following locations:
 ; 0x3664	(jr destination)
+
+l3674h:	equ 0x3674
+; Used at following locations:
+; 0x3702	(defw directive)
 
 l367fh:	equ 0x367f
 ; Used at following locations:
 ; 0x3679	(jr destination)
 
+l3680h:	equ 0x3680
+; Used at following locations:
+; 0x36f0	(defw directive)
+
+l368bh:	equ 0x368b
+; Used at following locations:
+; 0x3700	(defw directive)
+
+l369ah:	equ 0x369a
+; Used at following locations:
+; 0x3706	(defw directive)
+
+l36a5h:	equ 0x36a5
+; Used at following locations:
+; 0x3704	(defw directive)
+
+l36b2h:	equ 0x36b2
+; Used at following locations:
+; 0x370e	(defw directive)
+
+l36bdh:	equ 0x36bd
+; Used at following locations:
+; 0x370c	(defw directive)
+
+sub_3710h:	equ 0x3710
+; Used at following locations:
+; 0x3cca	(call destination)
+; 0x3c8a	(call destination)
+; 0x3c70	(call destination)
+
 l3722h:	equ 0x3722
 ; Used at following locations:
 ; 0x3719	(immediate value)
+
+l3725h:	equ 0x3725
+; Used at following locations:
+; 0x3756	(jr destination)
 
 l3754h:	equ 0x3754
 ; Used at following locations:
@@ -5348,7 +5810,14 @@ CSq_PushListEl_CallX:	equ 0x396b
 ; Used at following locations:
 ; 0x3950	(immediate value)
 
-CSq_PushIX_CallX: equ 0x3971
+CSq_PushIX_CallX:	equ 0x3971
+; Used at following locations:
+; 0x395a	(immediate value)
+
+l3975h:	equ 0x3975
+; Used at following locations:
+; 0x39bc	(jr destination)
+; 0x3997	(jr destination)
 
 l3999h:	equ 0x3999
 ; Used at following locations:
@@ -5839,6 +6308,7 @@ sub_3f3fh:	equ 0x3f3f
 ; 0x3d84	(call destination)
 ; 0x39a4	(call destination)
 ; 0x384d	(call destination)
+; 0x3713	(call destination)
 
 l3f43h:	equ 0x3f43
 ; Used at following locations:
@@ -7442,12 +7912,6 @@ PXCpChrMap:	equ 0x5311
 
 l531ah:	equ 0x531a
 ; Used at following locations:
-; 0x1a2e	(immediate value)
-
-PXTAPE: equ 0xbc0f
-PXTAPE+1: equ 0xbc10
-PXDISK: equ 0xbc20
-PXDISK+1: equ 0xbc21
 
 PXSTAB:	equ 0x5382
 ; Used at following locations:
@@ -7458,9 +7922,6 @@ PXUSASC:	equ 0x538a
 ; 0x531c	(immediate value)
 
 PXBASCI:	equ 0x53a2
-PXSASCI:	equ 0xbc00
-PXSASCI+1:	equ 0xbc01
-PXASCI:	equ 0xbc08
 ; Used at following locations:
 ; 0x5327	(immediate value)
 
@@ -7469,19 +7930,19 @@ PXSetSUTAB:	equ 0x53be
 ; 0x53cf	(jr destination)
 
 ISRO_s: equ 0x53d1
+; Used at following locations:
 
 PXSendName:	equ 0x53e0
 ; Used at following locations:
 ; 0x53e5	(jr destination)
 
-PXNxtBlock_s: equ 0x53e9
-PXNxtBlock: equ 0xbc47
+PXNxtBlock_s:	equ 0x53e9
+; Used at following locations:
 
 PXSendBlock:	equ 0x53f7
 ; Used at following locations:
 ; 0x53fc	(jr destination)
 
-PXSendCtl:	equ 0xbc5c
 PXSendCtl_s:	equ 0x53fe
 ; Used at following locations:
 ; 0x543e	(jr destination)
@@ -7490,23 +7951,146 @@ PXWaitForReady:	equ 0x5403
 ; Used at following locations:
 ; 0x540f	(jr destination)
 
-MBO_s: equ 0x5422
-CSRO_s: equ 0x5438
-ISRI_s: equ 0x5440
+MBO_s:	equ 0x5422
+; Used at following locations:
+
+CSRO_s:	equ 0x5438
+; Used at following locations:
+
+ISRI_s:	equ 0x5440
+; Used at following locations:
 
 PXSendName2:	equ 0x544d
 ; Used at following locations:
 ; 0x5452	(jr destination)
 
-PXRecvBlock: equ 0x5454
-PXRecvBlock_s: equ 0xbcb2
+PXRecvBlock_s:	equ 0x5454
+; Used at following locations:
 
 PXRecvByte:	equ 0x5465
 ; Used at following locations:
 ; 0x546a	(jr destination)
 
-MBI_s: equ 0x5472
-CSRI_s: equ 0x548b
-SUBNEU_s: equ 0x5490
+MBI_s:	equ 0x5472
+; Used at following locations:
 
+CSRI_s:	equ 0x548b
+; Used at following locations:
+
+SUBNEU_s:	equ 0x5490
+; Used at following locations:
+
+l5491h:	equ 0x5491
+; Used at following locations:
+; 0x2b4d	(jp destination)
+
+CCTL0:	equ 0xb7a6
+; Used at following locations:
+; 0x53ad	(word load pointer)
+; 0x5311	(word load pointer)
+
+SUTAB:	equ 0xb7b0
+; Used at following locations:
+; 0x53be	(word load pointer)
+; 0x5360	(word load pointer)
+; 0x5357	(word load pointer)
+
+SUBALT:	equ 0xb7fe
+; Used at following locations:
+; 0x53bb	(word load pointer)
+; 0x535a	(word load pointer)
+
+PXSASCI:	equ 0xbc00
+; Used at following locations:
+; 0x5334	(byte load pointer)
+; 0x532a	(immediate value)
+
+PXSASCI+1:	equ 0xbc01
+; Used at following locations:
+; 0x5337	(byte load pointer)
+
+PXASCI:	equ 0xbc08
+; Used at following locations:
+; 0x537f	(jp destination)
+; 0x5341	(jp destination)
+
+PXTAPE:	equ 0xbc0f
+; Used at following locations:
+; 0x534b	(byte load pointer)
+
+PXTAPE+1:	equ 0xbc10
+; Used at following locations:
+; 0x534e	(byte load pointer)
+
+PXDISK:	equ 0xbc20
+; Used at following locations:
+; 0x5351	(byte load pointer)
+
+PXDISK+1:	equ 0xbc21
+; Used at following locations:
+; 0x5354	(byte load pointer)
+
+ISRO:	equ 0xbc2f
+; Used at following locations:
+; 0x5382	(defw directive)
+
+PXNxtBlock:	equ 0xbc47
+; Used at following locations:
+; 0x5424	(call destination)
+
+PXSendCtl:	equ 0xbc5c
+; Used at following locations:
+; 0x5454	(call destination)
+
+MBO:	equ 0xbc80
+; Used at following locations:
+; 0x5438	(call destination)
+; 0x5369	(immediate value)
+
+CSRO:	equ 0xbc96
+; Used at following locations:
+; 0x5384	(defw directive)
+
+ISRI:	equ 0xbc9e
+; Used at following locations:
+; 0x5386	(defw directive)
+
+PXRecvBlock:	equ 0xbcb2
+; Used at following locations:
+; 0x5475	(call destination)
+
+MBI:	equ 0xbcd0
+; Used at following locations:
+; 0x536f	(immediate value)
+
+CSRI:	equ 0xbce9
+; Used at following locations:
+; 0x5388	(defw directive)
+
+SUBNEU:	equ 0xbcee
+; Used at following locations:
+; 0x53cc	(immediate value)
+; 0x535d	(immediate value)
+
+SUBNEU+2:	equ 0xbcf0
+; Used at following locations:
+; 0x536c	(word load pointer)
+
+SUBNEU+10:	equ 0xbcf8
+; Used at following locations:
+; 0x5372	(word load pointer)
+
+SUBNEU+16:	equ 0xbcfe
+; Used at following locations:
+; 0x5378	(immediate value)
+
+PV1:	equ 0xf003
+; Used at following locations:
+; 0x548b	(call destination)
+; 0x5480	(call destination)
+; 0x542e	(call destination)
+; 0x541c	(call destination)
+; 0x5418	(call destination)
+; 0x5406	(call destination)
+; 0x0252	(call destination)
 
