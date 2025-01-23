@@ -1986,7 +1986,7 @@ l0e64h:
 	or h	
 	ld h,a	
 	ret	
-sub_0e69h:
+Trunc__:
 	bit 6,h
 	ret z	
 	ld a,080h
@@ -2034,12 +2034,13 @@ l0ea7h:
 	ld l,a	
 	ld h,000h
 	ret	
+Round__:
 	push hl	
 	push de	
 	ld de,0ff00h
 	ld hl,04000h
 	call sub_0ca1h
-sub_0ebbh:
+Entier__:
 	bit 6,h
 	ret z	
 	ld a,080h
@@ -2285,7 +2286,7 @@ sub_103dh:
 sub_1045h:
 	ld (l17a1h),hl
 	ld (l17a3h),de
-	call sub_0e69h
+	call Trunc__
 	ld d,l	
 	pop hl	
 	pop bc	
@@ -2296,7 +2297,7 @@ sub_1045h:
 	push hl	
 	ret	
 l105ah:
-	ld hl,0117fh
+	ld hl,realStrPart
 	call OutZStr
 	ld a,(l1798h)
 	inc a	
@@ -2362,7 +2363,7 @@ l10bdh:
 	add a,a	
 	ld e,a	
 	ld d,000h
-	ld hl,l116bh
+	ld hl,xxTab1__
 	add hl,de	
 	ld e,(hl)	
 	inc hl	
@@ -2468,29 +2469,34 @@ l1143h:
 	ld hl,l1797h
 	dec (hl)	
 	jp l10bdh
-l116bh:
-	ld h,(hl)	
-	ei	
-	ld h,(hl)	
-	ld h,(hl)	
-	add a,l	
-	ret m	
-	ex de,hl	
-	ld d,c	
-	ld (hl),0f5h
-	add a,l	
-	ld b,c	
-	adc a,e	
-	pop af	
-	in a,(068h)
-	sub 0eeh
-	jp po,l2053h
-	jr nc,l11b0h
-	nop	
-	ld b,l	
-	dec hl	
-	jr nc,$+50
-	nop	
+xxTab1__:
+
+; BLOCK 'xxTab1__' (start 0x116b end 0x1188)
+xxTab1___start:
+	defb 066h
+	defb 0fbh
+	defb 066h
+	defb 066h
+	defb 085h
+	defb 0f8h
+	defb 0ebh
+	defb 051h
+	defb 036h
+	defb 0f5h
+	defb 085h
+	defb 041h
+	defb 08bh
+	defb 0f1h
+	defb 0dbh
+	defb 068h
+	defb 0d6h
+	defb 0eeh
+	defb 0e2h
+	defb 053h
+realStrPart:
+	defb ' 0.',000h
+        defb 'E+00',000h
+Sqrt__:
 	ld a,h	
 	or a	
 	jp m,ErrMath
@@ -2677,27 +2683,11 @@ l12b1h:
 	pop bc	
 	pop bc	
 	pop bc	
-	ld de,l12bah
+	ld de,tExpErw
 	jp PrErr2
-l12bah:
-	ld b,l	
-	ld a,b	
-	ld (hl),b	
-	ld l,a	
-	ld l,(hl)	
-	ld h,l	
-	ld l,(hl)	
-	ld (hl),h	
-	jr nz,$+103
-	ld (hl),d	
-	ld (hl),a	
-	ld h,c	
-	ld (hl),d	
-	ld (hl),h	
-	ld h,l	
-	ld (hl),h	
-	nop	
-sub_12cch:
+tExpErw:
+	defb 'Exponent erwartet',000h
+Frac__:
 	ld a,h	
 	or a	
 	ret z	
@@ -2740,6 +2730,7 @@ l12f2h:
 	ld e,l	
 	call sub_0ca1h
 	ret	
+Exp__:
 	push hl	
 	push de	
 	ld hl,05c55h
@@ -2747,11 +2738,11 @@ l12f2h:
 	call RealMul__
 	push hl	
 	push de	
-	call sub_0ebbh
+	call Entier__
 	ld (l1797h),hl
 	pop de	
 	pop hl	
-	call sub_12cch
+	call Frac__
 	bit 6,h
 	jr z,l1394h
 	call sub_1720h
@@ -2846,6 +2837,7 @@ l13a6h:
 	ld e,d	
 	ld d,d	
 	ld (de),a	
+Ln__:
 	ld a,h	
 	dec a	
 	jp m,ErrMath
@@ -2915,6 +2907,7 @@ l142eh:
 	ld d,l	
 	ld e,l	
 	ret	
+Cos__:
 	bit 6,h
 	jr z,l142eh
 	ld a,d	
@@ -2931,6 +2924,7 @@ l144ah:
 	ex af,af'	
 	ld a,002h
 	jr l1466h
+Sin__:
 	bit 6,h
 	ret z	
 	ld a,d	
@@ -3111,7 +3105,7 @@ sub_1581h:
 	ld bc,0fdc0h
 	push bc	
 	call RealMul__
-	call sub_12cch
+	call Frac__
 	pop af	
 	ex af,af'	
 	ld a,d	
@@ -3119,8 +3113,8 @@ sub_1581h:
 	ret	
 xxTab__:
 
-; BLOCK 'xxTab__' (start 0x1597 end 0x15a7)
-xxTab___start:
+; BLOCK 'xxTab2__' (start 0x1597 end 0x15a7)
+xxTab2___start:
 	defb 000h
 	defb 001h
 	defb 003h
@@ -3137,7 +3131,7 @@ xxTab___start:
 	defb 001h
 	defb 003h
 	defb 002h
-xxTab___end:
+Arctan__:
 	bit 6,h
 	ret z	
 	ld a,h	
@@ -3263,6 +3257,7 @@ l1666h:
 l1675h:
 	xor a	
 	jr l16b7h
+Tan__:
 	bit 6,h
 	ret z	
 	ld a,d	
@@ -3276,7 +3271,7 @@ l1675h:
 	ld bc,0fec1h
 	push bc	
 	call RealMul__
-	call sub_12cch
+	call Frac__
 	call sub_1720h
 	ld a,(l1797h)
 	xor h	
@@ -3450,23 +3445,13 @@ PasIDEStartAddr:
 	defw START_PASCAL
 RL_SETSYS:
 	defw 00000h
-	defb 053h
-	defb 045h
-	defb 054h
-	defb 053h
-	defb 059h
-	defb 0d3h
+	defb 'SETSY','S'+0x80
 	defb 006h
 	defb 04ah
 	defb 051h
 RL_GETSYS:
 	defw RL_SETSYS
-	defb 047h
-	defb 045h
-	defb 054h
-	defb 053h
-	defb 059h
-	defb 0d3h
+	defb 'GETSY','S'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3475,32 +3460,19 @@ RL_GETSYS:
 	defb 002h
 RL_PLOT:
 	defw RL_GETSYS
-	defb 050h
-	defb 04ch
-	defb 04fh
-	defb 0d4h
+	defb 'PLO','T'+0x80
 	defb 006h
 	defb 074h
 	defb 051h
 RL_CLRPLOT:
 	defw RL_PLOT
-	defb 043h
-	defb 04ch
-	defb 052h
-	defb 050h
-	defb 04ch
-	defb 04fh
-	defb 0d4h
+	defb 'CLRPLO','T'+0x80
 	defb 006h
 	defb 0a0h
 	defb 051h
 RL_PTEST:
 	defw RL_CLRPLOT
-	defb 050h
-	defb 054h
-	defb 045h
-	defb 053h
-	defb 0d4h
+	defb 'PTES','T'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3509,10 +3481,7 @@ RL_PTEST:
 	defb 003h
 RL_GETC:
 	defw RL_PTEST
-	defb 047h
-	defb 045h
-	defb 054h
-	defb 0c3h
+	defb 'GET','C'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3521,52 +3490,31 @@ RL_GETC:
 	defb 003h
 RL_SETC:
 	defw RL_GETC
-	defb 053h
-	defb 045h
-	defb 054h
-	defb 0c3h
+	defb 'SET','C'+0x80
 	defb 006h
 	defb 060h
 	defb 051h
 RL_LINEPLOT:
 	defw RL_SETC
-	defb 04ch
-	defb 049h
-	defb 04eh
-	defb 045h
-	defb 050h
-	defb 04ch
-	defb 04fh
-	defb 0d4h
+	defb 'LINEPLO','T'+0x80
 	defb 006h
 	defb 0b4h
 	defb 051h
 RL_CIRCLE:
 	defw RL_LINEPLOT
-	defb 043h
-	defb 049h
-	defb 052h
-	defb 043h
-	defb 04ch
-	defb 0c5h
+	defb 'CIRCL','E'+0x80
 	defb 006h
 	defb 0d0h
 	defb 051h
 RL_GOTOXY:
 	defw RL_CIRCLE
-	defb 047h
-	defb 04fh
-	defb 054h
-	defb 04fh
-	defb 058h
-	defb 0d9h
+	defb 'GOTOX','Y'+0x80
 	defb 006h
 	defb 036h
 	defb 051h
 RL_PI:
 	defw RL_GOTOXY
-	defb 050h
-	defb 0c9h
+	defb 'P','I'+0x80
 	defb 001h
 	defb 002h
 	defb 000h
@@ -3576,22 +3524,12 @@ RL_PI:
 	defb 064h
 RL_FRAC:
 	defw RL_PI
-	defb 046h
-	defb 052h
-	defb 041h
-	defb 0c3h
+	defb 'FRA','C'+0x80
 	defb 00bh
-	defb 0cch
-	defb 012h
+	defw Frac__
 RL_READKBD:
 	defw RL_FRAC
-	defb 052h
-	defb 045h
-	defb 041h
-	defb 044h
-	defb 04bh
-	defb 042h
-	defb 0c4h
+	defb 'READKB','D'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -3600,9 +3538,7 @@ RL_READKBD:
 	defb 001h
 RL_SHR:
 	defw RL_READKBD
-	defb 053h
-	defb 048h
-	defb 0d2h
+	defb 'SH','R'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3611,9 +3547,7 @@ RL_SHR:
 	defb 003h
 RL_SHL:
 	defw RL_SHR
-	defb 053h
-	defb 048h
-	defb 0cch
+	defb 'SH','L'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3622,8 +3556,7 @@ RL_SHL:
 	defb 003h
 RL_LO:
 	defw RL_SHL
-	defb 04ch
-	defb 0cfh
+	defb 'L','O'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3632,8 +3565,7 @@ RL_LO:
 	defb 002h
 RL_HI:
 	defw RL_LO
-	defb 048h
-	defb 0c9h
+	defb 'H','I'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3642,10 +3574,7 @@ RL_HI:
 	defb 002h
 RL_SWAP:
 	defw RL_HI
-	defb 053h
-	defb 057h
-	defb 041h
-	defb 0d0h
+	defb 'SWA','P'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3654,10 +3583,7 @@ RL_SWAP:
 	defb 002h
 RL_BXOR:
 	defw RL_SWAP
-	defb 042h
-	defb 058h
-	defb 04fh
-	defb 0d2h
+	defb 'BXO','R'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3666,9 +3592,7 @@ RL_BXOR:
 	defb 003h
 RL_BOR:
 	defw RL_BXOR
-	defb 042h
-	defb 04fh
-	defb 0d2h
+	defb 'BO','R'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3677,10 +3601,7 @@ RL_BOR:
 	defb 003h
 RL_BAND:
 	defw RL_BOR
-	defb 042h
-	defb 041h
-	defb 04eh
-	defb 0c4h
+	defb 'BAN','D'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3689,59 +3610,37 @@ RL_BAND:
 	defb 003h
 RL_EXP:
 	defw RL_BAND
-	defb 045h
-	defb 058h
-	defb 0d0h
+	defb 'EX','P'+0x80
 	defb 00bh
-	defb 007h
-	defb 013h
+	defw Exp__
 RL_LN:
 	defw RL_EXP
-	defb 04ch
-	defb 0ceh
+	defb 'L','N'+0x80
 	defb 00bh
-	defb 0adh
-	defb 013h
+	defw Ln__
 RL_ARCTAN:
 	defw RL_LN
-	defb 041h
-	defb 052h
-	defb 043h
-	defb 054h
-	defb 041h
-	defb 0ceh
+	defb 'ARCTA','N'+0x80
 	defb 00bh
-	defb 0a7h
-	defb 015h
+	defw Arctan__
 RL_TAN:
 	defw RL_ARCTAN
-	defb 054h
-	defb 041h
-	defb 0ceh
+	defb 'TA','N'+0x80
 	defb 00bh
-	defb 078h
-	defb 016h
+	defw Tan__
 RL_COS:
 	defw RL_TAN
-	defb 043h
-	defb 04fh
-	defb 0d3h
+	defb 'CO','S'+0x80
 	defb 00bh
-	defb 034h
-	defb 014h
+	defw Cos__
 RL_SIN:
 	defw RL_COS
-	defb 053h
-	defb 049h
-	defb 0ceh
+	defb 'SI','N'+0x80
 	defb 00bh
-	defb 052h
-	defb 014h
+	defw Sin__
 RL_INP:
 	defw RL_SIN
-	defb 049h
-	defb 04eh
-	defb 0d0h
+	defb 'IN','P'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -3750,58 +3649,36 @@ RL_INP:
 	defb 002h
 RL_OUT:
 	defw RL_INP
-	defb 04fh
-	defb 055h
-	defb 0d4h
+	defb 'OU','T'+0x80
 	defb 006h
 	defb 090h
 	defb 052h
 RL_SIZE:
 	defw RL_OUT
-	defb 053h
-	defb 049h
-	defb 05ah
-	defb 0c5h
+	defb 'SIZ','E'+0x80
 	defb 007h
 	defb 06bh
 	defb 052h
 RL_ADDR:
 	defw RL_SIZE
-	defb 041h
-	defb 044h
-	defb 044h
-	defb 0d2h
+	defb 'ADD','R'+0x80
 	defb 007h
 	defb 07fh
 	defb 052h
 RL_INLINE:
 	defw RL_ADDR
-	defb 049h
-	defb 04eh
-	defb 04ch
-	defb 049h
-	defb 04eh
-	defb 0c5h
+	defb 'INLIN','E'+0x80
 	defb 006h
 	defb 08ah
 	defb 043h
 RL_ENTIER:
 	defw RL_INLINE
-	defb 045h
-	defb 04eh
-	defb 054h
-	defb 049h
-	defb 045h
-	defb 0d2h
+	defb 'ENTIE','R'+0x80
 	defb 00ch
-	defb 0bbh
-	defb 00eh
+	defw Entier__
 RL_USER:
 	defw RL_ENTIER
-	defb 055h
-	defb 053h
-	defb 045h
-	defb 0d2h
+	defb 'USE','R'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
@@ -3810,12 +3687,7 @@ RL_USER:
 	defb 002h
 RL_RANDOM:
 	defw RL_USER
-	defb 052h
-	defb 041h
-	defb 04eh
-	defb 044h
-	defb 04fh
-	defb 0cdh
+	defb 'RANDO','M'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3824,16 +3696,7 @@ RL_RANDOM:
 	defb 001h
 RL_KEYPRESSED:
 	defw RL_RANDOM
-	defb 04bh
-	defb 045h
-	defb 059h
-	defb 050h
-	defb 052h
-	defb 045h
-	defb 053h
-	defb 053h
-	defb 045h
-	defb 0c4h
+	defb 'KEYPRESSE','D'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3842,10 +3705,7 @@ RL_KEYPRESSED:
 	defb 001h
 RL_HALT:
 	defw RL_KEYPRESSED
-	defb 048h
-	defb 041h
-	defb 04ch
-	defb 0d4h
+	defb 'HAL','T'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
@@ -3854,10 +3714,7 @@ RL_HALT:
 	defb 001h
 RL_EOLN:
 	defw RL_HALT
-	defb 045h
-	defb 04fh
-	defb 04ch
-	defb 0ceh
+	defb 'EOL','N'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3866,10 +3723,7 @@ RL_EOLN:
 	defb 001h
 RL_PAGE:
 	defw RL_EOLN
-	defb 050h
-	defb 041h
-	defb 047h
-	defb 0c5h
+	defb 'PAG','E'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
@@ -3878,141 +3732,89 @@ RL_PAGE:
 	defb 001h
 RL_SQRT:
 	defw RL_PAGE
-	defb 053h
-	defb 051h
-	defb 052h
-	defb 0d4h
+	defb 'SQR','T'+0x80
 	defb 00bh
-	defb 088h
-	defb 011h
+	defw Sqrt__
 RL_ROUND:
 	defw RL_SQRT
-	defb 052h
-	defb 04fh
-	defb 055h
-	defb 04eh
-	defb 0c4h
+	defb 'ROUN','D'+0x80
 	defb 00ch
-	defb 0b0h
-	defb 00eh
+	defw Round__
 RL_TRUNC:
 	defw RL_ROUND
-	defb 054h
-	defb 052h
-	defb 055h
-	defb 04eh
-	defb 0c3h
+	defb 'TRUN','C'+0x80
 	defb 00ch
-	defb 069h
-	defb 00eh
+	defw Trunc__
 RL_MAXINT:
 	defw RL_TRUNC
-	defb 04dh
-	defb 041h
-	defb 058h
-	defb 049h
-	defb 04eh
-	defb 0d4h
+	defb 'MAXIN','T'+0x80
 	defb 001h
 	defb 001h
 	defb 000h
-	defb 0ffh
-	defb 07fh
+	defw 07fffh
 RL_SUCC:
 	defw RL_MAXINT
-	defb 053h
-	defb 055h
-	defb 043h
-	defb 0c3h
+	defb 'SUC','C'+0x80
 	defb 007h
 	defb 06ch
 	defb 043h
 RL_PRED:
 	defw RL_SUCC
-	defb 050h
-	defb 052h
-	defb 045h
-	defb 0c4h
+	defb 'PRE','D'+0x80
 	defb 007h
 	defb 05bh
 	defb 043h
 RL_ORD:
 	defw RL_PRED
-	defb 04fh
-	defb 052h
-	defb 0c4h
+	defb 'OR','D'+0x80
 	defb 007h
 	defb 04ch
 	defb 043h
 RL_PEEK:
 	defw RL_ORD
-	defb 050h
-	defb 045h
-	defb 045h
-	defb 0cbh
+	defb 'PEE','K'+0x80
 	defb 007h
 	defb 036h
 	defb 045h
 RL_POKE:
 	defw RL_PEEK
-	defb 050h
-	defb 04fh
-	defb 04bh
-	defb 0c5h
+	defb 'POK','E'+0x80
 	defb 006h
 	defb 044h
 	defb 038h
 RL_RELEASE:
 	defw RL_POKE
-	defb 052h
-	defb 045h
-	defb 04ch
-	defb 045h
-	defb 041h
-	defb 053h
-	defb 0c5h
+	defb 'RELEAS','E'+0x80
 	defb 006h
 	defb 07bh
 	defb 050h
 RL_MARK:
 	defw RL_RELEASE
-	defb 04dh
-	defb 041h
-	defb 052h
-	defb 0cbh
+	defb 'MAR','K'+0x80
 	defb 006h
 	defb 076h
 	defb 050h
 RL_NEW:
 	defw RL_MARK
-	defb 04eh
-	defb 045h
-	defb 0d7h
+	defb 'NE','W'+0x80
 	defb 006h
 	defb 09eh
 	defb 050h
 RL_TOUT:
 	defw RL_NEW
-	defb 054h
-	defb 04fh
-	defb 055h
-	defb 0d4h
+	defb 'TOU',T''+0x80
 	defb 006h
 	defb 0fah
 	defb 050h
 RL_TIN:
 	defw RL_TOUT
-	defb 054h
-	defb 049h
-	defb 0ceh
+	defb 'TI','N'+0x80
 	defb 006h
 	defb 0eeh
 	defb 050h
 RL_CHR:
 	defw RL_TIN
-	defb 043h
-	defb 048h
-	defb 0d2h
+	defb 'CH',R''+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -4021,9 +3823,7 @@ RL_CHR:
 	defb 002h
 RL_ODD:
 	defw RL_CHR
-	defb 04fh
-	defb 044h
-	defb 0c4h
+	defb 'OD','D'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -4032,9 +3832,7 @@ RL_ODD:
 	defb 002h
 RL_ABS:
 	defw RL_ODD
-	defb 041h
-	defb 042h
-	defb 0d3h
+	defb 'AB','S'+0x80
 	defb 00dh
 	defb 0e3h
 	defb 052h
@@ -4042,9 +3840,7 @@ RL_ABS:
 	defb 052h
 RL_SQR:
 	defw RL_ABS
-	defb 053h
-	defb 051h
-	defb 0d2h
+	defb 'SQ','R'+0x80
 	defb 00dh
 	defb 0dch
 	defb 052h
@@ -4052,11 +3848,7 @@ RL_SQR:
 	defb 052h
 RL_FALSE:
 	defw RL_SQR
-	defb 046h
-	defb 041h
-	defb 04ch
-	defb 053h
-	defb 0c5h
+	defb 'FALS','E'+0x80
 	defb 001h
 	defb 004h
 	defb 000h
@@ -4064,10 +3856,7 @@ RL_FALSE:
 	defb 001h
 RL_TRUE:
 	defw RL_FALSE
-	defb 054h
-	defb 052h
-	defb 055h
-	defb 0c5h
+	defb 'TRU','E'+0x80
 	defb 001h
 	defb 004h
 	defb 000h
@@ -4075,13 +3864,7 @@ RL_TRUE:
 	defb 001h
 RL_BOOLEAN:
 	defw RL_TRUE
-	defb 042h
-	defb 04fh
-	defb 04fh
-	defb 04ch
-	defb 045h
-	defb 041h
-	defb 0ceh
+	defb 'BOOLEA','N'+0x80
 	defb 003h
 	defb 004h
 	defb 000h
@@ -4093,10 +3876,7 @@ RL_BOOLEAN:
 	defb 000h
 RL_CHAR:
 	defw RL_BOOLEAN
-	defb 043h
-	defb 048h
-	defb 041h
-	defb 0d2h
+	defb 'CHA','R'+0x80
 	defb 003h
 	defb 003h
 	defb 000h
@@ -4108,10 +3888,7 @@ RL_CHAR:
 	defb 000h
 RL_REAL:
 	defw RL_CHAR
-	defb 052h
-	defb 045h
-	defb 041h
-	defb 0cch
+	defb 'REA','L'+0x80
 	defb 003h
 	defb 002h
 	defb 000h
@@ -4123,13 +3900,7 @@ RL_REAL:
 	defb 000h
 RL_INTEGER:
 	defw RL_REAL
-	defb 049h
-	defb 04eh
-	defb 054h
-	defb 045h
-	defb 047h
-	defb 045h
-	defb 0d2h
+	defb 'INTEGE','R'+0x80
 	defb 003h
 	defb 001h
 	defb 000h
@@ -4141,43 +3912,25 @@ RL_INTEGER:
 	defb 000h
 RL_READLN:
 	defw RL_INTEGER
-	defb 052h
-	defb 045h
-	defb 041h
-	defb 044h
-	defb 04ch
-	defb 0ceh
+	defb 'READL','N'+0x80
 	defb 006h
 	defb 0e5h
 	defb 03eh
 RL_READ:
 	defw RL_READLN
-	defb 052h
-	defb 045h
-	defb 041h
-	defb 0c4h
+	defb 'REA','D'+0x80
 	defb 006h
 	defb 095h
 	defb 03eh
 RL_WRITELN:
 	defw RL_READ
-	defb 057h
-	defb 052h
-	defb 049h
-	defb 054h
-	defb 045h
-	defb 04ch
-	defb 0ceh
+	defb 'WRITEL','N'+0x80
 	defb 006h
 	defb 06eh
 	defb 03dh
 RL_WRITE:
 	defw RL_WRITELN
-	defb 057h
-	defb 052h
-	defb 049h
-	defb 054h
-	defb 0c5h
+	defb 'WRIT','E'+0x80
 	defb 006h
 	defb 081h
 	defb 03dh

@@ -1754,8 +1754,9 @@ l0e64h:	equ 0x0e64
 ; Used at following locations:
 ; 0x0e5c	(jp destination)
 
-sub_0e69h:	equ 0x0e69
+Trunc__:	equ 0x0e69
 ; Used at following locations:
+; 0x1a1f	(defw directive)
 ; 0x104c	(call destination)
 
 l0e7bh:	equ 0x0e7b
@@ -1782,8 +1783,13 @@ l0ea7h:	equ 0x0ea7
 ; Used at following locations:
 ; 0x0ea2	(jp destination)
 
-sub_0ebbh:	equ 0x0ebb
+Round__:	equ 0x0eb0
 ; Used at following locations:
+; 0x1a15	(defw directive)
+
+Entier__:	equ 0x0ebb
+; Used at following locations:
+; 0x19b2	(defw directive)
 ; 0x1314	(call destination)
 
 l0ed6h:	equ 0x0ed6
@@ -2002,9 +2008,17 @@ l1143h:	equ 0x1143
 ; Used at following locations:
 ; 0x113b	(jr destination)
 
-l116bh:	equ 0x116b
+xxTab1__:	equ 0x116b
 ; Used at following locations:
 ; 0x10c5	(immediate value)
+
+realStrPart:	equ 0x117f
+; Used at following locations:
+; 0x105a	(immediate value)
+
+Sqrt__:	equ 0x1188
+; Used at following locations:
+; 0x1a0b	(defw directive)
 
 l1199h:	equ 0x1199
 ; Used at following locations:
@@ -2111,12 +2125,13 @@ l12b1h:	equ 0x12b1
 ; Used at following locations:
 ; 0x1293	(jr destination)
 
-l12bah:	equ 0x12ba
+tExpErw:	equ 0x12ba
 ; Used at following locations:
 ; 0x12b4	(immediate value)
 
-sub_12cch:	equ 0x12cc
+Frac__:	equ 0x12cc
 ; Used at following locations:
+; 0x18dd	(defw directive)
 ; 0x1690	(call destination)
 ; 0x158f	(call destination)
 ; 0x131c	(call destination)
@@ -2137,6 +2152,10 @@ l12e2h:	equ 0x12e2
 l12f2h:	equ 0x12f2
 ; Used at following locations:
 ; 0x12cf	(jp destination)
+
+Exp__:	equ 0x1307
+; Used at following locations:
+; 0x194d	(defw directive)
 
 l1331h:	equ 0x1331
 ; Used at following locations:
@@ -2171,6 +2190,10 @@ l13a6h:	equ 0x13a6
 ; Used at following locations:
 ; 0x138f	(immediate value)
 
+Ln__:	equ 0x13ad
+; Used at following locations:
+; 0x1954	(defw directive)
+
 l141ch:	equ 0x141c
 ; Used at following locations:
 ; 0x1418	(jp destination)
@@ -2180,9 +2203,17 @@ l142eh:	equ 0x142e
 ; 0x143b	(jp destination)
 ; 0x1436	(jr destination)
 
+Cos__:	equ 0x1434
+; Used at following locations:
+; 0x196f	(defw directive)
+
 l144ah:	equ 0x144a
 ; Used at following locations:
 ; 0x1443	(jr destination)
+
+Sin__:	equ 0x1452
+; Used at following locations:
+; 0x1977	(defw directive)
 
 l1463h:	equ 0x1463
 ; Used at following locations:
@@ -2265,6 +2296,8 @@ xxTab__:	equ 0x1597
 ; Used at following locations:
 ; 0x1499	(immediate value)
 
+Arctan__:	equ 0x15a7
+
 l15cdh:	equ 0x15cd
 ; Used at following locations:
 ; 0x15b4	(jp destination)
@@ -2288,6 +2321,10 @@ l1666h:	equ 0x1666
 l1675h:	equ 0x1675
 ; Used at following locations:
 ; 0x16a6	(jr destination)
+
+Tan__:	equ 0x1678
+; Used at following locations:
+; 0x1967	(defw directive)
 
 l16b6h:	equ 0x16b6
 ; Used at following locations:
@@ -2564,6 +2601,9 @@ ram_end:	equ 0x1854
 ; 0x2358	(word load pointer)
 
 heapEndAddr:	equ 0x1856
+; Used at following locations:
+; 0x3334	(word load pointer)
+
 PasIDEStartAddr:	equ 0x1856
 ; Used at following locations:
 ; 0x3334	(word load pointer)
