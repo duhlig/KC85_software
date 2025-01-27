@@ -474,6 +474,8 @@ CSq: unlabeled first 0x46bb unlabeled last 0x46bb type bytedata
 CSq: unlabeled first 0x4ad9 unlabeled last 0x4ad9 type bytedata
 CSq: unlabeled first 0x4adf unlabeled last 0x4adf type bytedata
 
+xxTab3__: unlabeled start 0x4c9c unlabeled last 0x4ca6 type bytedata
+
 PXSTAB: first 0x5382 unlabeled last 0x5389 type pointers
 PXUSASC: unlabeled first 0x538a unlabeled last 0x53a1 type bytedata
 PXSASCI_PR: first 0x53a2 unlabeled last 0x53a3 type worddata

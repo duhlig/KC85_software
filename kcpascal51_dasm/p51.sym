@@ -30,14 +30,7 @@ iobuf+20:	equ 0x0094
 ; Used at following locations:
 ; 0x0325	(word load pointer)
 
-l01eeh:	equ 0x01ee
-; Used at following locations:
-; 0x1739	(immediate value)
-
-;PasPrgMenuHdr:	equ 0x0200
-;; Kann hier nicht definiert werden, weil 0x0200 auch für Zählerinitiali-
-;; sierung genutzt wird.
-l0200h:	equ 0x0200
+PasPrgMenuHdr:	equ 0x0200
 ; Used at following locations:
 ; 0x5317	(immediate value)
 ; 0x2ef2	(immediate value)
@@ -1061,9 +1054,6 @@ TNumTooBig:	equ 0x0995
 ; Used at following locations:
 ; 0x08ed	(immediate value)
 
-TEmpty:	equ 0x09a2
-; Used at following locations:
-
 TNumExpected:	equ 0x09a3
 ; Used at following locations:
 ; 0x08e6	(immediate value)
@@ -1970,12 +1960,6 @@ l10f9h:	equ 0x10f9
 ; Used at following locations:
 ; 0x1106	(djnz destination)
 
-l1110h:	equ 0x1110
-; Used at following locations:
-; 0x3d29	(immediate value)
-; 0x3c74	(immediate value)
-; 0x376e	(immediate value)
-
 l111bh:	equ 0x111b
 ; Used at following locations:
 ; 0x1111	(jp destination)
@@ -2026,7 +2010,6 @@ l1199h:	equ 0x1199
 
 l11b0h:	equ 0x11b0
 ; Used at following locations:
-; 0x1180	(jr destination)
 
 sub_11b1h:	equ 0x11b1
 ; Used at following locations:
@@ -2297,6 +2280,8 @@ xxTab__:	equ 0x1597
 ; 0x1499	(immediate value)
 
 Arctan__:	equ 0x15a7
+; Used at following locations:
+; 0x195f	(defw directive)
 
 l15cdh:	equ 0x15cd
 ; Used at following locations:
@@ -2606,7 +2591,6 @@ heapEndAddr:	equ 0x1856
 
 PasIDEStartAddr:	equ 0x1856
 ; Used at following locations:
-; 0x3334	(word load pointer)
 
 RL_SETSYS:	equ 0x1858
 ; Used at following locations:
@@ -2875,14 +2859,11 @@ RL_WRITELN:	equ 0x1b1f
 
 RL_WRITE:	equ 0x1b2b
 ; Used at following locations:
+; 0x2cd5	(defw directive)
 
 l1f40h:	equ 0x1f40
 ; Used at following locations:
 ; 0x0370	(immediate value)
-
-l2053h:	equ 0x2053
-; Used at following locations:
-; 0x117d	(jp destination)
 
 START_PASCAL:	equ 0x2355
 ; Used at following locations:
@@ -4607,6 +4588,7 @@ compOptTab:	equ 0x3165
 RL_PACKED:	equ 0x3171
 ; Used at following locations:
 ; 0x317a	(defw directive)
+; 0x2cd3	(defw directive)
 
 RL_NIL:	equ 0x317a
 ; Used at following locations:
@@ -4740,12 +4722,12 @@ RL_FUNCTION:	equ 0x3257
 ; Used at following locations:
 ; 0x3262	(defw directive)
 
-RL_PROCEDURE:	equ 0x3262
+ResWordsEntry2:	equ 0x3262
 ; Used at following locations:
 ; 0x326e	(defw directive)
 ; 0x3156	(immediate value)
 
-ResWordsEntry2:	equ 0x3262
+RL_PROCEDURE:	equ 0x3262
 ; Used at following locations:
 
 ResWordsEntry:	equ 0x326e
@@ -7928,6 +7910,7 @@ l52ceh:	equ 0x52ce
 
 StartPASSrc:	equ 0x52f3
 ; Used at following locations:
+; 0x2cd9	(defw directive)
 ; 0x29f9	(immediate value)
 ; 0x2379	(immediate value)
 
@@ -7949,9 +7932,6 @@ PXKillProlog:	equ 0x530f
 PXCpChrMap:	equ 0x5311
 ; Used at following locations:
 ; 0x530d	(jr destination)
-
-l531ah:	equ 0x531a
-; Used at following locations:
 
 PXSTAB:	equ 0x5382
 ; Used at following locations:

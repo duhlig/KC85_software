@@ -8,7 +8,6 @@ iobuf:	equ 0x0080
 ;iobuf+17:	equ 0x0091
 ;iobuf+19:	equ 0x0093
 ;iobuf+20:	equ 0x0094
-l01eeh:	equ 0x01ee
 l1798h:	equ 0x1798
 CCTL0:	equ 0xb7a6
 SUTAB:	equ 0xb7b0
@@ -35,10 +34,10 @@ SUBNEU:	equ 0xbcee
 ;SUBNEU+16:	equ 0xbcfe
 PV1:	equ 0xf003
 
-l0200h:
+PasPrgMenuHdr:
 	defw 00000h
 PasPrgMenuName:
-	defb 000h,000h,000h,000h,000h,000h,000h,000h
+	defs 8
 	defb 000h
 	jp PasPrgStart
 MenuPRec:
@@ -189,7 +188,7 @@ l0314h:
 	ld hl,l04d5h
 	ld (iobuf+20),hl
 	ld hl,07f7fh
-	ld (l0200h),hl
+	ld (PasPrgMenuHdr),hl
 	ld hl,00000h
 	ld (MenuPEnt),hl
 	ld (MenuPRec),hl
@@ -845,7 +844,7 @@ SaveLoadEnd:
 	pop ix
 	ret	
 SaveCom:
-	ld hl,l0200h
+	ld hl,PasPrgMenuHdr
 	call SetExtCOM
 	call SetFileName
 	call Save
@@ -1094,9 +1093,7 @@ TIdxHigh:
 TMathErr:
 	defb 'mathematischer Fehler',000h
 TNumTooBig:
-	defb 'Zahl zu gro',07eh,000h
-TEmpty:
-	defb 000h
+	defb 'Zahl zu gro',07eh,000h,000h
 TNumExpected:
 	defb 'Zahl erwartet',000h
 SelListElem__:
@@ -2410,7 +2407,6 @@ l10f9h:
 	ld a,045h
 	call OutChr
 	ld a,(l1797h)
-l1110h:
 	or a	
 	jp p,l111bh
 	neg
@@ -3374,11 +3370,11 @@ l172bh:
 	call RealSqrt__
 	ld bc,06487h
 	push bc	
-	ld bc,l01eeh
+	ld bc,001eeh
 	push bc	
 	push hl	
 	push de	
-	ld bc,l52aeh
+	ld bc,052aeh
 	push bc	
 	ld bc,003f5h
 	push bc	
@@ -3939,6 +3935,7 @@ RL_WRITE:
 ; BLOCK 'Symtab_open' (start 0x1b35 end 0x2355)
 Symtab_open_start:
 	defs 2080
+
 START_PASCAL:
 	call GetRAMEnd
 l2358h:
@@ -5795,7 +5792,7 @@ l2ea7h:
 	push hl	
 	push hl	
 	ld hl,RuntimeEnd
-	ld de,l0200h
+	ld de,PasPrgMenuHdr
 	or a	
 	sbc hl,de
 	ex de,hl	
@@ -6150,7 +6147,7 @@ LxIdAllChrsRead:
 	ld a,(curIdentifier)
 	cp 061h
 	jr nc,LxIdSetLxCode
-	ld hl,RL_PROCEDURE
+	ld hl,ResWordsEntry2
 	push de	
 	call SearchInSymTab__
 	pop de	
@@ -6165,266 +6162,161 @@ compOptTab:
 
 ; BLOCK 'compOptTab' (start 0x3165 end 0x3171)
 compOptTab_start:
-	defb 04ch
+	defb 'L'
 	defb 001h
-	defb 04fh
+	defb 'O'
 	defb 002h
-	defb 043h
+	defb 'C'
 	defb 004h
-	defb 053h
+	defb 'S'
 	defb 008h
-	defb 049h
+	defb 'I'
 	defb 010h
-	defb 041h
+	defb 'A'
 	defb 020h
 RL_PACKED:
 	defw 00000h
-	defb 050h
-	defb 041h
-	defb 043h
-	defb 04bh
-	defb 045h
-	defb 0c4h
+	defb 'PACKE','D'+080h
 	defb 023h
 RL_NIL:
 	defw RL_PACKED
-	defb 04eh
-	defb 049h
-	defb 0cch
+	defb 'NI','L'+080h
 	defb 022h
 RL_FORWARD:
 	defw RL_NIL
-	defb 046h
-	defb 04fh
-	defb 052h
-	defb 057h
-	defb 041h
-	defb 052h
-	defb 0c4h
+	defb 'FORWAR','D'+080h
 	defb 01dh
 RL_PROGRAM:
 	defw RL_FORWARD
-	defb 050h
-	defb 052h
-	defb 04fh
-	defb 047h
-	defb 052h
-	defb 041h
-	defb 0cdh
+	defb 'PROGRA','M'+080h
 	defb 001h
 RL_IN:
 	defw RL_PROGRAM
-	defb 049h
-	defb 0ceh
+	defb 'I','N'+080h
 	defb 020h
 RL_OR:
 	defw RL_IN
-	defb 04fh
-	defb 0d2h
+	defb 'O','R'+080h
 	defb 007h
 RL_ON:
 	defw RL_OR
-	defb 04fh
-	defb 0c6h
+	defb 'O','N'+080h
 	defb 00bh
 RL_TO:
 	defw RL_ON
-	defb 054h
-	defb 0cfh
+	defb 'T','O'+080h
 	defb 00ch
 RL_DO:
 	defw RL_TO
-	defb 044h
-	defb 0cfh
+	defb 'D','O'+080h
 	defb 011h
 RL_IF:
 	defw RL_DO
-	defb 049h
-	defb 0c6h
+	defb 'I','F'+080h
 	defb 017h
 RL_SET:
 	defw RL_IF
-	defb 053h
-	defb 045h
-	defb 0d4h
+	defb 'SE','T'+080h
 	defb 01bh
 RL_NOT:
 	defw RL_SET
-	defb 04eh
-	defb 04fh
-	defb 0d4h
+	defb 'NO','T'+080h
 	defb 006h
 RL_MOD:
 	defw RL_NOT
-	defb 04dh
-	defb 04fh
-	defb 0c4h
+	defb 'MO','D'+080h
 	defb 009h
 RL_DIV:
 	defw RL_MOD
-	defb 044h
-	defb 049h
-	defb 0d6h
+	defb 'DI','V'+080h
 	defb 002h
 RL_VAR:
 	defw RL_DIV
-	defb 056h
-	defb 041h
-	defb 0d2h
+	defb 'VA','R'+080h
 	defb 00ah
 RL_AND:
 	defw RL_VAR
-	defb 041h
-	defb 04eh
-	defb 0c4h
+	defb 'AN','D'+080h
 	defb 008h
 RL_FOR:
 	defw RL_AND
-	defb 046h
-	defb 04fh
-	defb 0d2h
+	defb 'FO','R'+080h
 	defb 016h
 RL_END:
 	defw RL_FOR
-	defb 045h
-	defb 04eh
-	defb 0c4h
+	defb 'EN','D'+080h
 	defb 010h
 RL_GOTO:
 	defw RL_END
-	defb 047h
-	defb 04fh
-	defb 054h
-	defb 0cfh
+	defb 'GOT','O'+080h
 	defb 01ah
 RL_WITH:
 	defw RL_GOTO
-	defb 057h
-	defb 049h
-	defb 054h
-	defb 0c8h
+	defb 'WIT','H'+080h
 	defb 019h
 RL_TYPE:
 	defw RL_WITH
-	defb 054h
-	defb 059h
-	defb 050h
-	defb 0c5h
+	defb 'TYP','E'+080h
 	defb 01fh
 RL_CASE:
 	defw RL_TYPE
-	defb 043h
-	defb 041h
-	defb 053h
-	defb 0c5h
+	defb 'CAS','E'+080h
 	defb 014h
 RL_ELSE:
 	defw RL_CASE
-	defb 045h
-	defb 04ch
-	defb 053h
-	defb 0c5h
+	defb 'ELS','E'+080h
 	defb 012h
 RL_THEN:
 	defw RL_ELSE
-	defb 054h
-	defb 048h
-	defb 045h
-	defb 0ceh
+	defb 'THE','N'+080h
 	defb 00eh
 RL_LABEL:
 	defw RL_THEN
-	defb 04ch
-	defb 041h
-	defb 042h
-	defb 045h
-	defb 0cch
+	defb 'LABE','L'+080h
 	defb 021h
 RL_CONST:
 	defw RL_LABEL
-	defb 043h
-	defb 04fh
-	defb 04eh
-	defb 053h
-	defb 0d4h
+	defb 'CONS','T'+080h
 	defb 003h
 RL_ARRAY:
 	defw RL_CONST
-	defb 041h
-	defb 052h
-	defb 052h
-	defb 041h
-	defb 0d9h
+	defb 'ARRA','Y'+080h
 	defb 01ch
 RL_UNTIL:
 	defw RL_ARRAY
-	defb 055h
-	defb 04eh
-	defb 054h
-	defb 049h
-	defb 0cch
+	defb 'UNTI','L'+080h
 	defb 00fh
 RL_WHILE:
 	defw RL_UNTIL
-	defb 057h
-	defb 048h
-	defb 049h
-	defb 04ch
-	defb 0c5h
+	defb 'WHIL','E'+080h
 	defb 015h
 RL_BEGIN:
 	defw RL_WHILE
-	defb 042h
-	defb 045h
-	defb 047h
-	defb 049h
-	defb 0ceh
+	defb 'BEGI','N'+080h
 	defb 018h
 RL_RECORD:
 	defw RL_BEGIN
-	defb 052h
-	defb 045h
-	defb 043h
-	defb 04fh
-	defb 052h
-	defb 0c4h
+	defb 'RECOR','D'+080h
 	defb 01eh
 RL_DOWNTO:
 	defw RL_RECORD
-	defb 044h
-	defb 04fh
-	defb 057h
-	defb 04eh
-	defb 054h
-	defb 0cfh
+	defb 'DOWNT','O'+080h
 	defb 00dh
 RL_REPEAT:
 	defw RL_DOWNTO
-	defb 052h
-	defb 045h
-	defb 050h
-	defb 045h
-	defb 041h
-	defb 0d4h
+	defb 'REPEA','T'+080h
 	defb 013h
 RL_FUNCTION:
 	defw RL_REPEAT
-	defb 046h
-	defb 055h
-	defb 04eh
-	defb 043h
-	defb 054h
-	defb 049h
-	defb 04fh
-	defb 0ceh
+	defb 'FUNCTIO','N'+080h
 	defb 005h
-RL_PROCEDURE:
 ResWordsEntry2:
+RL_PROCEDURE:
 	defw RL_FUNCTION
 	defb 'PROCEDUR','E'+080h
 	defb 004h
 ResWordsEntry:
-	defw RL_PROCEDURE
+	defw ResWordsEntry2
 tEadr:
 	defb 'Endadresse: ',000h
 tFeh1:
@@ -7328,7 +7220,7 @@ l376bh:
 	ret	
 sub_376dh:
 	ex af,af'	
-	ld de,l1110h
+	ld de,01110h
 	call ChkLexem_GetLex
 	call WCaBreak_IfCoCo_C
 l3777h:
@@ -8112,7 +8004,7 @@ l3c65h:
 	call WCaBreak_IfCoCo_C
 	call sub_3710h
 	push hl	
-	ld de,l1110h
+	ld de,01110h
 	call ChkLexem_GetLex
 	call l3777h
 	call WrJump
@@ -8125,7 +8017,7 @@ l3c65h:
 l3c8ah:
 	call sub_3710h
 	push hl	
-	ld de,l0e0fh
+	ld de,00e0fh
 	call ChkLexem_GetLex
 	call l3777h
 	cp 012h
@@ -8212,7 +8104,7 @@ sub_3ce7h:
 	push hl	
 	cp 0ach
 	jr z,l3d3ch
-	ld de,l1110h
+	ld de,01110h
 	call ChkLexem_GetLex
 	call l3777h
 l3d32h:
@@ -10614,15 +10506,17 @@ l4c5fh:
 	ex de,hl	
 	jr l4c5fh
 l4c9ch:
-	ld bc,00100h
-	nop	
-	nop	
-	inc bc	
-	nop	
-	nop	
-	rst 38h	
-	rst 38h	
-	rst 38h	
+	defb 001h
+	defb 000h
+	defb 001h
+	defb 000h
+	defb 000h
+	defb 003h
+	defb 000h
+	defb 000h
+	defb 0ffh
+	defb 0ffh
+	defb 0ffh
 l4ca7h:
 	push hl	
 	or a	
@@ -11656,8 +11550,7 @@ PXKillProlog:
 PXCpChrMap:
 	ld hl,(CCTL0)
 	ld de,0ba00h
-	ld bc,l0200h
-l531ah:
+	ld bc,00200h
 	ldir
 	ld hl,PXUSASC
 	ld de,0bbd8h
