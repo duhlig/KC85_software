@@ -2,23 +2,24 @@
 ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
 
 	org	00200h
-iobuf+11:	equ 0x008b
-iobuf+16:	equ 0x0090
-iobuf+17:	equ 0x0091
-iobuf+19:	equ 0x0093
-iobuf+20:	equ 0x0094
+iobuf:	equ 0x0080
+;iobuf+11:	equ 0x008b
+;iobuf+16:	equ 0x0090
+;iobuf+17:	equ 0x0091
+;iobuf+19:	equ 0x0093
+;iobuf+20:	equ 0x0094
 l01eeh:	equ 0x01ee
 l1798h:	equ 0x1798
 CCTL0:	equ 0xb7a6
 SUTAB:	equ 0xb7b0
 SUBALT:	equ 0xb7fe
 PXSASCI:	equ 0xbc00
-PXSASCI+1:	equ 0xbc01
+;PXSASCI+1:	equ 0xbc01
 PXASCI:	equ 0xbc08
 PXTAPE:	equ 0xbc0f
-PXTAPE+1:	equ 0xbc10
+;PXTAPE+1:	equ 0xbc10
 PXDISK:	equ 0xbc20
-PXDISK+1:	equ 0xbc21
+;PXDISK+1:	equ 0xbc21
 ISRO:	equ 0xbc2f
 PXNxtBlock:	equ 0xbc47
 PXSendCtl:	equ 0xbc5c
@@ -29,9 +30,9 @@ PXRecvBlock:	equ 0xbcb2
 MBI:	equ 0xbcd0
 CSRI:	equ 0xbce9
 SUBNEU:	equ 0xbcee
-SUBNEU+2:	equ 0xbcf0
-SUBNEU+10:	equ 0xbcf8
-SUBNEU+16:	equ 0xbcfe
+;SUBNEU+2:	equ 0xbcf0
+;SUBNEU+10:	equ 0xbcf8
+;SUBNEU+16:	equ 0xbcfe
 PV1:	equ 0xf003
 
 l0200h:
@@ -42,7 +43,7 @@ PasPrgMenuName:
 	jp PasPrgStart
 MenuPRec:
 	defw 07f7fh
-	defb 'RASREC',000h
+	defb 'PASREC',000h
 	jp Recall
 MenuPEnt:
 	defw 07f7fh
@@ -221,7 +222,7 @@ C_ISRO:
 	res 5,a
 	res 2,a
 	out (088h),a
-	ld bc,l1f40h
+	ld bc,01f40h
 	ld e,008h
 	call CCaos
 SaveBlock:
@@ -1590,7 +1591,7 @@ opCodes:
 	ld sp,hl	
 	ld hl,(retAddr__)
 	jp (hl)	
-sub_0c40h:
+MultiCall__:
 	pop hl	
 	ld (retAddr__),hl
 	ld hl,00000h
@@ -1599,38 +1600,38 @@ sub_0c40h:
 	ld e,l	
 	add hl,bc	
 	ld b,c	
-l0c4ch:
+VarCall:
 	call 00000h
 	inc hl	
 	inc de	
-	djnz l0c4ch
+	djnz VarCall
 	ld a,001h
-l0c55h:
+MultiCallEnd:
 	ld sp,hl	
 	ld hl,(retAddr__)
 	jp (hl)	
-l0c5ah:
+EquOrIncHLbyB:
 	ld a,(de)	
 	cp (hl)	
-l0c5ch:
+TestOrIncHLbyB:
 	ret z	
-l0c5dh:
+IncHLbyB:
 	inc hl	
-	djnz l0c5dh
+	djnz IncHLbyB
 	xor a	
-	jr l0c55h
-l0c63h:
+	jr MultiCallEnd
+NeqOrIncHLbyB:
 	ld a,(de)	
 	cpl	
 	and (hl)	
-	jr l0c5ch
-l0c68h:
+	jr TestOrIncHLbyB
+Neq2OrIncHLbyB:
 	ex de,hl	
 	ld a,(de)	
 	cpl	
 	and (hl)	
 	ex de,hl	
-	jr l0c5ch
+	jr TestOrIncHLbyB
 sub_0c6fh:
 	or a	
 	sbc hl,de
@@ -3802,7 +3803,7 @@ RL_NEW:
 	defb 050h
 RL_TOUT:
 	defw RL_NEW
-	defb 'TOU',T''+0x80
+	defb 'TOU','T'+0x80
 	defb 006h
 	defb 0fah
 	defb 050h
@@ -3814,7 +3815,7 @@ RL_TIN:
 	defb 050h
 RL_CHR:
 	defw RL_TIN
-	defb 'CH',R''+0x80
+	defb 'CH','R'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -5254,7 +5255,7 @@ l2b4ah:
 listPageSize:
 	nop	
 GetSrcChr:
-	jp l5491h
+	jp 05491h
 curIdentifier:
 	defs 10
 SP_safe:
@@ -5421,7 +5422,7 @@ CoInit:
 	call InitEditor__
 	ld hl,00000h
 	ld (curSrcLineNum),hl
-	ld hl,CoVarInitData__
+	ld hl,CoVarInitData
 	ld de,lastChrRead__
 	ld bc,0000fh
 	ldir
@@ -5467,105 +5468,23 @@ StackAtRamEnd:
 	call ChkLexem_GetLex
 	jp ChkSemi_GetLex
 banner_nl:
-
-; BLOCK 'TBanner' (start 0x2c86 end 0x2cd1)
-TBanner_start:
 	defb 00dh
 banner:
-	defb 00ch
-	defb 012h
-	defb 02ah
-	defb 02ah
-	defb 02ah
-	defb 02ah
+ 	defb 00ch,012h
+ 	defb '**** KC-PASCAL V5.1 ****',00dh,00dh
+ 	defb 'BEARB. VON  +++ AM90 +++',00dh,00dh
+ 	defb '   (VERSION KC85/4)',00dh,000h
+CoVarInitData:
 	defb 020h
-	defb 04bh
-	defb 043h
-	defb 02dh
-	defb 050h
-	defb 041h
-	defb 053h
-	defb 043h
-	defb 041h
-	defb 04ch
-	defb 020h
-	defb 056h
-	defb 035h
-	defb 02eh
-	defb 031h
-	defb 020h
-	defb 02ah
-	defb 02ah
-	defb 02ah
-	defb 02ah
-	defb 00dh
-	defb 00dh
-	defb 042h
-	defb 045h
-	defb 041h
-	defb 052h
-	defb 042h
-	defb 02eh
-	defb 020h
-	defb 056h
-	defb 04fh
-	defb 04eh
-	defb 020h
-	defb 020h
-	defb 02bh
-	defb 02bh
-	defb 02bh
-	defb 020h
-	defb 041h
-	defb 04dh
-	defb 039h
-	defb 030h
-	defb 020h
-	defb 02bh
-	defb 02bh
-	defb 02bh
-	defb 00dh
-	defb 00dh
-	defb 020h
-	defb 020h
-	defb 020h
-	defb 028h
-	defb 056h
-	defb 045h
-	defb 052h
-	defb 053h
-	defb 049h
-	defb 04fh
-	defb 04eh
-	defb 020h
-	defb 04bh
-	defb 043h
-	defb 038h
-	defb 035h
-	defb 02fh
-	defb 034h
-	defb 029h
-	defb 00dh
-	nop	
-CoVarInitData__:
-
-; BLOCK 'CoVarInitData' (start 0x2cd2 end 0x2ce0)
-CoVarInitData_start:
-	defb 020h
-	defb 071h
-	defb 031h
-	defb 02bh
-	defb 01bh
-	defb 035h
-	defb 01bh
-	defb 0f3h
-	defb 052h
+	defw RL_PACKED
+	defw RL_WRITE
+	defw Symtab_open_start
+	defw StartPASSrc
 	defb 000h
 	defb 000h
 	defb 006h
 	defb 0efh
-	defb 000h
-	nop	
+	defw 00000h
 CoErNumTooBigA:
 	ld (lastChrRead__),a
 CoErNumTooBig:
@@ -6513,7 +6432,7 @@ tFeh1:
 tFeh2:
 	defb '*FEHLER*',000h
 tKeTx:
-	defb 'Kein Text mehr!',000h
+	defb 00dh,'Kein Text mehr!',000h
 tTabU:
 	defb 'Tabellenueberlauf!',000h
 ChkType0004:
@@ -7284,28 +7203,28 @@ l368bh:
 	push af	
 l369ah:
 	defb 00ah
-	ld hl,l0c5ah
-	ld (l0c4ch+1),hl
-	call sub_0c40h
+	ld hl,EquOrIncHLbyB
+	ld (VarCall+1),hl
+	call MultiCall__
 	push af	
 l36a5h:
 	defb 00ch
-	ld hl,l0c5ah
-	ld (l0c4ch+1),hl
-	call sub_0c40h
+	ld hl,EquOrIncHLbyB
+	ld (VarCall+1),hl
+	call MultiCall__
 	xor 001h
 	push af	
 l36b2h:
 	defb 00ah
-	ld hl,l0c63h
-	ld (l0c4ch+1),hl
-	call sub_0c40h
+	ld hl,NeqOrIncHLbyB
+	ld (VarCall+1),hl
+	call MultiCall__
 	push af	
 l36bdh:
 	defb 00ah
-	ld hl,l0c68h
-	ld (l0c4ch+1),hl
-	call sub_0c40h
+	ld hl,Neq2OrIncHLbyB
+	ld (VarCall+1),hl
+	call MultiCall__
 	push af	
 	defw l3597h
 	defw l358eh
@@ -10382,7 +10301,7 @@ l4a98h:
 l4aafh:
 	ld a,c	
 ChkBegin:
-	ld de,l1819h
+	ld de,01819h
 	call ChkLexem_GetLex
 	jp l3cd4h
 WCorrAddr:
@@ -11415,7 +11334,7 @@ l50f4h:
 	jr l50f4h
 sub_5105h:
 	call NextChkOpBra_GetLex
-	ld bc,l0208h
+	ld bc,00208h
 	call sub_3f29h
 sub_510eh:
 	call ChkComma_GetLex

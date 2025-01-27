@@ -222,8 +222,11 @@ CompVar4: unlabeled start 0x2b6a unlabeled end 0x2b72 type worddata
 CompVar5: unlabeled start 0x2b72 unlabeled end 0x2b76 type bytedata
 CompVar6: unlabeled start 0x2b76 unlabeled end 0x2b80 type worddata
 CompVar7: unlabeled start 0x2b80 unlabeled end 0x2b89 type bytedata
-TBanner: start 0x2c86 unlabeled end 0x2cd1 type bytedata
-CoVarInitData: start 0x2cd2 unlabeled end 0x2ce0 type bytedata
+TBanner: unlabeled start 0x2c86 unlabeled last 0x2cd1 type bytedata
+CoVarInitData: unlabeled start 0x2cd2 unlabeled last 0x2cd2 type bytedata
+CoVarInitData: unlabeled start 0x2cd3 unlabeled last 0x2cda type pointers
+CoVarInitData: unlabeled start 0x2cdb unlabeled last 0x2cde type bytedata
+CoVarInitData: unlabeled start 0x2cdf unlabeled last 0x2ce0 type pointers
 TOk: start 0x2f24 unlabeled end 0x2f27 type bytedata
 TLauf: start 0x2f28 unlabeled end 0x2f2d type bytedata
 compOptTab: start 0x3165 unlabeled last 0x3170 type bytedata

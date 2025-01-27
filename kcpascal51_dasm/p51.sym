@@ -1428,40 +1428,40 @@ opCodes:	equ 0x0c33
 ; 0x4145	(word load pointer)
 ; 0x413b	(word load pointer)
 
-sub_0c40h:	equ 0x0c40
+MultiCall__:	equ 0x0c40
 ; Used at following locations:
 ; 0x36c4	(call destination)
 ; 0x36b9	(call destination)
 ; 0x36ac	(call destination)
 ; 0x36a1	(call destination)
 
-l0c4ch:	equ 0x0c4c
+VarCall:	equ 0x0c4c
 ; Used at following locations:
 ; 0x0c51	(djnz destination)
 
-l0c55h:	equ 0x0c55
+MultiCallEnd:	equ 0x0c55
 ; Used at following locations:
 ; 0x0c61	(jr destination)
 
-l0c5ah:	equ 0x0c5a
+EquOrIncHLbyB:	equ 0x0c5a
 ; Used at following locations:
 ; 0x36a6	(immediate value)
 ; 0x369b	(immediate value)
 
-l0c5ch:	equ 0x0c5c
+TestOrIncHLbyB:	equ 0x0c5c
 ; Used at following locations:
 ; 0x0c6d	(jr destination)
 ; 0x0c66	(jr destination)
 
-l0c5dh:	equ 0x0c5d
+IncHLbyB:	equ 0x0c5d
 ; Used at following locations:
 ; 0x0c5e	(djnz destination)
 
-l0c63h:	equ 0x0c63
+NeqOrIncHLbyB:	equ 0x0c63
 ; Used at following locations:
 ; 0x36b3	(immediate value)
 
-l0c68h:	equ 0x0c68
+Neq2OrIncHLbyB:	equ 0x0c68
 ; Used at following locations:
 ; 0x36be	(immediate value)
 
@@ -4031,7 +4031,7 @@ banner:	equ 0x2c87
 ; Used at following locations:
 ; 0x2385	(immediate value)
 
-CoVarInitData__:	equ 0x2cd2
+CoVarInitData:	equ 0x2cd2
 ; Used at following locations:
 ; 0x2c1a	(immediate value)
 
