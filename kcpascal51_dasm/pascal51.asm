@@ -8,7 +8,6 @@ iobuf:	equ 0x0080
 ;iobuf+17:	equ 0x0091
 ;iobuf+19:	equ 0x0093
 ;iobuf+20:	equ 0x0094
-l1798h:	equ 0x1798
 CCTL0:	equ 0xb7a6
 SUTAB:	equ 0xb7b0
 SUBALT:	equ 0xb7fe
@@ -3407,7 +3406,9 @@ l1793h:
 l1795h:
 	defw 00000h
 l1797h:
-	defw 00000h
+	defb 000h
+l1798h:
+	defb 000h
 l1799h:
 	defw 00000h
 l179bh:
@@ -6198,12 +6199,12 @@ RL_OR:
 	defw RL_IN
 	defb 'O','R'+080h
 	defb 007h
-RL_ON:
+RL_OF:
 	defw RL_OR
-	defb 'O','N'+080h
+	defb 'O','F'+080h
 	defb 00bh
 RL_TO:
-	defw RL_ON
+	defw RL_OF
 	defb 'T','O'+080h
 	defb 00ch
 RL_DO:
@@ -6295,28 +6296,28 @@ RL_BEGIN:
 	defb 'BEGI','N'+080h
 	defb 018h
 RL_RECORD:
-	defw RL_BEGIN
+ 	defw RL_BEGIN
 	defb 'RECOR','D'+080h
-	defb 01eh
+ 	defb 01eh
 RL_DOWNTO:
 	defw RL_RECORD
 	defb 'DOWNT','O'+080h
 	defb 00dh
 RL_REPEAT:
-	defw RL_DOWNTO
+ 	defw RL_DOWNTO
 	defb 'REPEA','T'+080h
-	defb 013h
+ 	defb 013h
 RL_FUNCTION:
-	defw RL_REPEAT
+ 	defw RL_REPEAT
 	defb 'FUNCTIO','N'+080h
-	defb 005h
+ 	defb 005h
 ResWordsEntry2:
 RL_PROCEDURE:
-	defw RL_FUNCTION
+ 	defw RL_FUNCTION
 	defb 'PROCEDUR','E'+080h
-	defb 004h
+ 	defb 004h
 ResWordsEntry:
-	defw ResWordsEntry2
+ 	defw ResWordsEntry2
 tEadr:
 	defb 'Endadresse: ',000h
 tFeh1:

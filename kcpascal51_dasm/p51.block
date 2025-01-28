@@ -18,7 +18,9 @@ realTab1__: start 0x0f24 end 0x0f2f type bytedata
 xxTab1__: start 0x116b unlabeled last 0x1187 type bytedata
 tExpErw: unlabeled start 0x12ba unlabeled end 0x12cc type bytedata
 xxTab2__: start 0x1597 unlabeled end 0x15a7 type bytedata
-addrs: unlabeled start 0x1789 unlabeled last 0x17aa type worddata
+addrs: unlabeled start 0x1789 unlabeled last 0x1796 type worddata
+vars: unlabeled start 0x1797 unlabeled last 0x1798 type bytedata
+addrs: unlabeled start 0x1799 unlabeled last 0x17aa type worddata
 inputBuf: unlabeled start 0x17ab unlabeled last 0x17ff type bytedata
 LineBuf: unlabeled start 0x1801 unlabeled end 0x1851 type bytedata
 lineBufEnd: unlabeled start 0x1851 unlabeled last 0x1851 type bytedata
@@ -243,8 +245,8 @@ RL_IN: unlabeled start 0x3194 unlabeled last 0x3195 type pointers
 RN_IN: unlabeled start 0x3196 unlabeled last 0x3198 type bytedata
 RL_OR: unlabeled start 0x3199 unlabeled last 0x319a type pointers
 RN_OR: unlabeled start 0x319b unlabeled last 0x319d type bytedata
-RL_ON: unlabeled start 0x319e unlabeled last 0x319f type pointers
-RN_ON: unlabeled start 0x31a0 unlabeled last 0x31a2 type bytedata
+RL_OF: unlabeled start 0x319e unlabeled last 0x319f type pointers
+RN_OF: unlabeled start 0x31a0 unlabeled last 0x31a2 type bytedata
 RL_TO: unlabeled start 0x31a3 unlabeled last 0x31a4 type pointers
 RN_TO: unlabeled start 0x31a5 unlabeled last 0x31a7 type bytedata
 RL_DO: unlabeled start 0x31a8 unlabeled last 0x31a9 type pointers

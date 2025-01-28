@@ -1,0 +1,11 @@
+4c4,11
+< 	org	00200h
+---
+> 	org	00280h
+> 	defb 'PASCAL5AKCC'
+> 	defs 5
+> 	defb 3
+> 	defw 0x0300
+> 	defw 0x5590
+> 	defw 0x5400
+> 	defs 0x69
