@@ -216,6 +216,35 @@ CmdAddr: unlabeled start 0x2ad1 unlabeled last 0x2ad2 type pointers
 Cmd: unlabeled start 0x2ad3 unlabeled last 0x2ad3 type bytedata
 CmdAddr: unlabeled start 0x2ad4 unlabeled last 0x2ad5 type pointers
 
+Cmd: unlabeled start 0x2ad6 unlabeled last 0x2ad6 type bytedata
+CmdAddr: unlabeled start 0x2ad7 unlabeled last 0x2ad8 type pointers
+Cmd: unlabeled start 0x2ad9 unlabeled last 0x2ad9 type bytedata
+CmdAddr: unlabeled start 0x2ada unlabeled last 0x2adb type pointers
+Cmd: unlabeled start 0x2adc unlabeled last 0x2adc type bytedata
+CmdAddr: unlabeled start 0x2add unlabeled last 0x2ade type pointers
+Cmd: unlabeled start 0x2adf unlabeled last 0x2adf type bytedata
+CmdAddr: unlabeled start 0x2ae0 unlabeled last 0x2ae1 type pointers
+Cmd: unlabeled start 0x2ae2 unlabeled last 0x2ae2 type bytedata
+CmdAddr: unlabeled start 0x2ae3 unlabeled last 0x2ae4 type pointers
+Cmd: unlabeled start 0x2ae5 unlabeled last 0x2ae5 type bytedata
+CmdAddr: unlabeled start 0x2ae6 unlabeled last 0x2ae7 type pointers
+Cmd: unlabeled start 0x2ae8 unlabeled last 0x2ae8 type bytedata
+CmdAddr: unlabeled start 0x2ae9 unlabeled last 0x2aea type pointers
+Cmd: unlabeled start 0x2aeb unlabeled last 0x2aeb type bytedata
+CmdAddr: unlabeled start 0x2aec unlabeled last 0x2aed type pointers
+Cmd: unlabeled start 0x2aee unlabeled last 0x2aee type bytedata
+CmdAddr: unlabeled start 0x2aef unlabeled last 0x2af0 type pointers
+Cmd: unlabeled start 0x2af1 unlabeled last 0x2af1 type bytedata
+CmdAddr: unlabeled start 0x2af2 unlabeled last 0x2af3 type pointers
+Cmd: unlabeled start 0x2af4 unlabeled last 0x2af4 type bytedata
+CmdAddr: unlabeled start 0x2af5 unlabeled last 0x2af6 type pointers
+Cmd: unlabeled start 0x2af7 unlabeled last 0x2af7 type bytedata
+CmdAddr: unlabeled start 0x2af8 unlabeled last 0x2af9 type pointers
+Cmd: unlabeled start 0x2afa unlabeled last 0x2afa type bytedata
+CmdAddr: unlabeled start 0x2afb unlabeled last 0x2afc type pointers
+Cmd: unlabeled start 0x2afd unlabeled last 0x2afd type bytedata
+CmdAddr: unlabeled start 0x2afe unlabeled last 0x2aff type pointers
+
 TPdParam: unlabeled start 0x2b00 unlabeled last 0x2b32 type bytedata
 CompVar1: unlabeled start 0x2b50 unlabeled end 0x2b5d type bytedata
 CompVar2: unlabeled start 0x2b5d unlabeled end 0x2b69 type worddata

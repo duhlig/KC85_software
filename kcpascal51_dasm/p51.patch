@@ -1,5 +1,5 @@
---- p51.asm	2025-01-28 21:12:07.577797061 +0100
-+++ pascal51.asm	2025-01-28 21:25:47.636173790 +0100
+--- p51.asm	2025-01-28 22:05:42.311026319 +0100
++++ pascal51.asm	2025-01-28 22:05:42.316026300 +0100
 @@ -2,21 +2,22 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -3433,7 +3433,7 @@
  START_PASCAL:
  	call GetRAMEnd
  l2358h:
-@@ -7780,44 +5087,44 @@
+@@ -7787,44 +5094,44 @@
  	xor a	
  	jr SetHLFirstSrcLine
  cmdTab:
@@ -3495,9 +3495,105 @@
 -	defb 05ah
 +	defb 'Z'
  	defw DoCmdZ
- l2ad6h:
- 	dec bc	
-@@ -7946,18 +5253,9 @@
+ EdCmdTab:
+ 	defb 00bh
+@@ -7833,82 +5140,36 @@
+ 	defw sub_2619h
+ 	defb 008h
+ 	defw sub_2668h
+-	defb 043h
++	defb 'C'
+ 	defw l2672h
+ 	defb 00dh
+ 	defw l28e8h
+-	defb 046h
++	defb 'F'
+ 	defw l26e8h
+-	defb 049h
++	defb 'I'
+ 	defw l267ch
+-	defb 04bh
++	defb 'K'
+ 	defw l2636h
+-	defb 04ch
++	defb 'L'
+ 	defw sub_29d4h
+-	defb 051h
++	defb 'Q'
+ 	defw l29f5h
+-	defb 053h
++	defb 'S'
+ 	defw l2692h
+-	defb 052h
++	defb 'R'
+ 	defw l2561h
+-	defb 058h
++	defb 'X'
+ 	defw l2677h
+-	defb 05ah
++	defb 'Z'
+ 	defw l2681h
+ tPardon:
+-	defb 050h
+-	defb 061h
+-	defb 072h
+-	defb 064h
+-	defb 06fh
+-	defb 06eh
+-	defb 03fh
+-	defb 00dh
+-	defb 000h
++	defb 'Pardon?',00dh,000h
+ param3:
+ 	defb 00dh
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defs 20
+ param4:
+ 	defb 00dh
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
+-	defb 000h
++	defs 20
+ l2b33h:
+ 	nop	
+ lineNumStart__:
+@@ -7950,18 +5211,9 @@
  listPageSize:
  	nop	
  GetSrcChr:
@@ -3518,7 +3614,7 @@
  SP_safe:
  	defb 0f0h
  	defb 07fh
-@@ -8170,81 +5468,10 @@
+@@ -8174,81 +5426,10 @@
  banner_nl:
  	defb 00dh
  banner:
@@ -3604,7 +3700,7 @@
  CoVarInitData:
  	defb 020h
  	defw RL_PACKED
-@@ -8936,345 +6163,171 @@
+@@ -8940,345 +6121,171 @@
  
  ; BLOCK 'compOptTab' (start 0x3165 end 0x3171)
  compOptTab_start:
@@ -4007,7 +4103,7 @@
  ChkType0004:
  	ld de,00004h
  	jr ChkType__
-@@ -10168,7 +7221,7 @@
+@@ -10172,7 +7179,7 @@
  	ret	
  sub_376dh:
  	ex af,af'	
@@ -4016,7 +4112,7 @@
  	call ChkLexem_GetLex
  	call WCaBreak_IfCoCo_C
  l3777h:
-@@ -10952,7 +8005,7 @@
+@@ -10956,7 +7963,7 @@
  	call WCaBreak_IfCoCo_C
  	call sub_3710h
  	push hl	
@@ -4025,7 +4121,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	call WrJump
-@@ -10965,7 +8018,7 @@
+@@ -10969,7 +7976,7 @@
  l3c8ah:
  	call sub_3710h
  	push hl	
@@ -4034,7 +4130,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	cp 012h
-@@ -11052,7 +8105,7 @@
+@@ -11056,7 +8063,7 @@
  	push hl	
  	cp 0ach
  	jr z,l3d3ch
@@ -4043,7 +4139,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  l3d32h:
-@@ -13141,7 +10194,7 @@
+@@ -13145,7 +10152,7 @@
  l4aafh:
  	ld a,c	
  ChkBegin:
@@ -4052,7 +4148,7 @@
  	call ChkLexem_GetLex
  	jp l3cd4h
  WCorrAddr:
-@@ -14176,7 +11229,7 @@
+@@ -14180,7 +11187,7 @@
  	jr l50f4h
  sub_5105h:
  	call NextChkOpBra_GetLex
@@ -4061,7 +4157,7 @@
  	call sub_3f29h
  sub_510eh:
  	call ChkComma_GetLex
-@@ -14498,7 +11551,7 @@
+@@ -14502,7 +11509,7 @@
  PXCpChrMap:
  	ld hl,(CCTL0)
  	ld de,0ba00h
@@ -4070,7 +4166,7 @@
  	ldir
  	ld hl,PXUSASC
  	ld de,0bbd8h
-@@ -14738,116 +11791,17 @@
+@@ -14742,116 +11749,17 @@
  
  ; BLOCK 'Rest' (start 0x5490 end 0x5500)
  Rest_first:

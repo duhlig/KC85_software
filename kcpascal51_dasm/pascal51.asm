@@ -4262,6 +4262,7 @@ PrevLineFound:
 	push hl	
 	push hl	
 	call InitEditor__
+l2561h:
 	pop hl	
 	call PrNL
 DoCmdE:
@@ -4294,7 +4295,7 @@ l258dh:
 	jr nz,l2601h
 	bit 3,c
 	jr nz,l25a4h
-	ld hl,l2ad6h
+	ld hl,EdCmdTab
 	ld b,00eh
 	jp TestCmd
 l25a4h:
@@ -4404,6 +4405,7 @@ l2647h:
 	ld a,(l2b3fh)
 	and 007h
 	ret z	
+l264dh:
 	call sub_2619h
 	ret z	
 	jr l2647h
@@ -4430,11 +4432,13 @@ sub_2668h:
 	ld a,008h
 	call ItsCuL
 	jr l2622h
+l2672h:
 	set 2,(ix+000h)
 	ret	
 l2677h:
 	call sub_2619h
 	jr nz,l2677h
+l267ch:
 	set 3,(ix+000h)
 	ret	
 l2681h:
@@ -4449,6 +4453,7 @@ l268dh:
 	pop hl	
 	pop hl	
 	jr l26e8h
+l2692h:
 	ld de,(l2b48h)
 	call sub_2749h
 	jr nc,l269dh
@@ -4826,6 +4831,7 @@ DoCmdM:
 	call ExpSrcToLineBuf
 	ld hl,(lineNumInc__)
 	jr CompriLineBuf__
+l28e8h:
 	call sub_29cch
 	ld hl,(param1)
 	ld de,lineBuf
@@ -5011,6 +5017,7 @@ PrSrcLiNum:
 	ld a,005h
 	call PrDez
 	jp PrSpace
+l29f5h:
 	pop hl	
 	jp PrNL
 DoCmdX:
@@ -5126,92 +5133,43 @@ cmdTabRunAddr:
 	defw DoCmdX
 	defb 'Z'
 	defw DoCmdZ
-l2ad6h:
-	dec bc	
-	ld c,l	
-	ld h,009h
-	add hl,de	
-	ld h,008h
-	ld l,b	
-	ld h,043h
-	ld (hl),d	
-	ld h,00dh
-	ret pe	
-	jr z,l2b2ch
-	ret pe	
-	ld h,049h
-	ld a,h	
-	ld h,04bh
-	ld (hl),026h
-	ld c,h	
-	call nc,05129h
-	push af	
-	add hl,hl	
-	ld d,e	
-	sub d	
-	ld h,052h
-	ld h,c	
-	dec h	
-	ld e,b	
-	ld (hl),a	
-	ld h,05ah
-	add a,c	
-	defb 026h
-tPardon:
-	defb 050h
-	defb 061h
-	defb 072h
-	defb 064h
-	defb 06fh
-	defb 06eh
-	defb 03fh
+EdCmdTab:
+	defb 00bh
+	defw l264dh
+	defb 009h
+	defw sub_2619h
+	defb 008h
+	defw sub_2668h
+	defb 'C'
+	defw l2672h
 	defb 00dh
-	defb 000h
+	defw l28e8h
+	defb 'F'
+	defw l26e8h
+	defb 'I'
+	defw l267ch
+	defb 'K'
+	defw l2636h
+	defb 'L'
+	defw sub_29d4h
+	defb 'Q'
+	defw l29f5h
+	defb 'S'
+	defw l2692h
+	defb 'R'
+	defw l2561h
+	defb 'X'
+	defw l2677h
+	defb 'Z'
+	defw l2681h
+tPardon:
+	defb 'Pardon?',00dh,000h
 param3:
 	defb 00dh
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
+	defs 20
 param4:
 	defb 00dh
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-l2b2ch:
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
+	defs 20
 l2b33h:
 	nop	
 lineNumStart__:

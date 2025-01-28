@@ -3063,6 +3063,10 @@ PrevLineFound:	equ 0x2551
 ; 0x254e	(jr destination)
 ; 0x06e0	(jp destination)
 
+l2561h:	equ 0x2561
+; Used at following locations:
+; 0x2af8	(defw directive)
+
 DoCmdE:	equ 0x2565
 ; Used at following locations:
 ; 0x2aa7	(defw directive)
@@ -3119,6 +3123,7 @@ l260dh:	equ 0x260d
 
 sub_2619h:	equ 0x2619
 ; Used at following locations:
+; 0x2ada	(defw directive)
 ; 0x29cc	(call destination)
 ; 0x2774	(call destination)
 ; 0x2677	(call destination)
@@ -3131,12 +3136,17 @@ l2622h:	equ 0x2622
 
 l2636h:	equ 0x2636
 ; Used at following locations:
+; 0x2aec	(defw directive)
 ; 0x2688	(call destination)
 ; 0x25be	(jr destination)
 
 l2647h:	equ 0x2647
 ; Used at following locations:
 ; 0x2651	(jr destination)
+
+l264dh:	equ 0x264d
+; Used at following locations:
+; 0x2ad7	(defw directive)
 
 sub_2653h:	equ 0x2653
 ; Used at following locations:
@@ -3146,20 +3156,35 @@ sub_2653h:	equ 0x2653
 
 sub_2668h:	equ 0x2668
 ; Used at following locations:
+; 0x2add	(defw directive)
 ; 0x2603	(jr destination)
 ; 0x25bb	(call destination)
 
+l2672h:	equ 0x2672
+; Used at following locations:
+; 0x2ae0	(defw directive)
+
 l2677h:	equ 0x2677
 ; Used at following locations:
+; 0x2afb	(defw directive)
 ; 0x267a	(jr destination)
+
+l267ch:	equ 0x267c
+; Used at following locations:
+; 0x2ae9	(defw directive)
 
 l2681h:	equ 0x2681
 ; Used at following locations:
+; 0x2afe	(defw directive)
 ; 0x268b	(jr destination)
 
 l268dh:	equ 0x268d
 ; Used at following locations:
 ; 0x26c2	(jp destination)
+
+l2692h:	equ 0x2692
+; Used at following locations:
+; 0x2af5	(defw directive)
 
 l269dh:	equ 0x269d
 ; Used at following locations:
@@ -3176,6 +3201,7 @@ l26e0h:	equ 0x26e0
 
 l26e8h:	equ 0x26e8
 ; Used at following locations:
+; 0x2ae6	(defw directive)
 ; 0x2690	(jr destination)
 
 DoCmdL:	equ 0x26ef
@@ -3320,6 +3346,10 @@ DoCmdM:	equ 0x28d6
 ; Used at following locations:
 ; 0x2ab9	(defw directive)
 
+l28e8h:	equ 0x28e8
+; Used at following locations:
+; 0x2ae3	(defw directive)
+
 CompriLineBuf__:	equ 0x28f2
 ; Used at following locations:
 ; 0x28e6	(jr destination)
@@ -3418,6 +3448,7 @@ sub_29cch:	equ 0x29cc
 
 sub_29d4h:	equ 0x29d4
 ; Used at following locations:
+; 0x2aef	(defw directive)
 ; 0x2575	(call destination)
 
 sub_29d7h:	equ 0x29d7
@@ -3429,6 +3460,10 @@ PrSrcLiNum:	equ 0x29ed
 ; Used at following locations:
 ; 0x2718	(call destination)
 ; 0x24d0	(call destination)
+
+l29f5h:	equ 0x29f5
+; Used at following locations:
+; 0x2af2	(defw directive)
 
 DoCmdX:	equ 0x29f9
 ; Used at following locations:
@@ -3484,7 +3519,7 @@ cmdTabRunAddr:	equ 0x2ac5
 ; 0x2a7d	(word load pointer)
 ; 0x23b3	(word load pointer)
 
-l2ad6h:	equ 0x2ad6
+EdCmdTab:	equ 0x2ad6
 ; Used at following locations:
 ; 0x259c	(immediate value)
 
@@ -3509,10 +3544,6 @@ param4:	equ 0x2b1e
 ; 0x2a3f	(immediate value)
 ; 0x26a5	(immediate value)
 ; 0x247e	(immediate value)
-
-l2b2ch:	equ 0x2b2c
-; Used at following locations:
-; 0x2ae4	(jr destination)
 
 l2b33h:	equ 0x2b33
 ; Used at following locations:
