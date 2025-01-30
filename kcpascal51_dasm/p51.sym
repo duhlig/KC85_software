@@ -82,10 +82,6 @@ CCaos:	equ 0x022c
 ; 0x02a1	(call destination)
 ; 0x0278	(call destination)
 
-l023bh:	equ 0x023b
-; Used at following locations:
-; 0x4660	(immediate value)
-
 OSPrc:	equ 0x0255
 ; Used at following locations:
 ; 0x0247	(byte load pointer)
@@ -118,10 +114,6 @@ CAOS_KBD:	equ 0x02c7
 ; Used at following locations:
 ; 0x02ce	(jr destination)
 ; 0x02ab	(jr destination)
-
-l02e5h:	equ 0x02e5
-; Used at following locations:
-; 0x4676	(immediate value)
 
 CAOS_CRT:	equ 0x02ea
 ; Used at following locations:
@@ -2008,9 +2000,6 @@ l1199h:	equ 0x1199
 ; Used at following locations:
 ; 0x11ae	(djnz destination)
 
-l11b0h:	equ 0x11b0
-; Used at following locations:
-
 sub_11b1h:	equ 0x11b1
 ; Used at following locations:
 ; 0x3f08	(call destination)
@@ -2398,6 +2387,7 @@ l178fh:	equ 0x178f
 
 l1791h:	equ 0x1791
 ; Used at following locations:
+; 0x51da	(word load pointer)
 ; 0x51c2	(word load pointer)
 ; 0x0637	(word load pointer)
 ; 0x05ff	(word load pointer)
@@ -5510,7 +5500,7 @@ l35e2h:	equ 0x35e2
 ; Used at following locations:
 ; 0x36de	(defw directive)
 
-l35e8h:	equ 0x35e8
+CSq_l35e8h:	equ 0x35e8
 ; Used at following locations:
 ; 0x3fb0	(immediate value)
 
@@ -5666,7 +5656,7 @@ sub_3710h:	equ 0x3710
 ; 0x3c8a	(call destination)
 ; 0x3c70	(call destination)
 
-l3722h:	equ 0x3722
+CSq_l3722h:	equ 0x3722
 ; Used at following locations:
 ; 0x3719	(immediate value)
 
@@ -5796,7 +5786,7 @@ l389ch:	equ 0x389c
 ; Used at following locations:
 ; 0x382d	(immediate value)
 
-l389fh:	equ 0x389f
+CSq_l389fh:	equ 0x389f
 ; Used at following locations:
 ; 0x3832	(immediate value)
 
@@ -5916,9 +5906,13 @@ l3a49h:	equ 0x3a49
 ; Used at following locations:
 ; 0x3a19	(jr destination)
 
-l3a5ch:	equ 0x3a5c
+CSq_l3a5ch:	equ 0x3a5c
 ; Used at following locations:
 ; 0x39c7	(immediate value)
+
+CSq_l3a62h:	equ 0x3a62
+; Used at following locations:
+; 0x398a	(immediate value)
 
 sub_3a64h:	equ 0x3a64
 ; Used at following locations:
@@ -5969,7 +5963,7 @@ CSq_NxtListEl:	equ 0x3ab6
 ; Used at following locations:
 ; 0x3a8b	(immediate value)
 
-l3abch:	equ 0x3abc
+CSq_l3abch:	equ 0x3abc
 ; Used at following locations:
 ; 0x3bea	(immediate value)
 
@@ -6052,15 +6046,31 @@ l3c43h:	equ 0x3c43
 ; Used at following locations:
 ; 0x3c06	(jr destination)
 
-l3c4bh:	equ 0x3c4b
+CSq_l3c4bh:	equ 0x3c4b
 ; Used at following locations:
 ; 0x3c18	(immediate value)
 
-l3c5ch:	equ 0x3c5c
+CSq_l3c50h:	equ 0x3c50
+; Used at following locations:
+; 0x3b3f	(immediate value)
+
+l3c53h:	equ 0x3c53
+; Used at following locations:
+; 0x3b53	(immediate value)
+
+l3c57h:	equ 0x3c57
+; Used at following locations:
+; 0x3b56	(immediate value)
+
+CSq_l3c5ch:	equ 0x3c5c
 ; Used at following locations:
 ; 0x3b5b	(immediate value)
 
-l3c65h:	equ 0x3c65
+CSq_l3c61h:	equ 0x3c61
+; Used at following locations:
+; 0x3b5e	(immediate value)
+
+CSq_l3c65h:	equ 0x3c65
 ; Used at following locations:
 ; 0x3b99	(immediate value)
 
@@ -6175,7 +6185,7 @@ l3e38h:	equ 0x3e38
 ; Used at following locations:
 ; 0x3e33	(jr destination)
 
-l3e3dh:	equ 0x3e3d
+CSq_l3e3dh:	equ 0x3e3d
 ; Used at following locations:
 ; 0x3d7b	(immediate value)
 
@@ -6187,11 +6197,11 @@ l3e48h:	equ 0x3e48
 ; Used at following locations:
 ; 0x3dab	(immediate value)
 
-l3e4eh:	equ 0x3e4e
+CSq_l3e4eh:	equ 0x3e4e
 ; Used at following locations:
 ; 0x3dc6	(immediate value)
 
-l3e53h:	equ 0x3e53
+CSq_l3e53h:	equ 0x3e53
 ; Used at following locations:
 ; 0x3e2d	(immediate value)
 
@@ -6199,11 +6209,11 @@ l3e5ah:	equ 0x3e5a
 ; Used at following locations:
 ; 0x3e38	(immediate value)
 
-l3e5eh:	equ 0x3e5e
+CSq_l3e5eh:	equ 0x3e5e
 ; Used at following locations:
 ; 0x3dd6	(immediate value)
 
-l3e68h:	equ 0x3e68
+CSq_l3e68h:	equ 0x3e68
 ; Used at following locations:
 ; 0x3dd9	(immediate value)
 
@@ -6276,11 +6286,11 @@ l3eefh:	equ 0x3eef
 ; Used at following locations:
 ; 0x3eea	(jr destination)
 
-l3ef5h:	equ 0x3ef5
+CSq_l3ef5h:	equ 0x3ef5
 ; Used at following locations:
 ; 0x3eef	(immediate value)
 
-l3ef9h:	equ 0x3ef9
+CSq_l3ef9h:	equ 0x3ef9
 ; Used at following locations:
 ; 0x3ec1	(immediate value)
 
@@ -6288,7 +6298,7 @@ l3efeh:	equ 0x3efe
 ; Used at following locations:
 ; 0x3ece	(immediate value)
 
-l3f03h:	equ 0x3f03
+CSq_l3f03h:	equ 0x3f03
 ; Used at following locations:
 ; 0x3eda	(immediate value)
 
@@ -6438,11 +6448,11 @@ l4022h:	equ 0x4022
 ; Used at following locations:
 ; 0x401a	(jr destination)
 
-l4026h:	equ 0x4026
+CSq_l4026h:	equ 0x4026
 ; Used at following locations:
 ; 0x3ff7	(immediate value)
 
-l402ah:	equ 0x402a
+CSq_l402ah:	equ 0x402a
 ; Used at following locations:
 ; 0x4005	(immediate value)
 
@@ -6558,7 +6568,7 @@ l4159h:	equ 0x4159
 ; Used at following locations:
 ; 0x4153	(jr destination)
 
-l415bh:	equ 0x415b
+CSq_l415bh:	equ 0x415b
 ; Used at following locations:
 ; 0x41b0	(immediate value)
 
@@ -6566,33 +6576,33 @@ l4162h:	equ 0x4162
 ; Used at following locations:
 ; 0x410f	(immediate value)
 
-l416ah:	equ 0x416a
+CSq_l416ah:	equ 0x416a
 ; Used at following locations:
 ; 0x4114	(immediate value)
 
-l416fh:	equ 0x416f
+CSq_l416fh:	equ 0x416f
 ; Used at following locations:
 ; 0x409d	(immediate value)
 
-l4173h:	equ 0x4173
+CSq_l4173h:	equ 0x4173
 ; Used at following locations:
 ; 0x40c2	(immediate value)
 
-l4178h:	equ 0x4178
+CSq_l4178h:	equ 0x4178
 ; Used at following locations:
 ; 0x45a6	(immediate value)
 ; 0x4232	(immediate value)
 
-l417eh:	equ 0x417e
+CSq_l417eh:	equ 0x417e
 ; Used at following locations:
 ; 0x4265	(immediate value)
 ; 0x40cc	(immediate value)
 
-l4184h:	equ 0x4184
+CSq_l4184h:	equ 0x4184
 ; Used at following locations:
 ; 0x3f72	(immediate value)
 
-l4188h:	equ 0x4188
+CSq_l4188h:	equ 0x4188
 ; Used at following locations:
 ; 0x40d2	(immediate value)
 
@@ -6742,7 +6752,7 @@ l42e0h:	equ 0x42e0
 ; Used at following locations:
 ; 0x4287	(immediate value)
 
-l42e4h:	equ 0x42e4
+CSq_l42e4h:	equ 0x42e4
 ; Used at following locations:
 ; 0x421b	(immediate value)
 
@@ -6750,7 +6760,7 @@ l42e9h:	equ 0x42e9
 ; Used at following locations:
 ; 0x4216	(immediate value)
 
-l42edh:	equ 0x42ed
+CSq_l42edh:	equ 0x42ed
 ; Used at following locations:
 ; 0x41f4	(immediate value)
 
@@ -6758,7 +6768,7 @@ l42f1h:	equ 0x42f1
 ; Used at following locations:
 ; 0x4242	(immediate value)
 
-l42f7h:	equ 0x42f7
+CSq_l42f7h:	equ 0x42f7
 ; Used at following locations:
 ; 0x426b	(immediate value)
 
@@ -6807,7 +6817,7 @@ l4367h:	equ 0x4367
 ; Used at following locations:
 ; 0x435e	(jr destination)
 
-l4379h:	equ 0x4379
+CSq_l4379h:	equ 0x4379
 ; Used at following locations:
 ; 0x4efb	(immediate value)
 ; 0x4351	(immediate value)
@@ -6816,7 +6826,7 @@ l437eh:	equ 0x437e
 ; Used at following locations:
 ; 0x436f	(immediate value)
 
-l4381h:	equ 0x4381
+CSq_l4381h:	equ 0x4381
 ; Used at following locations:
 ; 0x4360	(immediate value)
 
@@ -7070,11 +7080,11 @@ RestoreSignBit:	equ 0x464b
 ; Used at following locations:
 ; 0x4645	(jr destination)
 
-l4650h:	equ 0x4650
+CSq_l4650h:	equ 0x4650
 ; Used at following locations:
 ; 0x43a6	(immediate value)
 
-l4654h:	equ 0x4654
+CSq_l4654h:	equ 0x4654
 ; Used at following locations:
 ; 0x44aa	(immediate value)
 
@@ -7082,25 +7092,33 @@ l4657h:	equ 0x4657
 ; Used at following locations:
 ; 0x44b6	(immediate value)
 
-l465bh:	equ 0x465b
+CSq_l465bh:	equ 0x465b
 ; Used at following locations:
 ; 0x44bb	(immediate value)
 
-l4660h:	equ 0x4660
+CSq_l4660h:	equ 0x4660
 ; Used at following locations:
 ; 0x4498	(immediate value)
+
+l4662h:	equ 0x4662
+; Used at following locations:
+; 0x4618	(immediate value)
 
 l4665h:	equ 0x4665
 ; Used at following locations:
 ; 0x461d	(immediate value)
 
-l466bh:	equ 0x466b
+CSq_l466bh:	equ 0x466b
 ; Used at following locations:
 ; 0x4623	(immediate value)
 
 l4676h:	equ 0x4676
 ; Used at following locations:
 ; 0x448d	(immediate value)
+
+l4678h:	equ 0x4678
+; Used at following locations:
+; 0x4493	(immediate value)
 
 sub_467bh:	equ 0x467b
 ; Used at following locations:
@@ -7116,11 +7134,11 @@ CSq_IniLVar_CaPrc:	equ 0x468e
 ; Used at following locations:
 ; 0x4688	(immediate value)
 
-l4696h:	equ 0x4696
+CSq_l4696h:	equ 0x4696
 ; Used at following locations:
 ; 0x470f	(immediate value)
 
-l46a1h:	equ 0x46a1
+CSq_l46a1h:	equ 0x46a1
 ; Used at following locations:
 ; 0x473c	(immediate value)
 ; 0x472d	(immediate value)
@@ -7381,7 +7399,7 @@ CSq_IXisSPpl4:	equ 0x4adf
 ; Used at following locations:
 ; 0x4a66	(immediate value)
 
-l4ae8h:	equ 0x4ae8
+CSq_l4ae8h:	equ 0x4ae8
 ; Used at following locations:
 ; 0x4aa9	(immediate value)
 
@@ -7785,7 +7803,7 @@ l508eh:	equ 0x508e
 ; Used at following locations:
 ; 0x5076	(immediate value)
 
-l5096h:	equ 0x5096
+CSq_l5096h:	equ 0x5096
 ; Used at following locations:
 ; 0x507b	(immediate value)
 
@@ -7842,31 +7860,31 @@ l5130h:	equ 0x5130
 ; Used at following locations:
 ; 0x511a	(jr destination)
 
-l513fh:	equ 0x513f
+CSq_l513fh:	equ 0x513f
 ; Used at following locations:
 ; 0x5139	(immediate value)
 
-l5153h:	equ 0x5153
+CSq_l5153h:	equ 0x5153
 ; Used at following locations:
 ; 0x514d	(immediate value)
 
-l5169h:	equ 0x5169
+CSq_l5169h:	equ 0x5169
 ; Used at following locations:
 ; 0x5163	(immediate value)
 
-l517dh:	equ 0x517d
+CSq_l517dh:	equ 0x517d
 ; Used at following locations:
 ; 0x5177	(immediate value)
 
-l51a9h:	equ 0x51a9
+CSq_l51a9h:	equ 0x51a9
 ; Used at following locations:
 ; 0x51a3	(immediate value)
 
-l51bdh:	equ 0x51bd
+CSq_l51bdh:	equ 0x51bd
 ; Used at following locations:
 ; 0x51b7	(immediate value)
 
-l51d9h:	equ 0x51d9
+CSq_l51d9h:	equ 0x51d9
 ; Used at following locations:
 ; 0x51d3	(immediate value)
 
@@ -7886,7 +7904,7 @@ l5234h:	equ 0x5234
 ; Used at following locations:
 ; 0x522b	(jr destination)
 
-l5235h:	equ 0x5235
+CSq_l5235h:	equ 0x5235
 ; Used at following locations:
 ; 0x50f1	(immediate value)
 
@@ -7894,7 +7912,7 @@ l523ah:	equ 0x523a
 ; Used at following locations:
 ; 0x5100	(immediate value)
 
-l5242h:	equ 0x5242
+CSq_l5242h:	equ 0x5242
 ; Used at following locations:
 ; 0x50c0	(immediate value)
 
@@ -7902,28 +7920,32 @@ l5246h:	equ 0x5246
 ; Used at following locations:
 ; 0x4f50	(immediate value)
 
-l524ah:	equ 0x524a
+CSq_l524ah:	equ 0x524a
 ; Used at following locations:
 ; 0x4f96	(immediate value)
 ; 0x4f56	(immediate value)
 
-l524eh:	equ 0x524e
+CSq_l524eh:	equ 0x524e
 ; Used at following locations:
 ; 0x4f2b	(immediate value)
 
-l5254h:	equ 0x5254
+CSq_l5254h:	equ 0x5254
 ; Used at following locations:
 ; 0x4f3d	(immediate value)
 
-l525ch:	equ 0x525c
+CSq_l525ch:	equ 0x525c
 ; Used at following locations:
 ; 0x4f86	(immediate value)
+
+CSq_l5267h:	equ 0x5267
+; Used at following locations:
+; 0x4f90	(immediate value)
 
 l5287h:	equ 0x5287
 ; Used at following locations:
 ; 0x527d	(jr destination)
 
-l52a8h:	equ 0x52a8
+CSq_l52a8h:	equ 0x52a8
 ; Used at following locations:
 ; 0x52a2	(immediate value)
 

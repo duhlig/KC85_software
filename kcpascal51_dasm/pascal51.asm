@@ -61,7 +61,6 @@ CCaos:
 	push hl	
 	ld ix,(caos_ix)
 	ld (pascal_sp),sp
-l023bh:
 	ld (tmp_reg_a),a
 	in a,(088h)
 	set 5,a
@@ -149,7 +148,6 @@ CAOS_KBD:
 	res 5,a
 	res 2,a
 	out (088h),a
-l02e5h:
 	ld a,e	
 	pop ix
 	pop de	
@@ -2514,7 +2512,6 @@ l1199h:
 	dec d	
 	pop bc	
 	djnz l1199h
-l11b0h:
 	ret	
 sub_11b1h:
 	call l0ba7h
@@ -6894,8 +6891,8 @@ l35e2h:
 	pop de	
 	call sub_0c7ah
 	push af	
-l35e8h:
-	rlca	
+CSq_l35e8h:
+	defb 007h
 	pop de	
 	ld a,(de)	
 	sub (hl)	
@@ -7077,6 +7074,9 @@ l36bdh:
 	ld (VarCall+1),hl
 	call MultiCall__
 	push af	
+
+; BLOCK 'TabCSq' (start 0x36c8 end 0x3710)
+TabCSq_first:
 	defw l3597h
 	defw l358eh
 	defw l35a0h
@@ -7117,12 +7117,12 @@ sub_3710h:
 	call GetLexem
 	call sub_3f3fh
 	call ChkType0004
-	ld hl,l3722h
+	ld hl,CSq_l3722h
 	call WCodeOverLastByte
 	dec hl	
 	dec hl	
 	ret	
-l3722h:
+CSq_l3722h:
 	defb 004h
 	or a	
 	defb 0cah
@@ -7292,7 +7292,7 @@ l3827h:
 	ld hl,l389ch
 	jr l3835h
 l3832h:
-	ld hl,l389fh
+	ld hl,CSq_l389fh
 l3835h:
 	jp WCodeOverLastByte
 l3838h:
@@ -7355,8 +7355,8 @@ l389ch:
 	ld (bc),a	
 	pop hl	
 	ld (hl),a	
-l389fh:
-	dec b	
+CSq_l389fh:
+	defb 005h
 	ex de,hl	
 	pop hl	
 	ld (hl),e	
@@ -7513,7 +7513,7 @@ l3975h:
 	call JCodeNextByte
 	defb 0feh
 	call l381ah
-	ld hl,03a62h
+	ld hl,CSq_l3a62h
 	call WCode
 	cp 0bah
 	jr z,l3999h
@@ -7545,7 +7545,7 @@ l39beh:
 	call ParseConstVal
 	call ChkType0001
 	call WLdDEnnIsHL
-	ld hl,l3a5ch
+	ld hl,CSq_l3a5ch
 	call WCode
 	cp 0bah
 	jr z,l39d6h
@@ -7645,12 +7645,15 @@ l3a49h:
 	call l3777h
 	pop bc	
 	jr l3a3bh
-l3a5ch:
-	rlca	
+CSq_l3a5ch:
+	defb 007h
 	or a	
 	sbc hl,de
 	add hl,de	
-	jp z,0ca03h
+	defb 0cah
+CSq_l3a62h:
+	defb 003h
+	defb 0cah
 sub_3a64h:
 	call StoreAToHL2
 	inc c	
@@ -7708,8 +7711,8 @@ CSq_NxtListEl:
 	inc hl	
 	ld (hl),d	
 	ex de,hl	
-l3abch:
-	inc b	
+CSq_l3abch:
+	defb 004h
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
@@ -7783,7 +7786,7 @@ l3b37h:
 	inc hl	
 	exx	
 	res 2,(ix+001h)
-	ld hl,03c50h
+	ld hl,CSq_l3c50h
 	call WCode
 	pop af	
 l3b46h:
@@ -7796,12 +7799,12 @@ l3b4eh:
 	pop af	
 	cp 00ch
 	jr nz,l3b5bh
-	ld hl,03c53h
-	ld de,03c57h
+	ld hl,l3c53h
+	ld de,l3c57h
 	jr l3b61h
 l3b5bh:
-	ld hl,l3c5ch
-	ld de,03c61h
+	ld hl,CSq_l3c5ch
+	ld de,CSq_l3c61h
 l3b61h:
 	call WCodeOverLastByte
 	push hl	
@@ -7836,7 +7839,7 @@ l3b93h:
 	pop af	
 	add a,030h
 	call sub_3a64h
-	ld hl,l3c65h
+	ld hl,CSq_l3c65h
 	call WCode
 	pop de	
 	call WrDE_ByTargAddr_pl2
@@ -7881,7 +7884,7 @@ l3be5h:
 	call WLdHLfromMemIsDE
 	jr l3bf0h
 l3beah:
-	ld hl,l3abch
+	ld hl,CSq_l3abch
 	call WCode
 l3bf0h:
 	pop af	
@@ -7907,7 +7910,7 @@ l3c10h:
 	call JCodeNextByte
 	defb 0ebh
 l3c18h:
-	ld hl,l3c4bh
+	ld hl,CSq_l3c4bh
 	call WCode
 	dec hl	
 	push hl	
@@ -7935,26 +7938,39 @@ l3c43h:
 	call WLdDEnnIsDE
 	push bc	
 	jr l3c10h
-l3c4bh:
-	ld b,0b7h
+CSq_l3c4bh:
+	defb 006h
+	or a	
 	sbc hl,de
-	jp m,0e304h
-	jp 0c103h
+	defb 0fah
+CSq_l3c50h:
+	defb 004h
+	ex (sp),hl	
+	defb 0c3h
+l3c53h:
+	defb 003h
+	pop bc	
 	cp b	
-	jp c,00004h
+	defb 0dah
+l3c57h:
+	defb 004h
+	nop	
 	nop	
 	inc a	
 	ld b,a	
-l3c5ch:
-	inc b	
+CSq_l3c5ch:
+	defb 004h
 	ld b,a	
 	pop af	
 	cp b	
-	jp c,00003h
+	defb 0dah
+CSq_l3c61h:
+	defb 003h
+	nop	
 	nop	
 	dec b	
-l3c65h:
-	dec b	
+CSq_l3c65h:
+	defb 005h
 	pop bc	
 	cp b	
 	jp nz,0d8cdh
@@ -8109,7 +8125,7 @@ sub_3d41h:
 	call GetLexem
 	call sub_3d84h
 l3d7bh:
-	ld hl,l3e3dh
+	ld hl,CSq_l3e3dh
 	jp WCode
 	call NextChkOpBra_GetLex
 sub_3d84h:
@@ -8145,7 +8161,7 @@ l3da1h:
 	cp 0c8h
 	call nz,CompileErr
 	call GetLexem
-	ld hl,l3e4eh
+	ld hl,CSq_l3e4eh
 l3dc9h:
 	call WCodeOverLastByte
 	jr l3dedh
@@ -8154,8 +8170,8 @@ l3dceh:
 	ld hl,l3e73h
 	jr l3ddch
 l3dd6h:
-	ld de,l3e5eh
-	ld hl,l3e68h
+	ld de,CSq_l3e5eh
+	ld hl,CSq_l3e68h
 l3ddch:
 	cp 0bah
 	jr nz,l3dc9h
@@ -8201,7 +8217,7 @@ l3e15h:
 	call JCodeNextByte
 	defb 03eh
 	call l381ah
-	ld hl,l3e53h
+	ld hl,CSq_l3e53h
 	call WCode
 	jr l3e38h
 l3e35h:
@@ -8209,8 +8225,8 @@ l3e35h:
 l3e38h:
 	ld hl,l3e5ah
 	jr l3deah
-l3e3dh:
-	inc bc	
+CSq_l3e3dh:
+	defb 003h
 	call PrNL
 l3e41h:
 	ld b,0cdh
@@ -8221,28 +8237,29 @@ l3e48h:
 	ld a,l	
 	pop hl	
 	call PrDez
-l3e4eh:
-	inc b	
+CSq_l3e4eh:
+	defb 004h
 	pop de	
 	call PrHex
-l3e53h:
-	ld b,04fh
+CSq_l3e53h:
+	defb 006h
+	ld c,a	
 	call PrFillSpc
 	pop hl	
 	ld b,c	
 l3e5ah:
 	inc bc	
 	call OutNStr
-l3e5eh:
-	add hl,bc	
+CSq_l3e5eh:
+	defb 009h
 	ld a,005h
 	pop bc	
 	push bc	
 	sub b	
 	call PrFillSpc
 	pop af	
-l3e68h:
-	inc bc	
+CSq_l3e68h:
+	defb 003h
 	call PrBool
 l3e6ch:
 	ld b,03eh
@@ -8302,7 +8319,7 @@ sub_3ebch:
 	call GetLexem
 	jr l3e98h
 l3ec1h:
-	ld hl,l3ef9h
+	ld hl,CSq_l3ef9h
 l3ec4h:
 	call WCode
 	jr l3eb1h
@@ -8317,7 +8334,7 @@ l3ed3h:
 	dec b	
 	jr nz,l3each
 	call sub_343dh
-	ld hl,l3f03h
+	ld hl,CSq_l3f03h
 	call WCode
 	pop de	
 	pop hl	
@@ -8328,21 +8345,21 @@ l3ed3h:
 	jr nz,l3eefh
 	call sub_3ebch
 l3eefh:
-	ld hl,l3ef5h
+	ld hl,CSq_l3ef5h
 	jp WCode
-l3ef5h:
-	inc bc	
+CSq_l3ef5h:
+	defb 003h
 	call l0aa2h
-l3ef9h:
-	inc b	
+CSq_l3ef9h:
+	defb 004h
 	call sub_0bb3h
 	push hl	
 l3efeh:
 	inc b	
 	call JReadEditIBuf__
 	push af	
-l3f03h:
-	inc bc	
+CSq_l3f03h:
+	defb 003h
 	call l0bd4h
 l3f07h:
 	dec b	
@@ -8416,7 +8433,7 @@ l3f43h:
 	exx	
 	bit 0,c
 	jr z,l3f78h
-	ld hl,l4184h
+	ld hl,CSq_l4184h
 	call WCodeOverLastByte
 l3f78h:
 	ld bc,l360ah
@@ -8449,7 +8466,7 @@ l3f9eh:
 	dec d	
 	jr nz,l3fd0h
 	call sub_343dh
-	ld hl,l35e8h
+	ld hl,CSq_l35e8h
 	call WCode
 	ld bc,035feh
 	jr l3f7bh
@@ -8496,13 +8513,13 @@ l3febh:
 	call JCodeNextByte
 	defb 07dh
 l3ff7h:
-	ld hl,l4026h
+	ld hl,CSq_l4026h
 	call WCode
 	push bc	
 	call sub_4072h
 	pop de	
 	call ChkType__
-	ld hl,l402ah
+	ld hl,CSq_l402ah
 	call WCode
 	ld c,a	
 	ld hl,(l2b8bh)
@@ -8523,11 +8540,11 @@ sub_401ch:
 l4022h:
 	ld bc,00004h
 	ret	
-l4026h:
-	inc bc	
+CSq_l4026h:
+	defb 003h
 	ld (l1798h),a
-l402ah:
-	inc c	
+CSq_l402ah:
+	defb 00ch
 	ld a,(l1798h)
 	call sub_0be9h
 	and (hl)	
@@ -8590,7 +8607,7 @@ l4089h:
 	call ChkType0004
 	call sub_41d2h
 	call ChkType0004
-	ld hl,l416fh
+	ld hl,CSq_l416fh
 l40a0h:
 	call WCodeOverLastByte
 	jr l4089h
@@ -8612,15 +8629,15 @@ l40a5h:
 	exx	
 	bit 2,b
 	jr z,l40c8h
-	ld hl,l4173h
+	ld hl,CSq_l4173h
 	call WCode
 l40c8h:
 	bit 0,c
 	jr z,l40d2h
-	ld hl,l417eh
+	ld hl,CSq_l417eh
 	call WCode
 l40d2h:
-	ld hl,l4188h
+	ld hl,CSq_l4188h
 	ld bc,00002h
 	call WCode
 	jr l4089h
@@ -8654,7 +8671,7 @@ l410bh:
 	bit 1,(ix+000h)
 	ld hl,l4162h
 	jr nz,l4117h
-	ld hl,l416ah
+	ld hl,CSq_l416ah
 l4117h:
 	call WCode
 	jr l40f4h
@@ -8697,8 +8714,9 @@ l4150h:
 l4159h:
 	push hl	
 	push de	
-l415bh:
-	ld b,0b7h
+CSq_l415bh:
+	defb 006h
+	or a	
 	adc hl,de
 	call pe,ErrOverflow
 l4162h:
@@ -8707,36 +8725,36 @@ l4162h:
 	or a	
 	sbc hl,de
 	call pe,ErrOverflow
-l416ah:
-	inc b	
+CSq_l416ah:
+	defb 004h
 	ex de,hl	
 	or a	
 	sbc hl,de
-l416fh:
-	inc bc	
+CSq_l416fh:
+	defb 003h
 	pop bc	
 	or b	
 	push af	
-l4173h:
-	inc b	
+CSq_l4173h:
+	defb 004h
 	ld a,080h
 	xor h	
 	ld h,a	
-l4178h:
-	dec b	
+CSq_l4178h:
+	defb 005h
 	call sub_0e45h
 	push hl	
 	push de	
-l417eh:
-	dec b	
+CSq_l417eh:
+	defb 005h
 	ex (sp),hl	
 	push de	
 	call sub_0e45h
-l4184h:
-	inc bc	
+CSq_l4184h:
+	defb 003h
 	call sub_0e45h
-l4188h:
-	dec b	
+CSq_l4188h:
+	defb 005h
 	call sub_0ca1h
 	push hl	
 	push de	
@@ -8769,7 +8787,7 @@ l41ach:
 	call WLdDEnnIsHL
 	pop af	
 sub_41b0h:
-	ld hl,l415bh
+	ld hl,CSq_l415bh
 	jp nz,WCode
 	call JCodeNextByte
 	defb 019h
@@ -8813,7 +8831,7 @@ l41d8h:
 	call ChkType0004
 	call sub_43b5h
 	call ChkType0004
-	ld hl,l42edh
+	ld hl,CSq_l42edh
 	call WCodeOverLastByte
 	jr l41d8h
 l41fch:
@@ -8832,7 +8850,7 @@ l4213h:
 	bit 0,d
 	ld hl,l42e9h
 	jr nz,l421eh
-	ld hl,l42e4h
+	ld hl,CSq_l42e4h
 l421eh:
 	call WCode
 l4221h:
@@ -8844,7 +8862,7 @@ l422bh:
 	call PCVChkNum
 	bit 0,c
 	jr z,l423ch
-	ld hl,l4178h
+	ld hl,CSq_l4178h
 	call WCodeOverLastByte
 	set 0,(ix+001h)
 l423ch:
@@ -8870,10 +8888,10 @@ l424ah:
 	exx	
 	bit 0,e
 	jr z,l426bh
-	ld hl,l417eh
+	ld hl,CSq_l417eh
 	call WCode
 l426bh:
-	ld hl,l42f7h
+	ld hl,CSq_l42f7h
 	call WCode
 l4271h:
 	jp l41d8h
@@ -8951,15 +8969,15 @@ CSq_StorAndM:
 l42e0h:
 	inc bc	
 	call Mul16x8sgn
-l42e4h:
-	inc b	
+CSq_l42e4h:
+	defb 004h
 	call Div
 	ex de,hl	
 l42e9h:
 	inc bc	
 	call Div
-l42edh:
-	inc bc	
+CSq_l42edh:
+	defb 003h
 	pop bc	
 	and b	
 	push af	
@@ -8968,8 +8986,8 @@ l42f1h:
 	call RealDiv__
 	push hl	
 	push de	
-l42f7h:
-	dec b	
+CSq_l42f7h:
+	defb 005h
 	call RealMul__
 	push hl	
 	push de	
@@ -9024,7 +9042,7 @@ sub_4336h:
 	ret	
 	call sub_4336h
 	jr z,l4358h
-	ld hl,l4379h
+	ld hl,CSq_l4379h
 	ld c,b	
 l4355h:
 	call WCodeOverLastByte
@@ -9032,7 +9050,7 @@ l4358h:
 	jp l459fh
 	call sub_4336h
 	jr z,l4367h
-	ld hl,l4381h
+	ld hl,CSq_l4381h
 l4363h:
 	inc c	
 	jp WCodeOverLastByte
@@ -9044,8 +9062,8 @@ l4367h:
 	jr nz,l4363h
 	ld hl,l4384h
 	jr l4355h
-l4379h:
-	inc b	
+CSq_l4379h:
+	defb 004h
 	ld l,a	
 	ld h,000h
 	push hl	
@@ -9053,8 +9071,8 @@ l437eh:
 	ld (bc),a	
 	inc a	
 	push af	
-l4381h:
-	ld (bc),a	
+CSq_l4381h:
+	defb 002h
 	dec a	
 	push af	
 l4384h:
@@ -9079,7 +9097,7 @@ l438dh:
 l43a0h:
 	call sub_43b5h
 	call ChkType0004
-	ld hl,l4650h
+	ld hl,CSq_l4650h
 	jp WCodeOverLastByte
 l43ach:
 	call GetLexem
@@ -9213,9 +9231,9 @@ l4482h:
 	ld hl,l4676h
 	jr z,l449bh
 	dec a	
-	ld hl,l4676h+2
+	ld hl,l4678h
 	jr z,l449bh
-	ld hl,l4660h
+	ld hl,CSq_l4660h
 l449bh:
 	call WCode
 	pop hl	
@@ -9225,7 +9243,7 @@ l449bh:
 	ld (ix+001h),d
 	dec c	
 	jr nz,l44b3h
-	ld hl,l4654h
+	ld hl,CSq_l4654h
 	call WCode
 	jp l459fh
 l44b3h:
@@ -9234,7 +9252,7 @@ l44b3h:
 	ld hl,l4657h
 	jr l44c2h
 l44bbh:
-	ld hl,l465bh
+	ld hl,CSq_l465bh
 	set 0,(ix+001h)
 l44c2h:
 	inc c	
@@ -9371,7 +9389,7 @@ l45a0h:
 	bit 0,(ix+001h)
 	ret z	
 	inc c	
-	ld hl,l4178h
+	ld hl,CSq_l4178h
 	jp WCodeOverLastByte
 l45ach:
 	call JCodeNextByte
@@ -9435,13 +9453,13 @@ l4612h:
 	jr z,l461dh
 	dec c	
 	jr z,l4623h
-	ld hl,l4660h+2
+	ld hl,l4662h
 	jr l462ah
 l461dh:
 	ld hl,l4665h
 	jp l4355h
 l4623h:
-	ld hl,l466bh
+	ld hl,CSq_l466bh
 	set 0,(ix+001h)
 l462ah:
 	inc c	
@@ -9471,12 +9489,12 @@ RestoreSignBit:
 	or h	
 	ld h,a	
 	ret	
-l4650h:
-	inc bc	
+CSq_l4650h:
+	defb 003h
 	xor 001h
 	push af	
-l4654h:
-	ld (bc),a	
+CSq_l4654h:
+	defb 002h
 	pop hl	
 	push hl	
 l4657h:
@@ -9484,25 +9502,28 @@ l4657h:
 	dec sp	
 	pop af	
 	push af	
-l465bh:
-	inc b	
+CSq_l465bh:
+	defb 004h
 	pop de	
 	pop hl	
 	push hl	
 	push de	
-l4660h:
-	ld bc,l023bh
+CSq_l4660h:
+	defb 001h
+	dec sp	
+l4662h:
+	defb 002h
 	ld a,(hl)	
 	push af	
 l4665h:
-	dec b	
+	defb 005h
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
 	ex de,hl	
 	push hl	
-l466bh:
-	ld a,(bc)	
+CSq_l466bh:
+	defb 00ah
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
@@ -9514,7 +9535,10 @@ l466bh:
 	push hl	
 	push de	
 l4676h:
-	ld bc,l02e5h
+	defb 001h
+	push hl	
+l4678h:
+	defb 002h
 	push hl	
 	push de	
 sub_467bh:
@@ -9532,16 +9556,16 @@ CSq_IniLVar_CaPrc:
 	call InitLocVar_CaPrc__
 	inc bc	
 	call sub_0be9h
-l4696h:
-	dec b	
+CSq_l4696h:
+	defb 005h
 	call sub_0be9h
 	or (hl)	
 	ld (hl),a	
 	inc b	
 	ld a,l	
 	call sub_0be9h
-l46a1h:
-	rlca	
+CSq_l46a1h:
+	defb 007h
 	ld e,a	
 	call sub_0be9h
 	ld d,a	
@@ -9610,7 +9634,7 @@ l4704h:
 	call JCodeNextByte
 	defb 07dh
 l470fh:
-	ld hl,l4696h
+	ld hl,CSq_l4696h
 l4712h:
 	call WCode
 	cp 0ddh
@@ -9624,14 +9648,14 @@ l4721h:
 	call ChkLexem_GetLex
 	dec c	
 	jr z,l4738h
-	ld hl,l46a1h
+	ld hl,CSq_l46a1h
 	call WCode
 	call sub_3f16h
 	jr l4749h
 l4738h:
 	call JCodeNextByte
 	defb 07dh
-	ld hl,l46a1h
+	ld hl,CSq_l46a1h
 	call WCode
 	call sub_3f16h
 	call JCodeNextByte
@@ -10147,7 +10171,7 @@ l4a98h:
 	defb 0f9h
 	bit 3,(ix+000h)
 	jr z,l4aafh
-	ld hl,l4ae8h
+	ld hl,CSq_l4ae8h
 	call WCode
 l4aafh:
 	ld a,c	
@@ -10180,8 +10204,8 @@ CSq_IXisSPpl4:
 	push ix
 	ld ix,00004h
 	add ix,sp
-l4ae8h:
-	ex af,af'	
+CSq_l4ae8h:
+	defb 008h
 	ld de,(l178bh)
 	add hl,de	
 	call nc,PrRAM
@@ -10866,7 +10890,7 @@ l4ee2h:
 	ld (ix+001h),d
 	dec c	
 	jr z,l4f01h
-	ld hl,l4379h
+	ld hl,CSq_l4379h
 	call WCodeOverLastByte
 l4f01h:
 	exx	
@@ -10904,7 +10928,7 @@ l4f24h:
 	bit 5,(ix+000h)
 	jr z,l4f44h
 	push hl	
-	ld hl,l524eh
+	ld hl,CSq_l524eh
 	push de	
 	call WCode
 	ld h,b	
@@ -10915,7 +10939,7 @@ l4f24h:
 	ex de,hl	
 	inc de	
 	call WLdDEnnIsDE
-	ld hl,l5254h
+	ld hl,CSq_l5254h
 	call WCode
 	pop hl	
 l4f44h:
@@ -10929,7 +10953,7 @@ l4f44h:
 	push hl	
 	ld hl,l5246h
 	call sub_4295h
-	ld hl,l524ah
+	ld hl,CSq_l524ah
 	call WCode
 	pop hl	
 	ld c,(hl)	
@@ -10959,14 +10983,14 @@ l4f74h:
 	pop bc	
 	bit 5,(ix+000h)
 	jr z,l4f96h
-	ld hl,l525ch
+	ld hl,CSq_l525ch
 	call WCode
 	ld e,c	
 	call l381ah
-	ld hl,05267h
+	ld hl,CSq_l5267h
 	call WCode
 l4f96h:
-	ld hl,l524ah
+	ld hl,CSq_l524ah
 	call WCode
 	call ChkCloSqBra_GetLex
 	ld d,000h
@@ -11109,7 +11133,7 @@ l506ah:
 	ret	
 	ld hl,l508eh
 	jr l507eh
-	ld hl,l5096h
+	ld hl,CSq_l5096h
 l507eh:
 	push hl	
 	call NextChkOpBra_GetLex
@@ -11124,8 +11148,8 @@ l508eh:
 	ld (hl),e	
 	inc hl	
 	ld (hl),d	
-l5096h:
-	rlca	
+CSq_l5096h:
+	defb 007h
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
@@ -11145,7 +11169,7 @@ l5096h:
 	sbc hl,de
 	ex de,hl	
 	call StoreDE
-	ld hl,l5242h
+	ld hl,CSq_l5242h
 	call WCode
 	jp ChkCloBra_GetLex
 sub_50c9h:
@@ -11177,7 +11201,7 @@ l50e3h:
 	ld e,004h
 	ret	
 	call sub_5105h
-	ld hl,l5235h
+	ld hl,CSq_l5235h
 l50f4h:
 	call WCodeOverLastByte
 	jp ChkCloBra_GetLex
@@ -11210,19 +11234,19 @@ l5130h:
 	call sub_510eh
 	jp ChkCloBra_GetLex
 	call sub_5114h
-	ld hl,l513fh
+	ld hl,CSq_l513fh
 	jp WCodeOverLastByte
-l513fh:
-	ld a,(bc)	
+CSq_l513fh:
+	defb 00ah
 	ld (l178fh),hl
 	pop hl	
 	ld (l178dh),hl
 	call sub_04e6h
 	call sub_5114h
-	ld hl,l5153h
+	ld hl,CSq_l5153h
 	jp WCodeOverLastByte
-l5153h:
-	rlca	
+CSq_l5153h:
+	defb 007h
 	ld (l178dh),hl
 	pop hl	
 	call sub_0655h
@@ -11230,19 +11254,19 @@ l5153h:
 	call sub_066ah
 	push hl	
 	call sub_5114h
-	ld hl,l5169h
+	ld hl,CSq_l5169h
 	jp WCodeOverLastByte
-l5169h:
-	ld a,(bc)	
+CSq_l5169h:
+	defb 00ah
 	ld (l178fh),hl
 	pop hl	
 	ld (l178dh),hl
 	call sub_0502h
 	call sub_5114h
-	ld hl,l517dh
+	ld hl,CSq_l517dh
 	jp WCodeOverLastByte
-l517dh:
-	ld a,(bc)	
+CSq_l517dh:
+	defb 00ah
 	ld (l178fh),hl
 	pop hl	
 	ld (l178dh),hl
@@ -11260,19 +11284,19 @@ l517dh:
 	call sub_0553h
 	push hl	
 	call sub_5114h
-	ld hl,l51a9h
+	ld hl,CSq_l51a9h
 	jp WCodeOverLastByte
-l51a9h:
-	ld a,(bc)	
+CSq_l51a9h:
+	defb 00ah
 	ld (l178fh),hl
 	pop hl	
 	ld (l178dh),hl
 	call sub_05c7h
 	call sub_5124h
-	ld hl,l51bdh
+	ld hl,CSq_l51bdh
 	jp WCodeOverLastByte
-l51bdh:
-	ld (de),a	
+CSq_l51bdh:
+	defb 012h
 	ld (l1793h),hl
 	pop hl	
 	ld (l1791h),hl
@@ -11282,12 +11306,11 @@ l51bdh:
 	ld (l178dh),hl
 	call sub_05ebh
 	call sub_511ch
-	ld hl,l51d9h
+	ld hl,CSq_l51d9h
 	jp WCodeOverLastByte
-l51d9h:
-	ld c,022h
-	sub c	
-	rla	
+CSq_l51d9h:
+	defb 00eh
+	ld (l1791h),hl
 	pop hl	
 	ld (l178fh),hl
 	pop hl	
@@ -11362,8 +11385,8 @@ l522eh:
 	djnz l522eh
 l5234h:
 	push hl	
-l5235h:
-	inc b	
+CSq_l5235h:
+	defb 004h
 	pop de	
 	call LoadSrcFile
 l523ah:
@@ -11373,35 +11396,37 @@ l523ah:
 	pop hl	
 	pop de	
 	call SaveSrcFile
-l5242h:
-	inc bc	
+CSq_l5242h:
+	defb 003h
 	call sub_0c87h
 l5246h:
 	inc bc	
 	call Mul8x8
-l524ah:
-	inc bc	
+CSq_l524ah:
+	defb 003h
 	pop de	
 	add hl,de	
 	push hl	
-l524eh:
-	dec b	
+CSq_l524eh:
+	defb 005h
 	bit 7,h
 	call nz,ErrIdxLow
-l5254h:
-	rlca	
+CSq_l5254h:
+	defb 007h
 	or a	
 	sbc hl,de
 	add hl,de	
 	call p,ErrIdxHigh
-l525ch:
-	ld a,(bc)	
+CSq_l525ch:
+	defb 00ah
 	ld a,h	
 	or a	
 	call m,ErrIdxLow
 	call nz,ErrIdxHigh
 	ld a,l	
-	cp 003h
+	defb 0feh
+CSq_l5267h:
+	defb 003h
 	call nc,ErrIdxHigh
 	call NextChkOpBra_GetLex
 	ld e,03fh
@@ -11424,10 +11449,10 @@ l5287h:
 	ld bc,00003h
 	call sub_3f13h
 	call ChkCloBra_GetLex
-	ld hl,l52a8h
+	ld hl,CSq_l52a8h
 	jp WCodeOverLastByte
-l52a8h:
-	inc bc	
+CSq_l52a8h:
+	defb 003h
 	pop bc	
 	out (c),a
 	dec b	

@@ -27,10 +27,12 @@ test: p51.bin
 p51.bin: pascal51.asm
 	pasmo pascal51.asm p51.bin
 
-p5a.kcc:
+p5a.kcc: p5a.asm
+	pasmo p5a.asm p5a.kcc
+
+p5a.asm: pascal51.asm
 	cp pascal51.asm p5a.asm
 	patch p5a.asm p5a.patch
-	pasmo p5a.asm p5a.kcc
 
 clean:
 	-rm -f *~ p51.symout p51t.asm p51.bin
