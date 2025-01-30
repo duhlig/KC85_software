@@ -6383,7 +6383,7 @@ l3f78h:	equ 0x3f78
 ; Used at following locations:
 ; 0x3f70	(jr destination)
 
-l3f7bh:	equ 0x3f7b
+WCode_VarIdxHL:	equ 0x3f7b
 ; Used at following locations:
 ; 0x3fe5	(jr destination)
 ; 0x3fb9	(jr destination)
@@ -6439,7 +6439,7 @@ l3ff7h:	equ 0x3ff7
 ; Used at following locations:
 ; 0x3ff1	(jr destination)
 
-sub_401ch:	equ 0x401c
+GetCSqAddrByIdx:	equ 0x401c
 ; Used at following locations:
 ; 0x3fca	(call destination)
 ; 0x3f7c	(call destination)

@@ -1,5 +1,5 @@
---- p51.asm	2025-01-30 21:44:24.481213299 +0100
-+++ pascal51.asm	2025-01-30 21:44:24.487213264 +0100
+--- p51.asm	2025-01-30 21:49:49.819364833 +0100
++++ pascal51.asm	2025-01-30 21:49:49.825364800 +0100
 @@ -2,21 +2,22 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -4103,7 +4103,7 @@
  ChkType0004:
  	ld de,00004h
  	jr ChkType__
-@@ -10172,7 +7179,7 @@
+@@ -10174,7 +7181,7 @@
  	ret	
  sub_376dh:
  	ex af,af'	
@@ -4112,7 +4112,7 @@
  	call ChkLexem_GetLex
  	call WCaBreak_IfCoCo_C
  l3777h:
-@@ -10972,7 +7979,7 @@
+@@ -10974,7 +7981,7 @@
  	call WCaBreak_IfCoCo_C
  	call sub_3710h
  	push hl	
@@ -4121,7 +4121,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	call WrJump
-@@ -10985,7 +7992,7 @@
+@@ -10987,7 +7994,7 @@
  l3c8ah:
  	call sub_3710h
  	push hl	
@@ -4130,7 +4130,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	cp 012h
-@@ -11072,7 +8079,7 @@
+@@ -11074,7 +8081,7 @@
  	push hl	
  	cp 0ach
  	jr z,l3d3ch
@@ -4139,7 +4139,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  l3d32h:
-@@ -13169,7 +10176,7 @@
+@@ -13171,7 +10178,7 @@
  l4aafh:
  	ld a,c	
  ChkBegin:
@@ -4148,7 +4148,7 @@
  	call ChkLexem_GetLex
  	jp l3cd4h
  WCorrAddr:
-@@ -14204,7 +11211,7 @@
+@@ -14206,7 +11213,7 @@
  	jr l50f4h
  sub_5105h:
  	call NextChkOpBra_GetLex
@@ -4157,7 +4157,7 @@
  	call sub_3f29h
  sub_510eh:
  	call ChkComma_GetLex
-@@ -14527,7 +11534,7 @@
+@@ -14529,7 +11536,7 @@
  PXCpChrMap:
  	ld hl,(CCTL0)
  	ld de,0ba00h
@@ -4166,7 +4166,7 @@
  	ldir
  	ld hl,PXUSASC
  	ld de,0bbd8h
-@@ -14767,116 +11774,17 @@
+@@ -14769,116 +11776,17 @@
  
  ; BLOCK 'Rest' (start 0x5490 end 0x5500)
  Rest_first:

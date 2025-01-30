@@ -6583,7 +6583,9 @@ sub_343dh:
 	jp l381ah
 CSq_JP:
 	defb 003h
-	jp 0bbfeh
+	defb 0c3h
+l344bh:
+	cp 0bbh
 	ret z	
 	or a	
 	jr z,l3454h
@@ -6591,7 +6593,7 @@ CSq_JP:
 	ret c	
 l3454h:
 	call GetLexem
-	jr $-12
+	jr l344bh
 PCVNegNum:
 	call GetLexem
 	call ParseConstVal
@@ -8437,24 +8439,24 @@ l3f43h:
 	call WCodeOverLastByte
 l3f78h:
 	ld bc,l360ah
-l3f7bh:
+WCode_VarIdxHL:
 	pop hl	
-	call sub_401ch
+	call GetCSqAddrByIdx
 	jp WCodeOverLastByte
 l3f82h:
 	pop de	
 	call ChkType__
 	ld bc,l35f2h
-	jr l3f7bh
+	jr WCode_VarIdxHL
 l3f8bh:
 	ld a,e	
 	pop de	
 	call ChkType__
 	bit 4,(ix+000h)
 	ld bc,035dah
-	jr z,l3f7bh
+	jr z,WCode_VarIdxHL
 	ld bc,035e6h
-	jr l3f7bh
+	jr WCode_VarIdxHL
 l3f9eh:
 	ld a,e	
 	pop de	
@@ -8469,7 +8471,7 @@ l3f9eh:
 	ld hl,CSq_l35e8h
 	call WCode
 	ld bc,035feh
-	jr l3f7bh
+	jr WCode_VarIdxHL
 l3fbbh:
 	pop hl	
 	ld e,a	
@@ -8480,7 +8482,7 @@ l3fbbh:
 	ld a,e	
 	jr z,l3fd7h
 	ld bc,l3616h
-	call sub_401ch
+	call GetCSqAddrByIdx
 	jp CodeLdBC_0n_from_0x2b8b
 l3fd0h:
 	ld e,01bh
@@ -8501,7 +8503,7 @@ l3fdbh:
 	cp 0f2h
 	ld bc,035dah
 	ld a,e	
-	jr c,l3f7bh
+	jr c,WCode_VarIdxHL
 	ld e,040h
 	jr l3fd2h
 l3febh:
@@ -8530,7 +8532,7 @@ l3ff7h:
 	call JCodeNextByte
 	defb 0f5h
 	jr l4022h
-sub_401ch:
+GetCSqAddrByIdx:
 	add hl,bc	
 	ld e,(hl)	
 	inc hl	
@@ -9130,7 +9132,7 @@ sub_43b8h:
 	jr z,l43a0h
 	ld e,00ch
 	call CompileErr
-	jp 0344bh
+	jp l344bh
 WLdChr:
 	ld a,(curRealHWord)
 	ld bc,00003h

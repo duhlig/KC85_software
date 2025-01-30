@@ -451,6 +451,7 @@ CSq: unlabeled first 0x2e67 unlabeled last 0x2e67 type bytedata
 CSq: unlabeled first 0x2f2e unlabeled last 0x2f2e type bytedata
 CSq: unlabeled first 0x2f32 unlabeled last 0x2f32 type bytedata
 CSq: unlabeled first 0x3449 unlabeled last 0x3449 type bytedata
+CSqP: unlabeled first 0x344a unlabeled last 0x344a type bytedata
 CSq: unlabeled first 0x3534 unlabeled last 0x3534 type bytedata
 CSq: unlabeled first 0x3538 unlabeled last 0x3538 type bytedata
 CSq: unlabeled first 0x3547 unlabeled last 0x3547 type bytedata

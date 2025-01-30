@@ -1,3 +1,11 @@
+ChkType:
+  Parameter:
+    BC: ermittelter Typ
+    DE: geforderter Typ
+  Return:
+    Z-Flag: 1=OK
+    (im Fehlerfall JP CompileErr)
+    
 IsNum:
   Return:
     C-Flag: 1=True
