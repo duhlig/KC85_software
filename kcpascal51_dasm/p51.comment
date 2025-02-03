@@ -10,6 +10,10 @@ IsNum:
   Return:
     C-Flag: 1=True
 
+GetFactor:
+  Return:
+    BC: gefundener Typ
+    
 GetFloat:
   Return:
     HL: Zahlenwert
@@ -93,6 +97,21 @@ GotoSrcLineBC:
       Z=1: Zeilennummer gefunden
       Z=0 und C=0: gesu. ZlNr liegt zwischen 2 Zeilen
 
+WCode_VarIdxTOS:
+  Parameter:
+    BC: Basisadr., Werte: 35da (2x), 35e6, 35f2, 35fe, 360a
+    TOS: Abstand zur Basisadr.
+      - bei BC=35da: TOS zw. 00EE und 00F8 --> Adr. zw. 36c8 und 36d2
+      - bei BC=35e6: TOS zw. 00EE und 00F8 --> Adr. zw. 36d4 und 36de
+      - bei BC=35f2: TOS zw. 00EE und 00F8 --> Adr. zw. 36e0 und 36ea
+      - bei BC=35fe: TOS zw. 00EE und 00F8 --> Adr. zw. 36ec und 36f6
+      - bei BC=360a: TOS zw. 00EE und 00F8 --> Adr. zw. 36f8 und 3702
+
+l3754h:
+  - "ld de,0371eh", dann "add hl.de"
+    hl zw. 26h und 34h --> Adr. zw. 3744 und 3752
+
+
 IX:
   +0:
     bit_0: Comp-Opt. L, + -> 1, - -> 0
@@ -104,3 +123,10 @@ IX:
     bit_6: EOL im Line Buffer gelesen
   +2:
     bit_1: bewirkt return(0aeh) in GetLexem --> Quelltextende?
+    bit_3:?
+
+
+---
+offen:
+0b7..h
+

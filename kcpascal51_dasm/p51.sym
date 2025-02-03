@@ -128,10 +128,6 @@ KillMem:	equ 0x0304
 ; Used at following locations:
 ; 0x0307	(djnz destination)
 
-l0314h:	equ 0x0314
-; Used at following locations:
-; 0x13d6	(immediate value)
-
 FName2Menu:	equ 0x033f
 ; Used at following locations:
 ; 0x034a	(djnz destination)
@@ -145,10 +141,6 @@ C_ISRO:	equ 0x034c
 SaveBlock:	equ 0x0378
 ; Used at following locations:
 ; 0x03b2	(jr destination)
-
-l0390h:	equ 0x0390
-; Used at following locations:
-; 0x13ce	(immediate value)
 
 C_CSRO:	equ 0x03b4
 ; Used at following locations:
@@ -216,10 +208,6 @@ CAOS_UOT1:	equ 0x04db
 ; Used at following locations:
 ; 0x0754	(jp destination)
 
-l04dch:	equ 0x04dc
-; Used at following locations:
-; 0x1360	(immediate value)
-
 sub_04e6h:	equ 0x04e6
 ; Used at following locations:
 ; 0x5147	(call destination)
@@ -231,10 +219,6 @@ sub_0502h:	equ 0x0502
 sub_0527h:	equ 0x0527
 ; Used at following locations:
 ; 0x5185	(call destination)
-
-l0545h:	equ 0x0545
-; Used at following locations:
-; 0x13c4	(immediate value)
 
 sub_054bh:	equ 0x054b
 ; Used at following locations:
@@ -1266,10 +1250,6 @@ TestCuD:	equ 0x0afe
 ; Used at following locations:
 ; 0x0af5	(jr destination)
 
-l0b00h:	equ 0x0b00
-; Used at following locations:
-; 0x041d	(immediate value)
-
 TestEnter:	equ 0x0b07
 ; Used at following locations:
 ; 0x0b00	(jr destination)
@@ -2292,6 +2272,7 @@ l1666h:	equ 0x1666
 ; Used at following locations:
 ; 0x164e	(jr destination)
 
+xxTab3__: equ 0x1669
 l1675h:	equ 0x1675
 ; Used at following locations:
 ; 0x16a6	(jr destination)
@@ -4775,7 +4756,7 @@ tTabU:	equ 0x329f
 ; Used at following locations:
 ; 0x333f	(immediate value)
 
-ChkType0004:	equ 0x32b2
+ChkTypeBool__:	equ 0x32b2
 ; Used at following locations:
 ; 0x43a3	(call destination)
 ; 0x41f1	(call destination)
@@ -5513,10 +5494,6 @@ l35f0h:	equ 0x35f0
 ; 0x36ee	(defw directive)
 ; 0x35ee	(jr destination)
 
-l35f2h:	equ 0x35f2
-; Used at following locations:
-; 0x3f86	(immediate value)
-
 l35f5h:	equ 0x35f5
 ; Used at following locations:
 ; 0x35fb	(djnz destination)
@@ -5650,6 +5627,8 @@ l36bdh:	equ 0x36bd
 ; Used at following locations:
 ; 0x370c	(defw directive)
 
+TabCSq: equ 0x36c8
+
 sub_3710h:	equ 0x3710
 ; Used at following locations:
 ; 0x3cca	(call destination)
@@ -5663,6 +5642,8 @@ CSq_l3722h:	equ 0x3722
 l3725h:	equ 0x3725
 ; Used at following locations:
 ; 0x3756	(jr destination)
+
+xxTab4__: equ 0x3744
 
 l3754h:	equ 0x3754
 ; Used at following locations:
@@ -6217,23 +6198,23 @@ CSq_l3e68h:	equ 0x3e68
 ; Used at following locations:
 ; 0x3dd9	(immediate value)
 
-l3e6ch:	equ 0x3e6c
+CSq_l3e6ch:	equ 0x3e6c
 ; Used at following locations:
 ; 0x3dce	(immediate value)
 
-l3e73h:	equ 0x3e73
+CSq_l3e73h:	equ 0x3e73
 ; Used at following locations:
 ; 0x3dd1	(immediate value)
 
-l3e77h:	equ 0x3e77
+CSq_l3e77h:	equ 0x3e77
 ; Used at following locations:
 ; 0x3e00	(immediate value)
 
-l3e7eh:	equ 0x3e7e
+CSq_l3e7eh:	equ 0x3e7e
 ; Used at following locations:
 ; 0x3e0d	(immediate value)
 
-l3e82h:	equ 0x3e82
+CSq_l3e82h:	equ 0x3e82
 ; Used at following locations:
 ; 0x3e08	(immediate value)
 
@@ -6383,7 +6364,7 @@ l3f78h:	equ 0x3f78
 ; Used at following locations:
 ; 0x3f70	(jr destination)
 
-WCode_VarIdxHL:	equ 0x3f7b
+WCode_VarIdxTOS:	equ 0x3f7b
 ; Used at following locations:
 ; 0x3fe5	(jr destination)
 ; 0x3fb9	(jr destination)
@@ -6472,7 +6453,7 @@ l4051h:	equ 0x4051
 ; 0x403e	(jr destination)
 ; 0x4039	(jr destination)
 
-l405dh:	equ 0x405d
+FoundMinus__:	equ 0x405d
 ; Used at following locations:
 ; 0x4077	(jp destination)
 
@@ -6620,10 +6601,6 @@ l419eh:	equ 0x419e
 ; Used at following locations:
 ; 0x41a1	(djnz destination)
 
-l41a3h:	equ 0x41a3
-; Used at following locations:
-; 0x13dc	(immediate value)
-
 l41a4h:	equ 0x41a4
 ; Used at following locations:
 ; 0x4191	(jr destination)
@@ -6652,7 +6629,7 @@ l41cdh:	equ 0x41cd
 ; Used at following locations:
 ; 0x41c1	(jr destination)
 
-sub_41d2h:	equ 0x41d2
+GetTerm:	equ 0x41d2
 ; Used at following locations:
 ; 0x411f	(call destination)
 ; 0x40af	(call destination)
@@ -6660,11 +6637,11 @@ sub_41d2h:	equ 0x41d2
 ; 0x407e	(call destination)
 ; 0x405d	(call destination)
 
-sub_41d5h:	equ 0x41d5
+ChkTerm:	equ 0x41d5
 ; Used at following locations:
 ; 0x4086	(call destination)
 
-l41d8h:	equ 0x41d8
+ChkTermOp:	equ 0x41d8
 ; Used at following locations:
 ; 0x4271	(jp destination)
 ; 0x4248	(jr destination)
@@ -6777,10 +6754,6 @@ l42fdh:	equ 0x42fd
 ; 0x44c9	(jp destination)
 ; 0x3792	(jp destination)
 
-l4305h:	equ 0x4305
-; Used at following locations:
-; 0x16cd	(immediate value)
-
 l4313h:	equ 0x4313
 ; Used at following locations:
 ; 0x431b	(djnz destination)
@@ -6842,15 +6815,15 @@ l438dh:	equ 0x438d
 ; Used at following locations:
 ; 0x439e	(jr destination)
 
-l43a0h:	equ 0x43a0
+NOTFactor__:	equ 0x43a0
 ; Used at following locations:
 ; 0x43ea	(jr destination)
 
-l43ach:	equ 0x43ac
+GetExpr__:	equ 0x43ac
 ; Used at following locations:
 ; 0x43c9	(jr destination)
 
-sub_43b5h:	equ 0x43b5
+GetFactor:	equ 0x43b5
 ; Used at following locations:
 ; 0x43a0	(call destination)
 ; 0x4274	(call destination)
@@ -6859,7 +6832,7 @@ sub_43b5h:	equ 0x43b5
 ; 0x4200	(call destination)
 ; 0x41ee	(call destination)
 
-sub_43b8h:	equ 0x43b8
+ChkFactor:	equ 0x43b8
 ; Used at following locations:
 ; 0x41d5	(call destination)
 
@@ -6867,7 +6840,7 @@ WLdChr:	equ 0x43f4
 ; Used at following locations:
 ; 0x43c1	(jr destination)
 
-l43fch:	equ 0x43fc
+FoundStrLit__:	equ 0x43fc
 ; Used at following locations:
 ; 0x43c5	(jr destination)
 
@@ -6875,7 +6848,7 @@ l4406h:	equ 0x4406
 ; Used at following locations:
 ; 0x4421	(jr destination)
 
-l440fh:	equ 0x440f
+FoundIdent_2__:	equ 0x440f
 ; Used at following locations:
 ; 0x43bd	(jr destination)
 
@@ -6895,11 +6868,11 @@ l4445h:	equ 0x4445
 ; Used at following locations:
 ; 0x4425	(jr destination)
 
-l4446h:	equ 0x4446
+FoundPosInt__:	equ 0x4446
 ; Used at following locations:
 ; 0x43de	(jr destination)
 
-l444fh:	equ 0x444f
+FoundUnsigNum__:	equ 0x444f
 ; Used at following locations:
 ; 0x43e6	(jr destination)
 
@@ -6912,7 +6885,7 @@ l4464h:	equ 0x4464
 ; 0x4479	(jr destination)
 ; 0x443d	(jr destination)
 
-l4467h:	equ 0x4467
+FoundNIL__:	equ 0x4467
 ; Used at following locations:
 ; 0x43d2	(jp destination)
 
@@ -7080,7 +7053,7 @@ RestoreSignBit:	equ 0x464b
 ; Used at following locations:
 ; 0x4645	(jr destination)
 
-CSq_l4650h:	equ 0x4650
+CSqNOT:	equ 0x4650
 ; Used at following locations:
 ; 0x43a6	(immediate value)
 
@@ -7179,7 +7152,7 @@ l46e6h:	equ 0x46e6
 ; 0x4717	(jr destination)
 ; 0x46ff	(jr destination)
 
-l46edh:	equ 0x46ed
+GetRange__:	equ 0x46ed
 ; Used at following locations:
 ; 0x43cd	(jp destination)
 
@@ -7567,6 +7540,8 @@ l4d99h:	equ 0x4d99
 ; Used at following locations:
 ; 0x4d90	(jr destination)
 
+CallDest_04da2: equ 0x4da1
+
 ParseVar:	equ 0x4dbd
 ; Used at following locations:
 ; 0x48da	(call destination)
@@ -7748,12 +7723,6 @@ l4ffch:	equ 0x4ffc
 l4fffh:	equ 0x4fff
 ; Used at following locations:
 ; 0x4ea1	(jp destination)
-
-l5000h:	equ 0x5000
-; Used at following locations:
-; 0x1159	(immediate value)
-; 0x1022	(immediate value)
-; 0x0f42	(immediate value)
 
 l500dh:	equ 0x500d
 ; Used at following locations:
@@ -7974,10 +7943,6 @@ PXSrchProlog:	equ 0x5305
 ; Used at following locations:
 ; 0x530b	(djnz destination)
 
-l5309h:	equ 0x5309
-; Used at following locations:
-; 0x13ca	(immediate value)
-
 PXKillProlog:	equ 0x530f
 ; Used at following locations:
 ; 0x5309	(jr destination)
@@ -8166,4 +8131,17 @@ PV1:	equ 0xf003
 ; 0x5418	(call destination)
 ; 0x5406	(call destination)
 ; 0x0252	(call destination)
+
+CAOS_ARG1:   equ 0xb782
+CAOS_ARG2:   equ 0xb784
+CAOS_ARG3:   equ 0xb786
+CAOS_ARG4_9: equ 0xb788
+CAOS_CURSO:  equ 0xb7a0
+CAOS_COLOR:  equ 0xb7a3
+CAOS_HOR:    equ 0xb7d3
+CAOS_VERT:   equ 0xb7d5
+CAOS_FARB:   equ 0xb7d6
+
+
+
 

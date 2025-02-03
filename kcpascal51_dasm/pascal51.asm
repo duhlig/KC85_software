@@ -8,8 +8,17 @@ iobuf:	equ 0x0080
 ;iobuf+17:	equ 0x0091
 ;iobuf+19:	equ 0x0093
 ;iobuf+20:	equ 0x0094
+CAOS_ARG1:	equ 0xb782
+CAOS_ARG2:	equ 0xb784
+CAOS_ARG3:	equ 0xb786
+CAOS_ARG4_9:	equ 0xb788
+CAOS_CURSO:	equ 0xb7a0
+CAOS_COLOR:	equ 0xb7a3
 CCTL0:	equ 0xb7a6
 SUTAB:	equ 0xb7b0
+CAOS_HOR:	equ 0xb7d3
+CAOS_VERT:	equ 0xb7d5
+CAOS_FARB:	equ 0xb7d6
 SUBALT:	equ 0xb7fe
 PXSASCI:	equ 0xbc00
 ;PXSASCI+1:	equ 0xbc01
@@ -175,7 +184,6 @@ KillMem:
 	ld (bin_end),de
 	ld (iobuf+19),de
 	ld a,002h
-l0314h:
 	ld (iobuf+16),a
 	ld a,(fileExt)
 	cp 043h
@@ -231,7 +239,6 @@ SaveBlock:
 	ld e,001h
 	call CCaos
 	in a,(088h)
-l0390h:
 	set 5,a
 	set 2,a
 	out (088h),a
@@ -298,7 +305,7 @@ ChkForBlock1:
 	inc a	
 	ld (nextBlkNum),a
 	ld de,00080h
-	ld bc,l0b00h
+	ld bc,00b00h
 	ld hl,fileName
 CmpFNamChr:
 	ld a,(de)	
@@ -391,7 +398,6 @@ RET_to_CAOS:
 	jp CCaos
 CAOS_UOT1:
 	push af	
-l04dch:
 	ld a,c	
 	push de	
 	ld e,002h
@@ -408,7 +414,7 @@ sub_04e6h:
 	set 5,a
 	set 2,a
 	out (088h),a
-	ld (0b7a0h),hl
+	ld (CAOS_CURSO),hl
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -430,7 +436,7 @@ sub_0502h:
 	set 2,a
 	out (088h),a
 	ld a,l	
-	ld (0b7a3h),a
+	ld (CAOS_COLOR),a
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -442,14 +448,13 @@ sub_0527h:
 	set 2,a
 	out (088h),a
 	ld hl,(l178dh)
-	ld (0b7d3h),hl
+	ld (CAOS_HOR),hl
 	ld a,(l178fh)
-	ld (0b7d5h),a
-	ld a,(0b7a3h)
+	ld (CAOS_VERT),a
+	ld a,(CAOS_COLOR)
 	and 0f8h
-	ld (0b7d6h),a
+	ld (CAOS_FARB),a
 	in a,(088h)
-l0545h:
 	res 5,a
 	res 2,a
 	out (088h),a
@@ -470,12 +475,12 @@ sub_0553h:
 	set 2,a
 	out (088h),a
 	ld hl,(l178dh)
-	ld (0b7d3h),hl
+	ld (CAOS_HOR),hl
 	ld a,(l178fh)
-	ld (0b7d5h),a
+	ld (CAOS_VERT),a
 	ld a,(l1791h)
 	and 0f8h
-	ld (0b7d6h),a
+	ld (CAOS_FARB),a
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -501,12 +506,12 @@ sub_0590h:
 	set 2,a
 	out (088h),a
 	ld hl,(l178dh)
-	ld (0b7d3h),hl
+	ld (CAOS_HOR),hl
 	ld a,(l178fh)
-	ld (0b7d5h),a
+	ld (CAOS_VERT),a
 	ld a,(l1791h)
 	and 0f8h
-	ld (0b7d6h),a
+	ld (CAOS_FARB),a
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -523,9 +528,9 @@ sub_05c7h:
 	set 2,a
 	out (088h),a
 	ld hl,(l178dh)
-	ld (0b7d3h),hl
+	ld (CAOS_HOR),hl
 	ld a,(l178fh)
-	ld (0b7d5h),a
+	ld (CAOS_VERT),a
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -541,16 +546,16 @@ sub_05ebh:
 	set 2,a
 	out (088h),a
 	ld hl,(l178dh)
-	ld (0b782h),hl
+	ld (CAOS_ARG1),hl
 	ld hl,(l178fh)
-	ld (0b784h),hl
+	ld (CAOS_ARG2),hl
 	ld hl,(l1791h)
-	ld (0b786h),hl
+	ld (CAOS_ARG3),hl
 	ld hl,(l1793h)
-	ld (0b788h),hl
-	ld a,(0b7a3h)
+	ld (CAOS_ARG4_9),hl
+	ld a,(CAOS_COLOR)
 	and 0f8h
-	ld (0b7d6h),a
+	ld (CAOS_FARB),a
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -566,14 +571,14 @@ sub_0623h:
 	set 2,a
 	out (088h),a
 	ld hl,(l178dh)
-	ld (0b782h),hl
+	ld (CAOS_ARG1),hl
 	ld hl,(l178fh)
-	ld (0b784h),hl
+	ld (CAOS_ARG2),hl
 	ld hl,(l1791h)
-	ld (0b786h),hl
-	ld a,(0b7a3h)
+	ld (CAOS_ARG3),hl
+	ld a,(CAOS_COLOR)
 	and 0f8h
-	ld (0b7d6h),a
+	ld (CAOS_FARB),a
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -1350,7 +1355,6 @@ ItsCuL:
 	jr LineEdLoop__
 TestCuD:
 	cp 010h
-l0b00h:
 	jr nz,TestEnter
 	call OutChr
 	jr LineEdNextLine__
@@ -2104,36 +2108,25 @@ l0f1ch:
 	add iy,bc
 	jr l0f01h
 realTab1__:
-
-; BLOCK 'realTab1__' (start 0x0f24 end 0x0f2f)
-realTab1___start:
-	defb 050h
-	defb 000h
-	defb 000h
-	defb 003h
-	defb 064h
-	defb 000h
-	defb 000h
-	defb 006h
-	defb 04eh
-	defb 020h
-	defb 000h
-realTab1___end:
-	dec c	
-	ld e,a	
-	ld e,(hl)	
-	djnz l0f4eh
-	ld b,a	
-	dec c	
-	call po,04e35h
-	jp po,06ad4h
+	defw 00050h
+	defw 00300h
+	defw 00064h
+	defw 00600h
+	defw 0204eh
+	defw 00d00h
+	defw 05e5fh
+	defw 01a10h
+	defw 00d47h
+	defw 035e4h
+	defw 0e24eh
+	defw 06ad4h
 sub_0f3ch:
 	ld a,d	
 	cp 003h
 	ret c	
 	push hl	
 	push de	
-	ld bc,l5000h
+	ld bc,05000h
 	jr nz,l0f4ch
 	or a	
 	sbc hl,bc
@@ -2258,7 +2251,7 @@ l100bh:
 	call sub_0e45h
 	call sub_0ca1h
 l1022h:
-	ld bc,l5000h
+	ld bc,05000h
 	push bc	
 	ld b,003h
 	push bc	
@@ -2455,7 +2448,7 @@ l1143h:
 	ld a,d	
 	or a	
 	jp p,l10bdh
-	ld hl,l5000h
+	ld hl,05000h
 	ld de,00300h
 	call RealMul__
 	push hl	
@@ -2776,11 +2769,11 @@ l1331h:
 	push de	
 	ld bc,0c53fh
 	push bc	
-	ld bc,C_ISRI
+	ld bc,003d6h
 	push bc	
 	ld bc,063e7h
 	push bc	
-	ld bc,l04dch
+	ld bc,004dch
 	push bc	
 	call RealDiv__
 	call sub_0ca1h
@@ -2837,27 +2830,27 @@ Ln__:
 	ld a,d	
 	ld (l1797h),a
 	ld d,000h
-	ld bc,sub_4072h+1
+	ld bc,04073h
 	push bc	
-	ld bc,l02a1h
+	ld bc,002a1h
 	push bc	
 	ld bc,0c4d2h
 	push bc	
-	ld bc,l0545h
+	ld bc,00545h
 	push bc	
 	push hl	
 	push de	
-	ld bc,l5309h
+	ld bc,05309h
 	push bc	
-	ld bc,l0390h
+	ld bc,00390h
 	push bc	
 	ld bc,0c103h
 	push bc	
-	ld bc,l0314h
+	ld bc,00314h
 	push bc	
 	push hl	
 	push de	
-	ld bc,l41a3h
+	ld bc,041a3h
 	push bc	
 	ld bc,00189h
 	push bc	
@@ -3222,7 +3215,7 @@ l15fdh:
 	push de	
 	add a,a	
 	add a,a	
-	ld hl,01665h
+	ld hl,xxTab3__-4
 	ld e,a	
 	ld d,000h
 	add hl,de	
@@ -3237,16 +3230,13 @@ l15fdh:
 	call sub_0ca1h
 l1666h:
 	jp l150eh
-	ld c,b	
-	rst 38h	
-	dec b	
-	ld b,e	
-	ld c,b	
-	nop	
-	dec b	
-	ld b,e	
-	call pe,08700h
-	ld h,h	
+xxTab3__:
+	defw 0ff48h
+	defw 04305h
+	defw 00048h
+	defw 04305h
+	defw 000ech
+	defw 06487h
 l1675h:
 	xor a	
 	jr l16b7h
@@ -3301,7 +3291,7 @@ l16b7h:
 	call sub_0ca1h
 	push hl	
 	push de	
-	ld bc,l4305h
+	ld bc,04305h
 	push bc	
 	ld bc,0ff49h
 	push bc	
@@ -6283,7 +6273,7 @@ tKeTx:
 	defb 00dh,'Kein Text mehr!',000h
 tTabU:
 	defb 'Tabellenueberlauf!',000h
-ChkType0004:
+ChkTypeBool__:
 	ld de,00004h
 	jr ChkType__
 ChkType0001:
@@ -6905,7 +6895,6 @@ l35ech:
 l35f0h:
 	defb 008h
 	dec b	
-l35f2h:
 	djnz l35ech
 	inc a	
 l35f5h:
@@ -7076,6 +7065,7 @@ l36bdh:
 	ld (VarCall+1),hl
 	call MultiCall__
 	push af	
+TabCSq:
 
 ; BLOCK 'TabCSq' (start 0x36c8 end 0x3710)
 TabCSq_first:
@@ -7118,7 +7108,7 @@ TabCSq_first:
 sub_3710h:
 	call GetLexem
 	call sub_3f3fh
-	call ChkType0004
+	call ChkTypeBool__
 	ld hl,CSq_l3722h
 	call WCodeOverLastByte
 	dec hl	
@@ -7145,20 +7135,15 @@ l3725h:
 	ld de,0ba16h
 	call ChkLexem_GetLex
 	jr l3777h
-	or h	
-	inc a	
-	sbc a,l	
-	add hl,sp	
-	ld l,c	
-	inc a	
-	pop bc	
-	ld a,(l3c8ah)
-	pop de	
-	inc a	
-	rst 20h	
-	inc a	
-	ld d,a	
-	dec a	
+xxTab4__:
+	defw l3cb4h
+	defw l399dh
+	defw l3c69h
+	defw l3ac1h
+	defw l3c8ah
+	defw l3cd1h
+	defw sub_3ce7h
+	defw l3d57h
 l3754h:
 	cp 07fh
 	jr z,l3725h
@@ -7169,7 +7154,7 @@ l3754h:
 	add a,a	
 	ld l,a	
 	ld h,000h
-	ld de,0371eh
+	ld de,xxTab4__-00026h
 	add hl,de	
 	ld e,(hl)	
 	inc hl	
@@ -7524,6 +7509,7 @@ l3975h:
 l3999h:
 	ld a,0fbh
 	jr l39d8h
+l399dh:
 	ld bc,0ffffh
 	push bc	
 	call GetLexem
@@ -7719,6 +7705,7 @@ CSq_l3abch:
 	inc hl	
 	ld d,(hl)	
 	ex de,hl	
+l3ac1h:
 	call GetLexem
 	or a	
 	ld e,004h
@@ -7975,8 +7962,9 @@ CSq_l3c65h:
 	defb 005h
 	pop bc	
 	cp b	
-	jp nz,0d8cdh
-	inc sp	
+	defb 0c2h
+l3c69h:
+	call GetTargetAddrInHL__
 	push hl	
 	call WCaBreak_IfCoCo_C
 	call sub_3710h
@@ -8013,6 +8001,7 @@ l3cach:
 	ex de,hl	
 	pop hl	
 	jp WrDE_ByTargAddr
+l3cb4h:
 	call GetTargetAddrInHL__
 	push hl	
 	call GetLexem
@@ -8027,6 +8016,7 @@ l3ccah:
 	call sub_3710h
 	pop de	
 	jp WrDE_ByTargAddr
+l3cd1h:
 	call GetLexem
 l3cd4h:
 	call l3777h
@@ -8112,6 +8102,7 @@ sub_3d41h:
 	ret z	
 	ex de,hl	
 	jr sub_3d41h
+l3d57h:
 	call GetLexem
 	ld e,03ch
 	cp 07fh
@@ -8168,8 +8159,8 @@ l3dc9h:
 	call WCodeOverLastByte
 	jr l3dedh
 l3dceh:
-	ld de,l3e6ch
-	ld hl,l3e73h
+	ld de,CSq_l3e6ch
+	ld hl,CSq_l3e73h
 	jr l3ddch
 l3dd6h:
 	ld de,CSq_l3e5eh
@@ -8195,13 +8186,13 @@ l3df7h:
 	jr nz,l3e0dh
 	call sub_3f0dh
 	cp 0bah
-	ld hl,l3e77h
+	ld hl,CSq_l3e77h
 	jr nz,l3dc9h
 	call sub_3f0dh
-	ld hl,l3e82h
+	ld hl,CSq_l3e82h
 	jr l3dc9h
 l3e0dh:
-	ld hl,l3e7eh
+	ld hl,CSq_l3e7eh
 	call l33beh
 	jr l3dedh
 l3e15h:
@@ -8263,24 +8254,25 @@ CSq_l3e5eh:
 CSq_l3e68h:
 	defb 003h
 	call PrBool
-l3e6ch:
-	ld b,03eh
-	ld bc,07acdh
-	ex af,af'	
+CSq_l3e6ch:
+	defb 006h
+	ld a,001h
+	call PrFillSpc
 	pop af	
-l3e73h:
-	inc bc	
+CSq_l3e73h:
+	defb 003h
 	call OutChr
-l3e77h:
-	ld b,07dh
+CSq_l3e77h:
+	defb 006h
+	ld a,l	
 	pop de	
 	pop hl	
 	call l106fh
-l3e7eh:
-	inc bc	
+CSq_l3e7eh:
+	defb 003h
 	call l1074h
-l3e82h:
-	inc b	
+CSq_l3e82h:
+	defb 004h
 	pop de	
 	call sub_0f6eh
 sub_3e87h:
@@ -8438,25 +8430,25 @@ l3f43h:
 	ld hl,CSq_l4184h
 	call WCodeOverLastByte
 l3f78h:
-	ld bc,l360ah
-WCode_VarIdxHL:
+	ld bc,TabCSq-000beh
+WCode_VarIdxTOS:
 	pop hl	
 	call GetCSqAddrByIdx
 	jp WCodeOverLastByte
 l3f82h:
 	pop de	
 	call ChkType__
-	ld bc,l35f2h
-	jr WCode_VarIdxHL
+	ld bc,TabCSq-000d6h
+	jr WCode_VarIdxTOS
 l3f8bh:
 	ld a,e	
 	pop de	
 	call ChkType__
 	bit 4,(ix+000h)
-	ld bc,035dah
-	jr z,WCode_VarIdxHL
-	ld bc,035e6h
-	jr WCode_VarIdxHL
+	ld bc,TabCSq-000eeh
+	jr z,WCode_VarIdxTOS
+	ld bc,TabCSq-000e2h
+	jr WCode_VarIdxTOS
 l3f9eh:
 	ld a,e	
 	pop de	
@@ -8470,8 +8462,8 @@ l3f9eh:
 	call sub_343dh
 	ld hl,CSq_l35e8h
 	call WCode
-	ld bc,035feh
-	jr WCode_VarIdxHL
+	ld bc,TabCSq-000cah
+	jr WCode_VarIdxTOS
 l3fbbh:
 	pop hl	
 	ld e,a	
@@ -8481,7 +8473,7 @@ l3fbbh:
 	cp 0f4h
 	ld a,e	
 	jr z,l3fd7h
-	ld bc,l3616h
+	ld bc,TabCSq-000b2h
 	call GetCSqAddrByIdx
 	jp CodeLdBC_0n_from_0x2b8b
 l3fd0h:
@@ -8501,9 +8493,9 @@ l3fdbh:
 	push hl	
 	ld a,l	
 	cp 0f2h
-	ld bc,035dah
+	ld bc,TabCSq-000eeh
 	ld a,e	
-	jr c,WCode_VarIdxHL
+	jr c,WCode_VarIdxTOS
 	ld e,040h
 	jr l3fd2h
 l3febh:
@@ -8578,8 +8570,8 @@ l4051h:
 	call JCodeNextByte
 	defb 0f9h
 	ret	
-l405dh:
-	call sub_41d2h
+FoundMinus__:
+	call GetTerm
 	call PCVChkNum
 	bit 0,c
 	ld hl,l414bh
@@ -8591,14 +8583,14 @@ sub_4072h:
 	call GetLexem
 sub_4075h:
 	cp 0adh
-	jp z,l405dh
+	jp z,FoundMinus__
 	cp 0abh
 	jr nz,l4086h
-	call sub_41d2h
+	call GetTerm
 	call PCVChkNum
 	jr l4089h
 l4086h:
-	call sub_41d5h
+	call ChkTerm
 l4089h:
 	cp 0abh
 	jr z,l40a5h
@@ -8606,9 +8598,9 @@ l4089h:
 	jr z,l40a5h
 	cp 007h
 	ret nz	
-	call ChkType0004
-	call sub_41d2h
-	call ChkType0004
+	call ChkTypeBool__
+	call GetTerm
+	call ChkTypeBool__
 	ld hl,CSq_l416fh
 l40a0h:
 	call WCodeOverLastByte
@@ -8620,7 +8612,7 @@ l40a5h:
 	call PCVChkNum
 	ld b,a	
 	push bc	
-	call sub_41d2h
+	call GetTerm
 	call PCVChkNum
 	bit 0,c
 	pop bc	
@@ -8681,7 +8673,7 @@ l411ch:
 	push af	
 	inc b	
 	push bc	
-	call sub_41d2h
+	call GetTerm
 	pop de	
 	call ChkType__
 	pop de	
@@ -8777,7 +8769,6 @@ l4196h:
 l419eh:
 	call l381ah
 	djnz l419eh
-l41a3h:
 	ret	
 l41a4h:
 	inc a	
@@ -8815,11 +8806,11 @@ l41cdh:
 	inc hl	
 	exx	
 	ret	
-sub_41d2h:
+GetTerm:
 	call GetLexem
-sub_41d5h:
-	call sub_43b8h
-l41d8h:
+ChkTerm:
+	call ChkFactor
+ChkTermOp:
 	cp 0aah
 	jr z,l424ah
 	cp 002h
@@ -8830,16 +8821,16 @@ l41d8h:
 	jr z,l422bh
 	cp 008h
 	ret nz	
-	call ChkType0004
-	call sub_43b5h
-	call ChkType0004
+	call ChkTypeBool__
+	call GetFactor
+	call ChkTypeBool__
 	ld hl,CSq_l42edh
 	call WCodeOverLastByte
-	jr l41d8h
+	jr ChkTermOp
 l41fch:
 	call ChkType0001
 	push af	
-	call sub_43b5h
+	call GetFactor
 	call ChkType0001
 	call sub_41bbh
 	jr z,l4213h
@@ -8859,7 +8850,7 @@ l4221h:
 	call JCodeNextByte
 	defb 0e5h
 	res 3,(ix+002h)
-	jr l41d8h
+	jr ChkTermOp
 l422bh:
 	call PCVChkNum
 	bit 0,c
@@ -8868,18 +8859,18 @@ l422bh:
 	call WCodeOverLastByte
 	set 0,(ix+001h)
 l423ch:
-	call sub_43b5h
+	call GetFactor
 	call PCVChkNum
 	ld hl,l42f1h
 	call l33beh
-	jr l41d8h
+	jr ChkTermOp
 l424ah:
 	push bc	
 	dec b	
 	jr z,l4274h
 	inc b	
 	call PCVChkNum
-	call sub_43b5h
+	call GetFactor
 	call PCVChkNum
 	bit 0,c
 	pop de	
@@ -8896,9 +8887,9 @@ l426bh:
 	ld hl,CSq_l42f7h
 	call WCode
 l4271h:
-	jp l41d8h
+	jp ChkTermOp
 l4274h:
-	call sub_43b5h
+	call GetFactor
 	pop de	
 	call ChkType__
 	ld hl,CSq_StorAndM
@@ -9000,7 +8991,6 @@ l42fdh:
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
-l4305h:
 	push de	
 	inc hl	
 	ld b,(hl)	
@@ -9096,40 +9086,40 @@ l438dh:
 	jp nz,ChkCloBra_GetLex
 	call GetLexem
 	jr l438dh
-l43a0h:
-	call sub_43b5h
-	call ChkType0004
-	ld hl,CSq_l4650h
+NOTFactor__:
+	call GetFactor
+	call ChkTypeBool__
+	ld hl,CSqNOT
 	jp WCodeOverLastByte
-l43ach:
+GetExpr__:
 	call GetLexem
 	call l3f43h
 	jp l4511h
-sub_43b5h:
+GetFactor:
 	call GetLexem
-sub_43b8h:
+ChkFactor:
 	res 3,(ix+002h)
 	or a	
-	jr z,l440fh
+	jr z,FoundIdent_2__
 	cp 076h
 	jr z,WLdChr
 	cp 075h
-	jr z,l43fch
+	jr z,FoundStrLit__
 	cp 0a8h
-	jr z,l43ach
+	jr z,GetExpr__
 	cp 0dbh
-	jp z,l46edh
+	jp z,GetRange__
 	cp 022h
-	jp z,l4467h
+	jp z,FoundNIL__
 	set 3,(ix+002h)
 	cp 07fh
 	ld hl,(curRealHWord)
-	jr z,l4446h
+	jr z,FoundPosInt__
 	ld de,(curNum)
 	cp 07eh
-	jr z,l444fh
+	jr z,FoundUnsigNum__
 	cp 006h
-	jr z,l43a0h
+	jr z,NOTFactor__
 	ld e,00ch
 	call CompileErr
 	jp l344bh
@@ -9137,7 +9127,7 @@ WLdChr:
 	ld a,(curRealHWord)
 	ld bc,00003h
 	jr WLdChrInA
-l43fch:
+FoundStrLit__:
 	ld de,(curRealHWord)
 	ld a,(curNum)
 	ld c,a	
@@ -9147,7 +9137,7 @@ l4406h:
 	ld h,000h
 	ld (Merker1),hl
 	jp WLdStrAddr
-l440fh:
+FoundIdent_2__:
 	call GetIdentInfoInABC
 	cp 001h
 	ret m	
@@ -9183,11 +9173,11 @@ WLd0:
 	jr WPushAF
 l4445h:
 	ex de,hl	
-l4446h:
+FoundPosInt__:
 	bit 0,(ix+001h)
 	jr z,l446eh
 	call NormalisiereZahl__
-l444fh:
+FoundUnsigNum__:
 	ex de,hl	
 	push hl	
 l4451h:
@@ -9201,7 +9191,7 @@ l4451h:
 	set 0,(ix+001h)
 l4464h:
 	jp GetLexem
-l4467h:
+FoundNIL__:
 	ld bc,08000h
 	ld d,c	
 	ld e,c	
@@ -9491,7 +9481,7 @@ RestoreSignBit:
 	or h	
 	ld h,a	
 	ret	
-CSq_l4650h:
+CSqNOT:
 	defb 003h
 	xor 001h
 	push af	
@@ -9617,7 +9607,7 @@ l46dfh:
 l46e6h:
 	ld bc,(l2b89h)
 	jp GetLexem
-l46edh:
+GetRange__:
 	ld a,(l2b89h)
 	or a	
 	jp z,l474eh
@@ -9800,7 +9790,7 @@ l481fh:
 	jr z,l481fh
 l483ah:
 	ld hl,sub_4af1h
-	ld (04da2h),hl
+	ld (CallDest_04da2+1),hl
 	ld d,a	
 	ld a,(BlockLevel__)
 	or a	
@@ -9876,7 +9866,7 @@ l489dh:
 	ld hl,00000h
 	ld (l2b61h),hl
 	ld hl,l4d5fh
-	ld (04da2h),hl
+	ld (CallDest_04da2+1),hl
 l48d3h:
 	call GetLexem
 	cp 00ah
@@ -10395,7 +10385,7 @@ l4bf8h:
 	inc hl	
 	push hl	
 	ld hl,sub_4af1h
-	ld (04da2h),hl
+	ld (CallDest_04da2+1),hl
 	ld hl,00000h
 	ld (l2b63h),hl
 	call sub_4c27h
@@ -10679,6 +10669,7 @@ l4d99h:
 	pop de	
 	push hl	
 	push de	
+CallDest_04da2:
 	call sub_4af1h
 	pop hl	
 	call sub_4d6dh
@@ -11056,7 +11047,6 @@ l4ffch:
 	jp l4e61h
 l4fffh:
 	push hl	
-l5000h:
 	ld d,(ix+001h)
 	push de	
 	ld c,001h
@@ -11527,7 +11517,6 @@ PXSrchProlog:
 	ld a,(hl)	
 	cp 07fh
 	inc hl	
-l5309h:
 	jr z,PXKillProlog
 	djnz PXSrchProlog
 	jr PXCpChrMap

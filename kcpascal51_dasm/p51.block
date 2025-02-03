@@ -14,10 +14,11 @@ HexDezTab: unlabeled start 0x0870 unlabeled last 0x0879 type bytedata
 TFalse: start 0x08d4 unlabeled last 0x08d9 type bytedata
 TTrue: start 0x08da unlabeled last 0x08de type bytedata
 TErrMsg: start 0x0934 unlabeled end 0x09b1 type bytedata
-realTab1__: start 0x0f24 end 0x0f2f type bytedata
+realTab1__: unlabeled start 0x0f24 unlabeled last 0x0f3b type worddata
 xxTab1__: start 0x116b unlabeled last 0x1187 type bytedata
 tExpErw: unlabeled start 0x12ba unlabeled end 0x12cc type bytedata
 xxTab2__: start 0x1597 unlabeled end 0x15a7 type bytedata
+xxTab3__: unlabeled start 0x1669 unlabeled last 0x1674 type worddata
 addrs: unlabeled start 0x1789 unlabeled last 0x1796 type worddata
 vars: unlabeled start 0x1797 unlabeled last 0x1798 type bytedata
 addrs: unlabeled start 0x1799 unlabeled last 0x17aa type worddata
@@ -515,11 +516,17 @@ CSq: unlabeled first 0x3c5c unlabeled last 0x3c5c type bytedata
 CSqP: unlabeled first 0x3c60 unlabeled last 0x3c60 type bytedata
 CSq: unlabeled first 0x3c61 unlabeled last 0x3c61 type bytedata
 CSq: unlabeled first 0x3c65 unlabeled last 0x3c65 type bytedata
+CSqP: unlabeled first 0x3c68 unlabeled last 0x3c68 type bytedata
 CSq: unlabeled first 0x3e3d unlabeled last 0x3e3d type bytedata
 CSq: unlabeled first 0x3e4e unlabeled last 0x3e4e type bytedata
 CSq: unlabeled first 0x3e53 unlabeled last 0x3e53 type bytedata
 CSq: unlabeled first 0x3e5e unlabeled last 0x3e5e type bytedata
 CSq: unlabeled first 0x3e68 unlabeled last 0x3e68 type bytedata
+CSq: unlabeled first 0x3e6c unlabeled last 0x3e6c type bytedata
+CSq: unlabeled first 0x3e73 unlabeled last 0x3e73 type bytedata
+CSq: unlabeled first 0x3e77 unlabeled last 0x3e77 type bytedata
+CSq: unlabeled first 0x3e7e unlabeled last 0x3e7e type bytedata
+CSq: unlabeled first 0x3e82 unlabeled last 0x3e82 type bytedata
 CSq: unlabeled first 0x3ef5 unlabeled last 0x3ef5 type bytedata
 CSq: unlabeled first 0x3ef9 unlabeled last 0x3ef9 type bytedata
 CSq: unlabeled first 0x3f03 unlabeled last 0x3f03 type bytedata
@@ -576,7 +583,8 @@ CSqP: unlabeled first 0x5266 unlabeled last 0x5266 type bytedata
 CSq: unlabeled first 0x5267 unlabeled last 0x5267 type bytedata
 CSq: unlabeled first 0x52a8 unlabeled last 0x52a8 type bytedata
 
-xxTab3__: unlabeled start 0x4c9c unlabeled last 0x4ca6 type bytedata
+xxTab4__: unlabeled start 0x3744 unlabeled last 0x3753 type pointers
+xxTab5__: unlabeled start 0x4c9c unlabeled last 0x4ca6 type bytedata
 
 PXSTAB: first 0x5382 unlabeled last 0x5389 type pointers
 PXUSASC: unlabeled first 0x538a unlabeled last 0x53a1 type bytedata
