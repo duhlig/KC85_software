@@ -128,5 +128,28 @@ IX:
 
 ---
 offen:
-0b7..h
 
+2b9f	inc hl
+35f7	xor a	--> ok
+35ff	ld a,001h  --> ok
+3608	ld a,000h
+3614	ld a,000h
+3620	ld a,000h
+362c	ld a,000h
+3844	call NextChkOpBra_GetLex
+3d6e	call GetLexem
+3d81	call NextChkOpBra_GetLex
+3e95	call NextChkOpBra_GetLex
+3ee5	call GetLexem
+434c	call sub_4336h
+435b	call sub_4336h
+436c	call sub_4336h
+4536	ld a,(l2b76h)
+5025	ld e,041h
+5076	ld hl,l508eh
+507b	ld hl,CSq_l5096h
+50ee	call sub_5105h
+50fa	call sub_5105h
+5136	call sub_5114h
+527f	call NextChkOpBra_GetLex
+5290	call NextChkOpBra_GetLex

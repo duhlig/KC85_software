@@ -790,6 +790,7 @@ hexDezTab:	equ 0x0870
 
 PrFillSpc:	equ 0x087a
 ; Used at following locations:
+; 0x3e6f	(call destination)
 ; 0x3e64	(call destination)
 ; 0x3e55	(call destination)
 ; 0x0832	(call destination)
@@ -1807,7 +1808,6 @@ l0f4ch:	equ 0x0f4c
 
 l0f4eh:	equ 0x0f4e
 ; Used at following locations:
-; 0x0f32	(djnz destination)
 
 l0f5ch:	equ 0x0f5c
 ; Used at following locations:
@@ -2272,7 +2272,9 @@ l1666h:	equ 0x1666
 ; Used at following locations:
 ; 0x164e	(jr destination)
 
-xxTab3__: equ 0x1669
+xxTab3__:	equ 0x1669
+; Used at following locations:
+
 l1675h:	equ 0x1675
 ; Used at following locations:
 ; 0x16a6	(jr destination)
@@ -5105,6 +5107,7 @@ GetTargetAddrInHL__:	equ 0x33d8
 ; 0x47aa	(call destination)
 ; 0x3cb4	(call destination)
 ; 0x3cac	(call destination)
+; 0x3c69	(call destination)
 ; 0x3bf9	(call destination)
 ; 0x3a4d	(call destination)
 ; 0x3a3b	(call destination)
@@ -5249,6 +5252,11 @@ sub_343dh:	equ 0x343d
 CSq_JP:	equ 0x3449
 ; Used at following locations:
 ; 0x33c9	(immediate value)
+
+l344bh:	equ 0x344b
+; Used at following locations:
+; 0x43f1	(jp destination)
+; 0x3457	(jr destination)
 
 l3454h:	equ 0x3454
 ; Used at following locations:
@@ -5643,7 +5651,8 @@ l3725h:	equ 0x3725
 ; Used at following locations:
 ; 0x3756	(jr destination)
 
-xxTab4__: equ 0x3744
+xxTab4__:	equ 0x3744
+; Used at following locations:
 
 l3754h:	equ 0x3754
 ; Used at following locations:
@@ -5847,6 +5856,10 @@ l3999h:	equ 0x3999
 ; Used at following locations:
 ; 0x3992	(jr destination)
 
+l399dh:	equ 0x399d
+; Used at following locations:
+; 0x3746	(defw directive)
+
 l39bah:	equ 0x39ba
 ; Used at following locations:
 ; 0x3a26	(jp destination)
@@ -5947,6 +5960,10 @@ CSq_NxtListEl:	equ 0x3ab6
 CSq_l3abch:	equ 0x3abc
 ; Used at following locations:
 ; 0x3bea	(immediate value)
+
+l3ac1h:	equ 0x3ac1
+; Used at following locations:
+; 0x374a	(defw directive)
 
 l3af7h:	equ 0x3af7
 ; Used at following locations:
@@ -6055,13 +6072,21 @@ CSq_l3c65h:	equ 0x3c65
 ; Used at following locations:
 ; 0x3b99	(immediate value)
 
+l3c69h:	equ 0x3c69
+; Used at following locations:
+; 0x3748	(defw directive)
+
 l3c8ah:	equ 0x3c8a
 ; Used at following locations:
-; 0x374b	(byte load pointer)
+; 0x374c	(defw directive)
 
 l3cach:	equ 0x3cac
 ; Used at following locations:
 ; 0x3c99	(jr destination)
+
+l3cb4h:	equ 0x3cb4
+; Used at following locations:
+; 0x3744	(defw directive)
 
 l3cbeh:	equ 0x3cbe
 ; Used at following locations:
@@ -6070,6 +6095,10 @@ l3cbeh:	equ 0x3cbe
 l3ccah:	equ 0x3cca
 ; Used at following locations:
 ; 0x3cc3	(jr destination)
+
+l3cd1h:	equ 0x3cd1
+; Used at following locations:
+; 0x374e	(defw directive)
 
 l3cd4h:	equ 0x3cd4
 ; Used at following locations:
@@ -6084,6 +6113,7 @@ l3ce1h:	equ 0x3ce1
 sub_3ce7h:	equ 0x3ce7
 ; Used at following locations:
 ; 0x3d3c	(call destination)
+; 0x3750	(defw directive)
 
 l3d32h:	equ 0x3d32
 ; Used at following locations:
@@ -6098,6 +6128,10 @@ sub_3d41h:	equ 0x3d41
 ; 0x3d55	(jr destination)
 ; 0x3d37	(call destination)
 ; 0x3d1f	(call destination)
+
+l3d57h:	equ 0x3d57
+; Used at following locations:
+; 0x3752	(defw directive)
 
 l3d7bh:	equ 0x3d7b
 ; Used at following locations:
@@ -7540,7 +7574,8 @@ l4d99h:	equ 0x4d99
 ; Used at following locations:
 ; 0x4d90	(jr destination)
 
-CallDest_04da2: equ 0x4da1
+CallDest_04da2:	equ 0x4da1
+; Used at following locations:
 
 ParseVar:	equ 0x4dbd
 ; Used at following locations:
@@ -8022,6 +8057,36 @@ l5491h:	equ 0x5491
 ; Used at following locations:
 ; 0x2b4d	(jp destination)
 
+CAOS_ARG1:	equ 0xb782
+; Used at following locations:
+; 0x062e	(word load pointer)
+; 0x05f6	(word load pointer)
+
+CAOS_ARG2:	equ 0xb784
+; Used at following locations:
+; 0x0634	(word load pointer)
+; 0x05fc	(word load pointer)
+
+CAOS_ARG3:	equ 0xb786
+; Used at following locations:
+; 0x063a	(word load pointer)
+; 0x0602	(word load pointer)
+
+CAOS_ARG4_9:	equ 0xb788
+; Used at following locations:
+; 0x0608	(word load pointer)
+
+CAOS_CURSO:	equ 0xb7a0
+; Used at following locations:
+; 0x04f6	(word load pointer)
+
+CAOS_COLOR:	equ 0xb7a3
+; Used at following locations:
+; 0x063d	(byte load pointer)
+; 0x060b	(byte load pointer)
+; 0x053b	(byte load pointer)
+; 0x051b	(byte load pointer)
+
 CCTL0:	equ 0xb7a6
 ; Used at following locations:
 ; 0x53ad	(word load pointer)
@@ -8032,6 +8097,28 @@ SUTAB:	equ 0xb7b0
 ; 0x53be	(word load pointer)
 ; 0x5360	(word load pointer)
 ; 0x5357	(word load pointer)
+
+CAOS_HOR:	equ 0xb7d3
+; Used at following locations:
+; 0x05d2	(word load pointer)
+; 0x05a6	(word load pointer)
+; 0x0569	(word load pointer)
+; 0x0532	(word load pointer)
+
+CAOS_VERT:	equ 0xb7d5
+; Used at following locations:
+; 0x05d8	(byte load pointer)
+; 0x05ac	(byte load pointer)
+; 0x056f	(byte load pointer)
+; 0x0538	(byte load pointer)
+
+CAOS_FARB:	equ 0xb7d6
+; Used at following locations:
+; 0x0642	(byte load pointer)
+; 0x0610	(byte load pointer)
+; 0x05b4	(byte load pointer)
+; 0x0577	(byte load pointer)
+; 0x0540	(byte load pointer)
 
 SUBALT:	equ 0xb7fe
 ; Used at following locations:
@@ -8131,17 +8218,4 @@ PV1:	equ 0xf003
 ; 0x5418	(call destination)
 ; 0x5406	(call destination)
 ; 0x0252	(call destination)
-
-CAOS_ARG1:   equ 0xb782
-CAOS_ARG2:   equ 0xb784
-CAOS_ARG3:   equ 0xb786
-CAOS_ARG4_9: equ 0xb788
-CAOS_CURSO:  equ 0xb7a0
-CAOS_COLOR:  equ 0xb7a3
-CAOS_HOR:    equ 0xb7d3
-CAOS_VERT:   equ 0xb7d5
-CAOS_FARB:   equ 0xb7d6
-
-
-
 
