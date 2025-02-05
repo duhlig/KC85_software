@@ -1,5 +1,5 @@
---- p51.asm	2025-02-03 21:21:09.803110480 +0100
-+++ pascal51.asm	2025-02-03 21:21:09.810110438 +0100
+--- p51.asm	2025-02-04 21:19:07.903310001 +0100
++++ pascal51.asm	2025-02-05 17:08:19.120031241 +0100
 @@ -2,11 +2,12 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -739,7 +739,7 @@
  lineBufEnd:
  	defb 00dh
  stack_adr:
-@@ -3819,23 +3430,13 @@
+@@ -3819,22 +3430,12 @@
  	defw START_PASCAL
  RL_SETSYS:
  	defw 00000h
@@ -751,8 +751,7 @@
 -	defb 0d3h
 +	defb 'SETSY','S'+0x80
  	defb 006h
- 	defb 04ah
- 	defb 051h
+ 	defw PaSetsys
  RL_GETSYS:
  	defw RL_SETSYS
 -	defb 047h
@@ -765,7 +764,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -3844,32 +3445,19 @@
+@@ -3842,30 +3443,17 @@
  	defb 002h
  RL_PLOT:
  	defw RL_GETSYS
@@ -775,8 +774,7 @@
 -	defb 0d4h
 +	defb 'PLO','T'+0x80
  	defb 006h
- 	defb 074h
- 	defb 051h
+ 	defw l5174h
  RL_CLRPLOT:
  	defw RL_PLOT
 -	defb 043h
@@ -788,8 +786,7 @@
 -	defb 0d4h
 +	defb 'CLRPLO','T'+0x80
  	defb 006h
- 	defb 0a0h
- 	defb 051h
+ 	defw l51a0h
  RL_PTEST:
  	defw RL_CLRPLOT
 -	defb 050h
@@ -801,7 +798,7 @@
  	defb 009h
  	defb 004h
  	defb 000h
-@@ -3878,10 +3466,7 @@
+@@ -3873,10 +3461,7 @@
  	defb 003h
  RL_GETC:
  	defw RL_PTEST
@@ -813,7 +810,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -3890,52 +3475,31 @@
+@@ -3884,48 +3469,27 @@
  	defb 003h
  RL_SETC:
  	defw RL_GETC
@@ -823,8 +820,7 @@
 -	defb 0c3h
 +	defb 'SET','C'+0x80
  	defb 006h
- 	defb 060h
- 	defb 051h
+ 	defw l5160h
  RL_LINEPLOT:
  	defw RL_SETC
 -	defb 04ch
@@ -837,8 +833,7 @@
 -	defb 0d4h
 +	defb 'LINEPLO','T'+0x80
  	defb 006h
- 	defb 0b4h
- 	defb 051h
+ 	defw l51b4h
  RL_CIRCLE:
  	defw RL_LINEPLOT
 -	defb 043h
@@ -849,8 +844,7 @@
 -	defb 0c5h
 +	defb 'CIRCL','E'+0x80
  	defb 006h
- 	defb 0d0h
- 	defb 051h
+ 	defw l51d0h
  RL_GOTOXY:
  	defw RL_CIRCLE
 -	defb 047h
@@ -861,8 +855,7 @@
 -	defb 0d9h
 +	defb 'GOTOX','Y'+0x80
  	defb 006h
- 	defb 036h
- 	defb 051h
+ 	defw l5136h
  RL_PI:
  	defw RL_GOTOXY
 -	defb 050h
@@ -871,7 +864,7 @@
  	defb 001h
  	defb 002h
  	defb 000h
-@@ -3945,21 +3509,12 @@
+@@ -3935,21 +3499,12 @@
  	defb 064h
  RL_FRAC:
  	defw RL_PI
@@ -895,7 +888,7 @@
  	defb 009h
  	defb 003h
  	defb 000h
-@@ -3968,9 +3523,7 @@
+@@ -3957,9 +3512,7 @@
  	defb 001h
  RL_SHR:
  	defw RL_READKBD
@@ -906,7 +899,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -3979,9 +3532,7 @@
+@@ -3967,9 +3520,7 @@
  	defb 003h
  RL_SHL:
  	defw RL_SHR
@@ -917,7 +910,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -3990,8 +3541,7 @@
+@@ -3977,8 +3528,7 @@
  	defb 003h
  RL_LO:
  	defw RL_SHL
@@ -927,7 +920,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4000,8 +3550,7 @@
+@@ -3986,8 +3536,7 @@
  	defb 002h
  RL_HI:
  	defw RL_LO
@@ -937,7 +930,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4010,10 +3559,7 @@
+@@ -3995,10 +3544,7 @@
  	defb 002h
  RL_SWAP:
  	defw RL_HI
@@ -949,7 +942,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4022,10 +3568,7 @@
+@@ -4006,10 +3552,7 @@
  	defb 002h
  RL_BXOR:
  	defw RL_SWAP
@@ -961,7 +954,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4034,9 +3577,7 @@
+@@ -4017,9 +3560,7 @@
  	defb 003h
  RL_BOR:
  	defw RL_BXOR
@@ -972,7 +965,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4045,10 +3586,7 @@
+@@ -4027,10 +3568,7 @@
  	defb 003h
  RL_BAND:
  	defw RL_BOR
@@ -984,7 +977,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4057,53 +3595,37 @@
+@@ -4038,53 +3576,37 @@
  	defb 003h
  RL_EXP:
  	defw RL_BAND
@@ -1045,7 +1038,7 @@
  	defb 009h
  	defb 003h
  	defb 000h
-@@ -4112,57 +3634,36 @@
+@@ -4092,53 +3614,32 @@
  	defb 002h
  RL_OUT:
  	defw RL_INP
@@ -1054,8 +1047,7 @@
 -	defb 0d4h
 +	defb 'OU','T'+0x80
  	defb 006h
- 	defb 090h
- 	defb 052h
+ 	defw l5290h
  RL_SIZE:
  	defw RL_OUT
 -	defb 053h
@@ -1064,8 +1056,7 @@
 -	defb 0c5h
 +	defb 'SIZ','E'+0x80
  	defb 007h
- 	defb 06bh
- 	defb 052h
+ 	defw l526bh
  RL_ADDR:
  	defw RL_SIZE
 -	defb 041h
@@ -1074,8 +1065,7 @@
 -	defb 0d2h
 +	defb 'ADD','R'+0x80
  	defb 007h
- 	defb 07fh
- 	defb 052h
+ 	defw l527fh
  RL_INLINE:
  	defw RL_ADDR
 -	defb 049h
@@ -1086,8 +1076,7 @@
 -	defb 0c5h
 +	defb 'INLIN','E'+0x80
  	defb 006h
- 	defb 08ah
- 	defb 043h
+ 	defw l438ah
  RL_ENTIER:
  	defw RL_INLINE
 -	defb 045h
@@ -1109,7 +1098,7 @@
  	defb 008h
  	defb 000h
  	defb 000h
-@@ -4171,12 +3672,7 @@
+@@ -4146,12 +3647,7 @@
  	defb 002h
  RL_RANDOM:
  	defw RL_USER
@@ -1123,7 +1112,7 @@
  	defb 009h
  	defb 001h
  	defb 000h
-@@ -4185,16 +3681,7 @@
+@@ -4159,16 +3655,7 @@
  	defb 001h
  RL_KEYPRESSED:
  	defw RL_RANDOM
@@ -1141,7 +1130,7 @@
  	defb 009h
  	defb 004h
  	defb 000h
-@@ -4203,10 +3690,7 @@
+@@ -4176,10 +3663,7 @@
  	defb 001h
  RL_HALT:
  	defw RL_KEYPRESSED
@@ -1153,7 +1142,7 @@
  	defb 008h
  	defb 000h
  	defb 000h
-@@ -4215,10 +3699,7 @@
+@@ -4187,10 +3671,7 @@
  	defb 001h
  RL_EOLN:
  	defw RL_HALT
@@ -1165,7 +1154,7 @@
  	defb 009h
  	defb 004h
  	defb 000h
-@@ -4227,10 +3708,7 @@
+@@ -4198,10 +3679,7 @@
  	defb 001h
  RL_PAGE:
  	defw RL_EOLN
@@ -1177,7 +1166,7 @@
  	defb 008h
  	defb 000h
  	defb 000h
-@@ -4239,137 +3717,89 @@
+@@ -4209,127 +3687,79 @@
  	defb 001h
  RL_SQRT:
  	defw RL_PAGE
@@ -1229,8 +1218,7 @@
 -	defb 0c3h
 +	defb 'SUC','C'+0x80
  	defb 007h
- 	defb 06ch
- 	defb 043h
+ 	defw l436ch
  RL_PRED:
  	defw RL_SUCC
 -	defb 050h
@@ -1239,8 +1227,7 @@
 -	defb 0c4h
 +	defb 'PRE','D'+0x80
  	defb 007h
- 	defb 05bh
- 	defb 043h
+ 	defw l435bh
  RL_ORD:
  	defw RL_PRED
 -	defb 04fh
@@ -1248,8 +1235,7 @@
 -	defb 0c4h
 +	defb 'OR','D'+0x80
  	defb 007h
- 	defb 04ch
- 	defb 043h
+ 	defw l434ch
  RL_PEEK:
  	defw RL_ORD
 -	defb 050h
@@ -1258,8 +1244,7 @@
 -	defb 0cbh
 +	defb 'PEE','K'+0x80
  	defb 007h
- 	defb 036h
- 	defb 045h
+ 	defw l4536h
  RL_POKE:
  	defw RL_PEEK
 -	defb 050h
@@ -1268,8 +1253,7 @@
 -	defb 0c5h
 +	defb 'POK','E'+0x80
  	defb 006h
- 	defb 044h
- 	defb 038h
+ 	defw l3844h
  RL_RELEASE:
  	defw RL_POKE
 -	defb 052h
@@ -1281,8 +1265,7 @@
 -	defb 0c5h
 +	defb 'RELEAS','E'+0x80
  	defb 006h
- 	defb 07bh
- 	defb 050h
+ 	defw l507bh
  RL_MARK:
  	defw RL_RELEASE
 -	defb 04dh
@@ -1291,8 +1274,7 @@
 -	defb 0cbh
 +	defb 'MAR','K'+0x80
  	defb 006h
- 	defb 076h
- 	defb 050h
+ 	defw l5076h
  RL_NEW:
  	defw RL_MARK
 -	defb 04eh
@@ -1300,8 +1282,7 @@
 -	defb 0d7h
 +	defb 'NE','W'+0x80
  	defb 006h
- 	defb 09eh
- 	defb 050h
+ 	defw l509eh
  RL_TOUT:
  	defw RL_NEW
 -	defb 054h
@@ -1310,8 +1291,7 @@
 -	defb 0d4h
 +	defb 'TOU','T'+0x80
  	defb 006h
- 	defb 0fah
- 	defb 050h
+ 	defw l50fah
  RL_TIN:
  	defw RL_TOUT
 -	defb 054h
@@ -1319,8 +1299,7 @@
 -	defb 0ceh
 +	defb 'TI','N'+0x80
  	defb 006h
- 	defb 0eeh
- 	defb 050h
+ 	defw l50eeh
  RL_CHR:
  	defw RL_TIN
 -	defb 043h
@@ -1330,7 +1309,7 @@
  	defb 009h
  	defb 003h
  	defb 000h
-@@ -4378,9 +3808,7 @@
+@@ -4337,9 +3767,7 @@
  	defb 002h
  RL_ODD:
  	defw RL_CHR
@@ -1341,7 +1320,7 @@
  	defb 009h
  	defb 004h
  	defb 000h
-@@ -4389,9 +3817,7 @@
+@@ -4347,27 +3775,19 @@
  	defb 002h
  RL_ABS:
  	defw RL_ODD
@@ -1350,10 +1329,8 @@
 -	defb 0d3h
 +	defb 'AB','S'+0x80
  	defb 00dh
- 	defb 0e3h
- 	defb 052h
-@@ -4399,9 +3825,7 @@
- 	defb 052h
+ 	defw l52e3h
+ 	defw l52eeh
  RL_SQR:
  	defw RL_ABS
 -	defb 053h
@@ -1361,10 +1338,8 @@
 -	defb 0d2h
 +	defb 'SQ','R'+0x80
  	defb 00dh
- 	defb 0dch
- 	defb 052h
-@@ -4409,11 +3833,7 @@
- 	defb 052h
+ 	defw l52dch
+ 	defw l52e8h
  RL_FALSE:
  	defw RL_SQR
 -	defb 046h
@@ -1376,7 +1351,7 @@
  	defb 001h
  	defb 004h
  	defb 000h
-@@ -4421,10 +3841,7 @@
+@@ -4375,10 +3795,7 @@
  	defb 001h
  RL_TRUE:
  	defw RL_FALSE
@@ -1388,7 +1363,7 @@
  	defb 001h
  	defb 004h
  	defb 000h
-@@ -4432,13 +3849,7 @@
+@@ -4386,13 +3803,7 @@
  	defb 001h
  RL_BOOLEAN:
  	defw RL_TRUE
@@ -1403,7 +1378,7 @@
  	defb 003h
  	defb 004h
  	defb 000h
-@@ -4450,10 +3861,7 @@
+@@ -4404,10 +3815,7 @@
  	defb 000h
  RL_CHAR:
  	defw RL_BOOLEAN
@@ -1415,7 +1390,7 @@
  	defb 003h
  	defb 003h
  	defb 000h
-@@ -4465,10 +3873,7 @@
+@@ -4419,10 +3827,7 @@
  	defb 000h
  RL_REAL:
  	defw RL_CHAR
@@ -1427,7 +1402,7 @@
  	defb 003h
  	defb 002h
  	defb 000h
-@@ -4480,13 +3885,7 @@
+@@ -4434,13 +3839,7 @@
  	defb 000h
  RL_INTEGER:
  	defw RL_REAL
@@ -1442,7 +1417,7 @@
  	defb 003h
  	defb 001h
  	defb 000h
-@@ -4498,2130 +3897,33 @@
+@@ -4452,2126 +3851,29 @@
  	defb 000h
  RL_READLN:
  	defw RL_INTEGER
@@ -1454,8 +1429,7 @@
 -	defb 0ceh
 +	defb 'READL','N'+0x80
  	defb 006h
- 	defb 0e5h
- 	defb 03eh
+ 	defw l3ee5h
  RL_READ:
  	defw RL_READLN
 -	defb 052h
@@ -1464,8 +1438,7 @@
 -	defb 0c4h
 +	defb 'REA','D'+0x80
  	defb 006h
- 	defb 095h
- 	defb 03eh
+ 	defw l3e95h
  RL_WRITELN:
  	defw RL_READ
 -	defb 057h
@@ -1477,8 +1450,7 @@
 -	defb 0ceh
 +	defb 'WRITEL','N'+0x80
  	defb 006h
- 	defb 06eh
- 	defb 03dh
+ 	defw l3d6eh
  RL_WRITE:
  	defw RL_WRITELN
 -	defb 057h
@@ -1488,8 +1460,7 @@
 -	defb 0c5h
 +	defb 'WRIT','E'+0x80
  	defb 006h
- 	defb 081h
- 	defb 03dh
+ 	defw l3d81h
  
  ; BLOCK 'Symtab_open' (start 0x1b35 end 0x2355)
  Symtab_open_start:
@@ -3579,7 +3550,7 @@
  START_PASCAL:
  	call GetRAMEnd
  l2358h:
-@@ -7779,44 +5081,44 @@
+@@ -7729,44 +5031,44 @@
  	xor a	
  	jr SetHLFirstSrcLine
  cmdTab:
@@ -3643,7 +3614,7 @@
  	defw DoCmdZ
  EdCmdTab:
  	defb 00bh
-@@ -7825,82 +5127,36 @@
+@@ -7775,82 +5077,36 @@
  	defw sub_2619h
  	defb 008h
  	defw sub_2668h
@@ -3739,7 +3710,7 @@
  l2b33h:
  	nop	
  lineNumStart__:
-@@ -7942,18 +5198,9 @@
+@@ -7892,18 +5148,9 @@
  listPageSize:
  	nop	
  GetSrcChr:
@@ -3760,7 +3731,7 @@
  SP_safe:
  	defb 0f0h
  	defb 07fh
-@@ -8166,81 +5413,10 @@
+@@ -8116,81 +5363,10 @@
  banner_nl:
  	defb 00dh
  banner:
@@ -3846,7 +3817,7 @@
  CoVarInitData:
  	defb 020h
  	defw RL_PACKED
-@@ -8932,345 +6108,171 @@
+@@ -8882,345 +6058,171 @@
  
  ; BLOCK 'compOptTab' (start 0x3165 end 0x3171)
  compOptTab_start:
@@ -4249,7 +4220,7 @@
  ChkTypeBool__:
  	ld de,00004h
  	jr ChkType__
-@@ -9893,7 +6895,6 @@
+@@ -9843,7 +6845,6 @@
  l35f0h:
  	defb 008h
  	dec b	
@@ -4257,7 +4228,7 @@
  	djnz l35ech
  	inc a	
  l35f5h:
-@@ -10153,7 +7154,7 @@
+@@ -10103,7 +7104,7 @@
  	add a,a	
  	ld l,a	
  	ld h,000h
@@ -4266,7 +4237,7 @@
  	add hl,de	
  	ld e,(hl)	
  	inc hl	
-@@ -10165,7 +7166,7 @@
+@@ -10115,7 +7116,7 @@
  	ret	
  sub_376dh:
  	ex af,af'	
@@ -4275,7 +4246,7 @@
  	call ChkLexem_GetLex
  	call WCaBreak_IfCoCo_C
  l3777h:
-@@ -10968,7 +7969,7 @@
+@@ -10919,7 +7920,7 @@
  	call WCaBreak_IfCoCo_C
  	call sub_3710h
  	push hl	
@@ -4284,7 +4255,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	call WrJump
-@@ -10981,7 +7982,7 @@
+@@ -10932,7 +7933,7 @@
  l3c8ah:
  	call sub_3710h
  	push hl	
@@ -4293,7 +4264,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	cp 012h
-@@ -11070,7 +8071,7 @@
+@@ -11021,7 +8022,7 @@
  	push hl	
  	cp 0ach
  	jr z,l3d3ch
@@ -4302,7 +4273,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  l3d32h:
-@@ -11429,7 +8430,7 @@
+@@ -11384,7 +8385,7 @@
  	ld hl,CSq_l4184h
  	call WCodeOverLastByte
  l3f78h:
@@ -4311,7 +4282,7 @@
  WCode_VarIdxTOS:
  	pop hl	
  	call GetCSqAddrByIdx
-@@ -11437,16 +8438,16 @@
+@@ -11392,16 +8393,16 @@
  l3f82h:
  	pop de	
  	call ChkType__
@@ -4331,7 +4302,7 @@
  	jr WCode_VarIdxTOS
  l3f9eh:
  	ld a,e	
-@@ -11461,7 +8462,7 @@
+@@ -11416,7 +8417,7 @@
  	call sub_343dh
  	ld hl,CSq_l35e8h
  	call WCode
@@ -4340,7 +4311,7 @@
  	jr WCode_VarIdxTOS
  l3fbbh:
  	pop hl	
-@@ -11472,7 +8473,7 @@
+@@ -11427,7 +8428,7 @@
  	cp 0f4h
  	ld a,e	
  	jr z,l3fd7h
@@ -4349,7 +4320,7 @@
  	call GetCSqAddrByIdx
  	jp CodeLdBC_0n_from_0x2b8b
  l3fd0h:
-@@ -11492,7 +8493,7 @@
+@@ -11447,7 +8448,7 @@
  	push hl	
  	ld a,l	
  	cp 0f2h
@@ -4358,7 +4329,7 @@
  	ld a,e	
  	jr c,WCode_VarIdxTOS
  	ld e,040h
-@@ -11768,7 +8769,6 @@
+@@ -11723,7 +8724,6 @@
  l419eh:
  	call l381ah
  	djnz l419eh
@@ -4366,7 +4337,7 @@
  	ret	
  l41a4h:
  	inc a	
-@@ -11991,7 +8991,6 @@
+@@ -11946,7 +8946,6 @@
  	ld e,(hl)	
  	inc hl	
  	ld d,(hl)	
@@ -4374,7 +4345,7 @@
  	push de	
  	inc hl	
  	ld b,(hl)	
-@@ -13169,7 +10168,7 @@
+@@ -13129,7 +10128,7 @@
  l4aafh:
  	ld a,c	
  ChkBegin:
@@ -4383,7 +4354,7 @@
  	call ChkLexem_GetLex
  	jp l3cd4h
  WCorrAddr:
-@@ -14048,7 +11047,6 @@
+@@ -14008,7 +11007,6 @@
  	jp l4e61h
  l4fffh:
  	push hl	
@@ -4391,7 +4362,7 @@
  	ld d,(ix+001h)
  	push de	
  	ld c,001h
-@@ -14205,7 +11203,7 @@
+@@ -14170,7 +11168,7 @@
  	jr l50f4h
  sub_5105h:
  	call NextChkOpBra_GetLex
@@ -4400,7 +4371,7 @@
  	call sub_3f29h
  sub_510eh:
  	call ChkComma_GetLex
-@@ -14519,7 +11517,6 @@
+@@ -14518,7 +11516,6 @@
  	ld a,(hl)	
  	cp 07fh
  	inc hl	
@@ -4408,7 +4379,7 @@
  	jr z,PXKillProlog
  	djnz PXSrchProlog
  	jr PXCpChrMap
-@@ -14528,7 +11525,7 @@
+@@ -14527,7 +11524,7 @@
  PXCpChrMap:
  	ld hl,(CCTL0)
  	ld de,0ba00h
@@ -4417,7 +4388,16 @@
  	ldir
  	ld hl,PXUSASC
  	ld de,0bbd8h
-@@ -14768,116 +11765,17 @@
+@@ -14715,7 +11712,7 @@
+ 	ld (ix+002h),000h
+ 	ld hl,fileName
+ 	ld bc,083f3h
+-	ld de,ErrIdxHigh
++	ld de,0090bh
+ PXSendName2:
+ 	outi
+ 	inc b	
+@@ -14767,116 +11764,17 @@
  
  ; BLOCK 'Rest' (start 0x5490 end 0x5500)
  Rest_first:

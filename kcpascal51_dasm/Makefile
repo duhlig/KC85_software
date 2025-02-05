@@ -13,6 +13,7 @@ patch:
 	[ -r p51.patch ] && patch pascal51.asm p51.patch
 
 pascal51.asm: pascal51_kcc.bin p51.block p51.sym
+	cp pascal51.asm pascal51.bak
 	z80dasm -a -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -t -u -o p51t.asm pascal51_kcc.bin
 	@z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
 	cp pascal51.asm p51.asm
@@ -35,7 +36,7 @@ p5a.asm: pascal51.asm
 	patch p5a.asm p5a.patch
 
 clean:
-	-rm -f *~ p51.symout p51t.asm p51.bin
+	-rm -f *~ p51.symout p51t.asm p51.bin pascal51.bak
 
 distclean: clean
 	-rm -f pascal51_kcc.bin p51.asm pascal51.asm.orig pascal51.asm.rej

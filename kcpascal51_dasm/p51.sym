@@ -5502,6 +5502,10 @@ l35f0h:	equ 0x35f0
 ; 0x36ee	(defw directive)
 ; 0x35ee	(jr destination)
 
+l35f2h:	equ 0x35f2
+; Used at following locations:
+; 0x3f86	(immediate value)
+
 l35f5h:	equ 0x35f5
 ; Used at following locations:
 ; 0x35fb	(djnz destination)
@@ -5750,6 +5754,10 @@ l3838h:	equ 0x3838
 l383eh:	equ 0x383e
 ; Used at following locations:
 ; 0x37b4	(jp destination)
+
+l3844h:	equ 0x3844
+; Used at following locations:
+; 0x1a58	(defw directive)
 
 l385fh:	equ 0x385f
 ; Used at following locations:
@@ -6133,9 +6141,17 @@ l3d57h:	equ 0x3d57
 ; Used at following locations:
 ; 0x3752	(defw directive)
 
+l3d6eh:	equ 0x3d6e
+; Used at following locations:
+; 0x1b29	(defw directive)
+
 l3d7bh:	equ 0x3d7b
 ; Used at following locations:
 ; 0x3d73	(jr destination)
+
+l3d81h:	equ 0x3d81
+; Used at following locations:
+; 0x1b33	(defw directive)
 
 sub_3d84h:	equ 0x3d84
 ; Used at following locations:
@@ -6256,6 +6272,10 @@ sub_3e87h:	equ 0x3e87
 ; Used at following locations:
 ; 0x3e98	(call destination)
 
+l3e95h:	equ 0x3e95
+; Used at following locations:
+; 0x1b1d	(defw directive)
+
 l3e98h:	equ 0x3e98
 ; Used at following locations:
 ; 0x3ebf	(jr destination)
@@ -6296,6 +6316,10 @@ l3eceh:	equ 0x3ece
 l3ed3h:	equ 0x3ed3
 ; Used at following locations:
 ; 0x3ea0	(jr destination)
+
+l3ee5h:	equ 0x3ee5
+; Used at following locations:
+; 0x1b14	(defw directive)
 
 l3eefh:	equ 0x3eef
 ; Used at following locations:
@@ -6635,6 +6659,10 @@ l419eh:	equ 0x419e
 ; Used at following locations:
 ; 0x41a1	(djnz destination)
 
+l41a3h:	equ 0x41a3
+; Used at following locations:
+; 0x13dc	(immediate value)
+
 l41a4h:	equ 0x41a4
 ; Used at following locations:
 ; 0x4191	(jr destination)
@@ -6788,6 +6816,10 @@ l42fdh:	equ 0x42fd
 ; 0x44c9	(jp destination)
 ; 0x3792	(jp destination)
 
+l4305h:	equ 0x4305
+; Used at following locations:
+; 0x16cd	(immediate value)
+
 l4313h:	equ 0x4313
 ; Used at following locations:
 ; 0x431b	(djnz destination)
@@ -6806,6 +6838,10 @@ sub_4336h:	equ 0x4336
 ; 0x435b	(call destination)
 ; 0x434c	(call destination)
 
+l434ch:	equ 0x434c
+; Used at following locations:
+; 0x1a46	(defw directive)
+
 l4355h:	equ 0x4355
 ; Used at following locations:
 ; 0x4620	(jp destination)
@@ -6816,6 +6852,10 @@ l4358h:	equ 0x4358
 ; Used at following locations:
 ; 0x434f	(jr destination)
 
+l435bh:	equ 0x435b
+; Used at following locations:
+; 0x1a3e	(defw directive)
+
 l4363h:	equ 0x4363
 ; Used at following locations:
 ; 0x4372	(jr destination)
@@ -6823,6 +6863,10 @@ l4363h:	equ 0x4363
 l4367h:	equ 0x4367
 ; Used at following locations:
 ; 0x435e	(jr destination)
+
+l436ch:	equ 0x436c
+; Used at following locations:
+; 0x1a35	(defw directive)
 
 CSq_l4379h:	equ 0x4379
 ; Used at following locations:
@@ -6844,6 +6888,10 @@ l4384h:	equ 0x4384
 l4387h:	equ 0x4387
 ; Used at following locations:
 ; 0x4367	(immediate value)
+
+l438ah:	equ 0x438a
+; Used at following locations:
+; 0x19a7	(defw directive)
 
 l438dh:	equ 0x438d
 ; Used at following locations:
@@ -6982,6 +7030,10 @@ l4511h:	equ 0x4511
 l4518h:	equ 0x4518
 ; Used at following locations:
 ; 0x44d1	(jr destination)
+
+l4536h:	equ 0x4536
+; Used at following locations:
+; 0x1a4f	(defw directive)
 
 l455dh:	equ 0x455d
 ; Used at following locations:
@@ -7799,6 +7851,14 @@ l506ah:	equ 0x506a
 ; Used at following locations:
 ; 0x5066	(jr destination)
 
+l5076h:	equ 0x5076
+; Used at following locations:
+; 0x1a6d	(defw directive)
+
+l507bh:	equ 0x507b
+; Used at following locations:
+; 0x1a64	(defw directive)
+
 l507eh:	equ 0x507e
 ; Used at following locations:
 ; 0x5079	(jr destination)
@@ -7810,6 +7870,10 @@ l508eh:	equ 0x508e
 CSq_l5096h:	equ 0x5096
 ; Used at following locations:
 ; 0x507b	(immediate value)
+
+l509eh:	equ 0x509e
+; Used at following locations:
+; 0x1a75	(defw directive)
 
 sub_50c9h:	equ 0x50c9
 ; Used at following locations:
@@ -7824,9 +7888,17 @@ l50e3h:	equ 0x50e3
 ; Used at following locations:
 ; 0x50d3	(jr destination)
 
+l50eeh:	equ 0x50ee
+; Used at following locations:
+; 0x1a86	(defw directive)
+
 l50f4h:	equ 0x50f4
 ; Used at following locations:
 ; 0x5103	(jr destination)
+
+l50fah:	equ 0x50fa
+; Used at following locations:
+; 0x1a7e	(defw directive)
 
 sub_5105h:	equ 0x5105
 ; Used at following locations:
@@ -7864,33 +7936,105 @@ l5130h:	equ 0x5130
 ; Used at following locations:
 ; 0x511a	(jr destination)
 
+l5136h:	equ 0x5136
+; Used at following locations:
+; 0x18c9	(defw directive)
+
 CSq_l513fh:	equ 0x513f
 ; Used at following locations:
 ; 0x5139	(immediate value)
+
+PaSetsys:	equ 0x514a
+; Used at following locations:
+; 0x1861	(defw directive)
 
 CSq_l5153h:	equ 0x5153
 ; Used at following locations:
 ; 0x514d	(immediate value)
 
+l515bh:	equ 0x515b
+; Used at following locations:
+; 0x186e	(defw directive)
+
+l5160h:	equ 0x5160
+; Used at following locations:
+; 0x18a6	(defw directive)
+
 CSq_l5169h:	equ 0x5169
 ; Used at following locations:
 ; 0x5163	(immediate value)
+
+l5174h:	equ 0x5174
+; Used at following locations:
+; 0x1878	(defw directive)
 
 CSq_l517dh:	equ 0x517d
 ; Used at following locations:
 ; 0x5177	(immediate value)
 
+l5188h:	equ 0x5188
+; Used at following locations:
+; 0x1890	(defw directive)
+
+l5194h:	equ 0x5194
+; Used at following locations:
+; 0x189c	(defw directive)
+
+l51a0h:	equ 0x51a0
+; Used at following locations:
+; 0x1884	(defw directive)
+
 CSq_l51a9h:	equ 0x51a9
 ; Used at following locations:
 ; 0x51a3	(immediate value)
+
+l51b4h:	equ 0x51b4
+; Used at following locations:
+; 0x18b3	(defw directive)
 
 CSq_l51bdh:	equ 0x51bd
 ; Used at following locations:
 ; 0x51b7	(immediate value)
 
+l51d0h:	equ 0x51d0
+; Used at following locations:
+; 0x18be	(defw directive)
+
 CSq_l51d9h:	equ 0x51d9
 ; Used at following locations:
 ; 0x51d3	(immediate value)
+
+l51e8h:	equ 0x51e8
+; Used at following locations:
+; 0x18eb	(defw directive)
+
+l51edh:	equ 0x51ed
+; Used at following locations:
+; 0x1944	(defw directive)
+
+l51f7h:	equ 0x51f7
+; Used at following locations:
+; 0x1938	(defw directive)
+
+l5201h:	equ 0x5201
+; Used at following locations:
+; 0x192d	(defw directive)
+
+l520bh:	equ 0x520b
+; Used at following locations:
+; 0x1915	(defw directive)
+
+l5210h:	equ 0x5210
+; Used at following locations:
+; 0x190b	(defw directive)
+
+l5214h:	equ 0x5214
+; Used at following locations:
+; 0x1921	(defw directive)
+
+l5219h:	equ 0x5219
+; Used at following locations:
+; 0x18f6	(defw directive)
 
 l5220h:	equ 0x5220
 ; Used at following locations:
@@ -7899,6 +8043,10 @@ l5220h:	equ 0x5220
 l5226h:	equ 0x5226
 ; Used at following locations:
 ; 0x521d	(jr destination)
+
+l5227h:	equ 0x5227
+; Used at following locations:
+; 0x1901	(defw directive)
 
 l522eh:	equ 0x522e
 ; Used at following locations:
@@ -7945,25 +8093,86 @@ CSq_l5267h:	equ 0x5267
 ; Used at following locations:
 ; 0x4f90	(immediate value)
 
+l526bh:	equ 0x526b
+; Used at following locations:
+; 0x1993	(defw directive)
+
+l527fh:	equ 0x527f
+; Used at following locations:
+; 0x199c	(defw directive)
+
 l5287h:	equ 0x5287
 ; Used at following locations:
 ; 0x527d	(jr destination)
+
+l5290h:	equ 0x5290
+; Used at following locations:
+; 0x198a	(defw directive)
 
 CSq_l52a8h:	equ 0x52a8
 ; Used at following locations:
 ; 0x52a2	(immediate value)
 
+l52ach:	equ 0x52ac
+; Used at following locations:
+; 0x1981	(defw directive)
+
 l52aeh:	equ 0x52ae
 ; Used at following locations:
 ; 0x173f	(immediate value)
+
+l52b2h:	equ 0x52b2
+; Used at following locations:
+; 0x19dd	(defw directive)
 
 l52bbh:	equ 0x52bb
 ; Used at following locations:
 ; 0x52b7	(jr destination)
 
+l52bch:	equ 0x52bc
+; Used at following locations:
+; 0x19bd	(defw directive)
+
+l52c0h:	equ 0x52c0
+; Used at following locations:
+; 0x1a9b	(defw directive)
+
+l52c5h:	equ 0x52c5
+; Used at following locations:
+; 0x19cb	(defw directive)
+
+l52cah:	equ 0x52ca
+; Used at following locations:
+; 0x19e9	(defw directive)
+
 l52ceh:	equ 0x52ce
 ; Used at following locations:
 ; 0x34b2	(immediate value)
+; 0x1a90	(defw directive)
+
+l52d1h:	equ 0x52d1
+; Used at following locations:
+; 0x19f5	(defw directive)
+
+l52d6h:	equ 0x52d6
+; Used at following locations:
+; 0x1a01	(defw directive)
+
+l52dch:	equ 0x52dc
+; Used at following locations:
+; 0x1aae	(defw directive)
+
+l52e3h:	equ 0x52e3
+; Used at following locations:
+; 0x1aa4	(defw directive)
+
+l52e8h:	equ 0x52e8
+; Used at following locations:
+; 0x1ab0	(defw directive)
+
+l52eeh:	equ 0x52ee
+; Used at following locations:
+; 0x1aa6	(defw directive)
 
 StartPASSrc:	equ 0x52f3
 ; Used at following locations:

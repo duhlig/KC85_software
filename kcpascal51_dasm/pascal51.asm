@@ -3432,37 +3432,32 @@ RL_SETSYS:
 	defw 00000h
 	defb 'SETSY','S'+0x80
 	defb 006h
-	defb 04ah
-	defb 051h
+	defw PaSetsys
 RL_GETSYS:
 	defw RL_SETSYS
 	defb 'GETSY','S'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 05bh
-	defb 051h
+	defw l515bh
 	defb 002h
 RL_PLOT:
 	defw RL_GETSYS
 	defb 'PLO','T'+0x80
 	defb 006h
-	defb 074h
-	defb 051h
+	defw l5174h
 RL_CLRPLOT:
 	defw RL_PLOT
 	defb 'CLRPLO','T'+0x80
 	defb 006h
-	defb 0a0h
-	defb 051h
+	defw l51a0h
 RL_PTEST:
 	defw RL_CLRPLOT
 	defb 'PTES','T'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
-	defb 088h
-	defb 051h
+	defw l5188h
 	defb 003h
 RL_GETC:
 	defw RL_PTEST
@@ -3470,33 +3465,28 @@ RL_GETC:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 094h
-	defb 051h
+	defw l5194h
 	defb 003h
 RL_SETC:
 	defw RL_GETC
 	defb 'SET','C'+0x80
 	defb 006h
-	defb 060h
-	defb 051h
+	defw l5160h
 RL_LINEPLOT:
 	defw RL_SETC
 	defb 'LINEPLO','T'+0x80
 	defb 006h
-	defb 0b4h
-	defb 051h
+	defw l51b4h
 RL_CIRCLE:
 	defw RL_LINEPLOT
 	defb 'CIRCL','E'+0x80
 	defb 006h
-	defb 0d0h
-	defb 051h
+	defw l51d0h
 RL_GOTOXY:
 	defw RL_CIRCLE
 	defb 'GOTOX','Y'+0x80
 	defb 006h
-	defb 036h
-	defb 051h
+	defw l5136h
 RL_PI:
 	defw RL_GOTOXY
 	defb 'P','I'+0x80
@@ -3518,8 +3508,7 @@ RL_READKBD:
 	defb 009h
 	defb 003h
 	defb 000h
-	defb 0e8h
-	defb 051h
+	defw l51e8h
 	defb 001h
 RL_SHR:
 	defw RL_READKBD
@@ -3527,8 +3516,7 @@ RL_SHR:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 019h
-	defb 052h
+	defw l5219h
 	defb 003h
 RL_SHL:
 	defw RL_SHR
@@ -3536,8 +3524,7 @@ RL_SHL:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 027h
-	defb 052h
+	defw l5227h
 	defb 003h
 RL_LO:
 	defw RL_SHL
@@ -3545,8 +3532,7 @@ RL_LO:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 010h
-	defb 052h
+	defw l5210h
 	defb 002h
 RL_HI:
 	defw RL_LO
@@ -3554,8 +3540,7 @@ RL_HI:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 00bh
-	defb 052h
+	defw l520bh
 	defb 002h
 RL_SWAP:
 	defw RL_HI
@@ -3563,8 +3548,7 @@ RL_SWAP:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 014h
-	defb 052h
+	defw l5214h
 	defb 002h
 RL_BXOR:
 	defw RL_SWAP
@@ -3572,8 +3556,7 @@ RL_BXOR:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 001h
-	defb 052h
+	defw l5201h
 	defb 003h
 RL_BOR:
 	defw RL_BXOR
@@ -3581,8 +3564,7 @@ RL_BOR:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 0f7h
-	defb 051h
+	defw l51f7h
 	defb 003h
 RL_BAND:
 	defw RL_BOR
@@ -3590,8 +3572,7 @@ RL_BAND:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 0edh
-	defb 051h
+	defw l51edh
 	defb 003h
 RL_EXP:
 	defw RL_BAND
@@ -3629,33 +3610,28 @@ RL_INP:
 	defb 009h
 	defb 003h
 	defb 000h
-	defb 0ach
-	defb 052h
+	defw l52ach
 	defb 002h
 RL_OUT:
 	defw RL_INP
 	defb 'OU','T'+0x80
 	defb 006h
-	defb 090h
-	defb 052h
+	defw l5290h
 RL_SIZE:
 	defw RL_OUT
 	defb 'SIZ','E'+0x80
 	defb 007h
-	defb 06bh
-	defb 052h
+	defw l526bh
 RL_ADDR:
 	defw RL_SIZE
 	defb 'ADD','R'+0x80
 	defb 007h
-	defb 07fh
-	defb 052h
+	defw l527fh
 RL_INLINE:
 	defw RL_ADDR
 	defb 'INLIN','E'+0x80
 	defb 006h
-	defb 08ah
-	defb 043h
+	defw l438ah
 RL_ENTIER:
 	defw RL_INLINE
 	defb 'ENTIE','R'+0x80
@@ -3667,8 +3643,7 @@ RL_USER:
 	defb 008h
 	defb 000h
 	defb 000h
-	defb 0bch
-	defb 052h
+	defw l52bch
 	defb 002h
 RL_RANDOM:
 	defw RL_USER
@@ -3676,8 +3651,7 @@ RL_RANDOM:
 	defb 009h
 	defb 001h
 	defb 000h
-	defb 0c5h
-	defb 052h
+	defw l52c5h
 	defb 001h
 RL_KEYPRESSED:
 	defw RL_RANDOM
@@ -3685,8 +3659,7 @@ RL_KEYPRESSED:
 	defb 009h
 	defb 004h
 	defb 000h
-	defb 0b2h
-	defb 052h
+	defw l52b2h
 	defb 001h
 RL_HALT:
 	defw RL_KEYPRESSED
@@ -3694,8 +3667,7 @@ RL_HALT:
 	defb 008h
 	defb 000h
 	defb 000h
-	defb 0cah
-	defb 052h
+	defw l52cah
 	defb 001h
 RL_EOLN:
 	defw RL_HALT
@@ -3703,8 +3675,7 @@ RL_EOLN:
 	defb 009h
 	defb 004h
 	defb 000h
-	defb 0d1h
-	defb 052h
+	defw l52d1h
 	defb 001h
 RL_PAGE:
 	defw RL_EOLN
@@ -3712,8 +3683,7 @@ RL_PAGE:
 	defb 008h
 	defb 000h
 	defb 000h
-	defb 0d6h
-	defb 052h
+	defw l52d6h
 	defb 001h
 RL_SQRT:
 	defw RL_PAGE
@@ -3741,70 +3711,59 @@ RL_SUCC:
 	defw RL_MAXINT
 	defb 'SUC','C'+0x80
 	defb 007h
-	defb 06ch
-	defb 043h
+	defw l436ch
 RL_PRED:
 	defw RL_SUCC
 	defb 'PRE','D'+0x80
 	defb 007h
-	defb 05bh
-	defb 043h
+	defw l435bh
 RL_ORD:
 	defw RL_PRED
 	defb 'OR','D'+0x80
 	defb 007h
-	defb 04ch
-	defb 043h
+	defw l434ch
 RL_PEEK:
 	defw RL_ORD
 	defb 'PEE','K'+0x80
 	defb 007h
-	defb 036h
-	defb 045h
+	defw l4536h
 RL_POKE:
 	defw RL_PEEK
 	defb 'POK','E'+0x80
 	defb 006h
-	defb 044h
-	defb 038h
+	defw l3844h
 RL_RELEASE:
 	defw RL_POKE
 	defb 'RELEAS','E'+0x80
 	defb 006h
-	defb 07bh
-	defb 050h
+	defw l507bh
 RL_MARK:
 	defw RL_RELEASE
 	defb 'MAR','K'+0x80
 	defb 006h
-	defb 076h
-	defb 050h
+	defw l5076h
 RL_NEW:
 	defw RL_MARK
 	defb 'NE','W'+0x80
 	defb 006h
-	defb 09eh
-	defb 050h
+	defw l509eh
 RL_TOUT:
 	defw RL_NEW
 	defb 'TOU','T'+0x80
 	defb 006h
-	defb 0fah
-	defb 050h
+	defw l50fah
 RL_TIN:
 	defw RL_TOUT
 	defb 'TI','N'+0x80
 	defb 006h
-	defb 0eeh
-	defb 050h
+	defw l50eeh
 RL_CHR:
 	defw RL_TIN
 	defb 'CH','R'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
-	defb 0ceh
-	defb 052h
+	defw l52ceh
 	defb 002h
 RL_ODD:
 	defw RL_CHR
@@ -3812,25 +3771,20 @@ RL_ODD:
 	defb 009h
 	defb 004h
 	defb 000h
-	defb 0c0h
-	defb 052h
+	defw l52c0h
 	defb 002h
 RL_ABS:
 	defw RL_ODD
 	defb 'AB','S'+0x80
 	defb 00dh
-	defb 0e3h
-	defb 052h
-	defb 0eeh
-	defb 052h
+	defw l52e3h
+	defw l52eeh
 RL_SQR:
 	defw RL_ABS
 	defb 'SQ','R'+0x80
 	defb 00dh
-	defb 0dch
-	defb 052h
-	defb 0e8h
-	defb 052h
+	defw l52dch
+	defw l52e8h
 RL_FALSE:
 	defw RL_SQR
 	defb 'FALS','E'+0x80
@@ -3899,26 +3853,22 @@ RL_READLN:
 	defw RL_INTEGER
 	defb 'READL','N'+0x80
 	defb 006h
-	defb 0e5h
-	defb 03eh
+	defw l3ee5h
 RL_READ:
 	defw RL_READLN
 	defb 'REA','D'+0x80
 	defb 006h
-	defb 095h
-	defb 03eh
+	defw l3e95h
 RL_WRITELN:
 	defw RL_READ
 	defb 'WRITEL','N'+0x80
 	defb 006h
-	defb 06eh
-	defb 03dh
+	defw l3d6eh
 RL_WRITE:
 	defw RL_WRITELN
 	defb 'WRIT','E'+0x80
 	defb 006h
-	defb 081h
-	defb 03dh
+	defw l3d81h
 
 ; BLOCK 'Symtab_open' (start 0x1b35 end 0x2355)
 Symtab_open_start:
@@ -7288,6 +7238,7 @@ l3838h:
 l383eh:
 	ld hl,l38b4h
 	jp CodeLdBC_0n_from_0x2b8b
+l3844h:
 	call NextChkOpBra_GetLex
 	call sub_3f10h
 	call ChkComma_GetLex
@@ -8112,6 +8063,7 @@ l3d57h:
 	defb 0c3h
 	call StoreDE
 	jp GetLexem
+l3d6eh:
 	call GetLexem
 	cp 0a8h
 	jr nz,l3d7bh
@@ -8120,6 +8072,7 @@ l3d57h:
 l3d7bh:
 	ld hl,CSq_l3e3dh
 	jp WCode
+l3d81h:
 	call NextChkOpBra_GetLex
 sub_3d84h:
 	call sub_3f3fh
@@ -8282,6 +8235,7 @@ sub_3e87h:
 	call GetIdentInfoInABC
 	ld e,01ah
 	jp sub_4e7dh
+l3e95h:
 	call NextChkOpBra_GetLex
 l3e98h:
 	call sub_3e87h
@@ -8334,6 +8288,7 @@ l3ed3h:
 	pop hl	
 	pop af	
 	jr l3eb7h
+l3ee5h:
 	call GetLexem
 	cp 0a8h
 	jr nz,l3eefh
@@ -9032,6 +8987,7 @@ sub_4336h:
 	pop de	
 	ld (ix+001h),d
 	ret	
+l434ch:
 	call sub_4336h
 	jr z,l4358h
 	ld hl,CSq_l4379h
@@ -9040,6 +8996,7 @@ l4355h:
 	call WCodeOverLastByte
 l4358h:
 	jp l459fh
+l435bh:
 	call sub_4336h
 	jr z,l4367h
 	ld hl,CSq_l4381h
@@ -9049,6 +9006,7 @@ l4363h:
 l4367h:
 	ld hl,l4387h
 	jr l4355h
+l436ch:
 	call sub_4336h
 	ld hl,l437eh
 	jr nz,l4363h
@@ -9075,6 +9033,7 @@ l4387h:
 	ld (bc),a	
 	dec hl	
 	push hl	
+l438ah:
 	call NextChkOpBra_GetLex
 l438dh:
 	call ParseConstVal
@@ -9310,6 +9269,7 @@ l4518h:
 	jp nz,WCodeOverLastByte
 	ex de,hl	
 	jp l33beh
+l4536h:
 	ld a,(l2b76h)
 	push af	
 	call NextChkOpBra_GetLex
@@ -11123,8 +11083,10 @@ l506ah:
 	ld (l2b8bh),a
 	ld a,e	
 	ret	
+l5076h:
 	ld hl,l508eh
 	jr l507eh
+l507bh:
 	ld hl,CSq_l5096h
 l507eh:
 	push hl	
@@ -11146,6 +11108,7 @@ CSq_l5096h:
 	inc hl	
 	ld d,(hl)	
 	ld (l178bh),de
+l509eh:
 	call NextChkOpBra_GetLex
 	ld e,045h
 	call sub_5027h
@@ -11192,11 +11155,13 @@ l50e3h:
 	ret nz	
 	ld e,004h
 	ret	
+l50eeh:
 	call sub_5105h
 	ld hl,CSq_l5235h
 l50f4h:
 	call WCodeOverLastByte
 	jp ChkCloBra_GetLex
+l50fah:
 	call sub_5105h
 	call sub_510eh
 	ld hl,l523ah
@@ -11225,6 +11190,7 @@ l512dh:
 l5130h:
 	call sub_510eh
 	jp ChkCloBra_GetLex
+l5136h:
 	call sub_5114h
 	ld hl,CSq_l513fh
 	jp WCodeOverLastByte
@@ -11234,6 +11200,7 @@ CSq_l513fh:
 	pop hl	
 	ld (l178dh),hl
 	call sub_04e6h
+PaSetsys:
 	call sub_5114h
 	ld hl,CSq_l5153h
 	jp WCodeOverLastByte
@@ -11242,9 +11209,11 @@ CSq_l5153h:
 	ld (l178dh),hl
 	pop hl	
 	call sub_0655h
+l515bh:
 	inc b	
 	call sub_066ah
 	push hl	
+l5160h:
 	call sub_5114h
 	ld hl,CSq_l5169h
 	jp WCodeOverLastByte
@@ -11254,6 +11223,7 @@ CSq_l5169h:
 	pop hl	
 	ld (l178dh),hl
 	call sub_0502h
+l5174h:
 	call sub_5114h
 	ld hl,CSq_l517dh
 	jp WCodeOverLastByte
@@ -11263,18 +11233,21 @@ CSq_l517dh:
 	pop hl	
 	ld (l178dh),hl
 	call sub_0527h
+l5188h:
 	dec bc	
 	ld (l178fh),hl
 	pop hl	
 	ld (l178dh),hl
 	call sub_0590h
 	push af	
+l5194h:
 	dec bc	
 	ld (l178fh),hl
 	pop hl	
 	ld (l178dh),hl
 	call sub_0553h
 	push hl	
+l51a0h:
 	call sub_5114h
 	ld hl,CSq_l51a9h
 	jp WCodeOverLastByte
@@ -11284,6 +11257,7 @@ CSq_l51a9h:
 	pop hl	
 	ld (l178dh),hl
 	call sub_05c7h
+l51b4h:
 	call sub_5124h
 	ld hl,CSq_l51bdh
 	jp WCodeOverLastByte
@@ -11297,6 +11271,7 @@ CSq_l51bdh:
 	pop hl	
 	ld (l178dh),hl
 	call sub_05ebh
+l51d0h:
 	call sub_511ch
 	ld hl,CSq_l51d9h
 	jp WCodeOverLastByte
@@ -11308,9 +11283,11 @@ CSq_l51d9h:
 	pop hl	
 	ld (l178dh),hl
 	call sub_0623h
+l51e8h:
 	inc b	
 	call GetKey
 	push af	
+l51edh:
 	add hl,bc	
 	ex de,hl	
 	pop hl	
@@ -11321,6 +11298,7 @@ CSq_l51d9h:
 	and d	
 	ld h,a	
 	push hl	
+l51f7h:
 	add hl,bc	
 	ex de,hl	
 	pop hl	
@@ -11331,6 +11309,7 @@ CSq_l51d9h:
 	or d	
 	ld h,a	
 	push hl	
+l5201h:
 	add hl,bc	
 	ex de,hl	
 	pop hl	
@@ -11341,18 +11320,22 @@ CSq_l51d9h:
 	xor d	
 	ld h,a	
 	push hl	
+l520bh:
 	inc b	
 	ld l,h	
 	ld h,000h
 	push hl	
+l5210h:
 	inc bc	
 	ld h,000h
 	push hl	
+l5214h:
 	inc b	
 	ld a,h	
 	ld h,l	
 	ld l,a	
 	push hl	
+l5219h:
 	dec c	
 	ld a,l	
 	pop hl	
@@ -11365,6 +11348,7 @@ l5220h:
 	djnz l5220h
 l5226h:
 	push hl	
+l5227h:
 	dec c	
 	ld a,l	
 	pop hl	
@@ -11420,6 +11404,7 @@ CSq_l525ch:
 CSq_l5267h:
 	defb 003h
 	call nc,ErrIdxHigh
+l526bh:
 	call NextChkOpBra_GetLex
 	ld e,03fh
 	call sub_5027h
@@ -11428,6 +11413,7 @@ CSq_l5267h:
 	call JCodeNextByte
 	defb 0e5h
 	jr l5287h
+l527fh:
 	call NextChkOpBra_GetLex
 	ld e,046h
 	call sub_5027h
@@ -11435,6 +11421,7 @@ l5287h:
 	ld bc,00001h
 	call ChkCloBra_GetLex
 	jp l45a0h
+l5290h:
 	call NextChkOpBra_GetLex
 	call sub_3f10h
 	call ChkComma_GetLex
@@ -11447,12 +11434,14 @@ CSq_l52a8h:
 	defb 003h
 	pop bc	
 	out (c),a
+l52ach:
 	dec b	
 	ld c,l	
 l52aeh:
 	ld b,h	
 	in a,(c)
 	push af	
+l52b2h:
 	add hl,bc	
 	call KbdStat
 	or a	
@@ -11460,38 +11449,48 @@ l52aeh:
 	ld a,001h
 l52bbh:
 	push af	
+l52bch:
 	inc bc	
 	call sub_0c25h
+l52c0h:
 	inc b	
 	ld a,l	
 	and 001h
 	push af	
+l52c5h:
 	inc b	
 	call sub_0e8fh
 	push hl	
+l52cah:
 	inc bc	
 	call PrHalt
 l52ceh:
 	ld (bc),a	
 	ld a,l	
 	push af	
+l52d1h:
 	inc b	
 	call IsEOL
 	push af	
+l52d6h:
 	dec b	
 	ld a,00ch
 	call OutChr
+l52dch:
 	ld b,05dh
 	ld d,h	
 	call Mul16x8sgn
 	push hl	
+l52e3h:
 	inc b	
 	call AbsHL
 	push hl	
+l52e8h:
 	dec b	
 	call RealSqrt__
 	push hl	
 	push de	
+l52eeh:
 	inc b	
 	res 7,h
 	push hl	
@@ -11713,7 +11712,7 @@ ISRI_s:
 	ld (ix+002h),000h
 	ld hl,fileName
 	ld bc,083f3h
-	ld de,ErrIdxHigh
+	ld de,0090bh
 PXSendName2:
 	outi
 	inc b	
