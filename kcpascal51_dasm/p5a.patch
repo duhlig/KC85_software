@@ -4,8 +4,8 @@
 > 	defb 'PASCAL5AKCC'
 > 	defs 5
 > 	defb 3
-> 	defw 0x0280
-> 	defw 0x5510
-> 	defw 0x5380
+> 	defw PasPrgMenuHdr
+> 	defw Rest_first
+> 	defw PasEx
 > 	defs 0x69
 > iobuf:	equ 0x0200
