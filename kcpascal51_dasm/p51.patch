@@ -1,5 +1,5 @@
---- p51.asm	2025-02-04 21:19:07.903310001 +0100
-+++ pascal51.asm	2025-02-05 17:08:19.120031241 +0100
+--- p51.asm	2025-02-13 21:23:01.822093584 +0100
++++ pascal51.asm	2025-02-13 21:30:35.797342351 +0100
 @@ -2,11 +2,12 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -18,29 +18,47 @@
  CAOS_ARG1:	equ 0xb782
  CAOS_ARG2:	equ 0xb784
  CAOS_ARG3:	equ 0xb786
-@@ -20,12 +21,12 @@
+@@ -19,63 +20,41 @@
+ CAOS_VERT:	equ 0xb7d5
  CAOS_FARB:	equ 0xb7d6
  SUBALT:	equ 0xb7fe
- PXSASCI:	equ 0xbc00
+-PXSASCI:	equ 0xbc00
 -PXSASCI+1:	equ 0xbc01
-+;PXSASCI+1:	equ 0xbc01
- PXASCI:	equ 0xbc08
- PXTAPE:	equ 0xbc0f
+-PXASCI:	equ 0xbc08
+-PXTAPE:	equ 0xbc0f
 -PXTAPE+1:	equ 0xbc10
-+;PXTAPE+1:	equ 0xbc10
- PXDISK:	equ 0xbc20
+-PXDISK:	equ 0xbc20
 -PXDISK+1:	equ 0xbc21
-+;PXDISK+1:	equ 0xbc21
- ISRO:	equ 0xbc2f
- PXNxtBlock:	equ 0xbc47
- PXSendCtl:	equ 0xbc5c
-@@ -36,46 +37,24 @@
- MBI:	equ 0xbcd0
- CSRI:	equ 0xbce9
- SUBNEU:	equ 0xbcee
+-ISRO:	equ 0xbc2f
+-PXNxtBlock:	equ 0xbc47
+-PXSendCtl:	equ 0xbc5c
+-MBO:	equ 0xbc80
+-CSRO:	equ 0xbc96
+-ISRI:	equ 0xbc9e
+-PXRecvBlock:	equ 0xbcb2
+-MBI:	equ 0xbcd0
+-CSRI:	equ 0xbce9
+-SUBNEU:	equ 0xbcee
 -SUBNEU+2:	equ 0xbcf0
 -SUBNEU+10:	equ 0xbcf8
 -SUBNEU+16:	equ 0xbcfe
++;;PXSASCI:	equ 0xbc00
++;PXSASCI+1:	equ 0xbc01
++;;PXASCI:	equ 0xbc08
++;;PXTAPE:	equ 0xbc0f
++;PXTAPE+1:	equ 0xbc10
++;;PXDISK:	equ 0xbc20
++;PXDISK+1:	equ 0xbc21
++;;ISRO:	equ 0xbc2f
++;;PXNxtBlock:	equ 0xbc47
++;;PXSendCtl:	equ 0xbc5c
++;;MBO:	equ 0xbc80
++;;CSRO:	equ 0xbc96
++;;ISRI:	equ 0xbc9e
++;;PXRecvBlock:	equ 0xbcb2
++;;MBI:	equ 0xbcd0
++;;CSRI:	equ 0xbce9
++;;SUBNEU:	equ 0xbcee
 +;SUBNEU+2:	equ 0xbcf0
 +;SUBNEU+10:	equ 0xbcf8
 +;SUBNEU+16:	equ 0xbcfe
@@ -95,7 +113,19 @@
  	ld (iobuf+16),a
  	ld a,(fileExt)
  	cp 043h
-@@ -248,7 +226,7 @@
+@@ -235,9 +213,9 @@
+ C_ISRO:
+ 	ld hl,fileName
+ 	ld bc,0000bh
+-	ld de,00080h
++	ld de,iobuf
+ 	ldir
+-	ld hl,00080h
++	ld hl,iobuf
+ 	in a,(088h)
+ 	set 5,a
+ 	set 2,a
+@@ -248,12 +226,12 @@
  	res 5,a
  	res 2,a
  	out (088h),a
@@ -104,6 +134,12 @@
  	ld e,008h
  	call CCaos
  SaveBlock:
+ 	ld hl,(SaveBlockAdr)
+-	ld de,00080h
++	ld de,iobuf
+ 	ld bc,00080h
+ 	ldir
+ 	ld (SaveBlockAdr),hl
 @@ -261,7 +239,6 @@
  	ld e,001h
  	call CCaos
@@ -112,15 +148,43 @@
  	set 5,a
  	set 2,a
  	out (088h),a
-@@ -328,7 +305,7 @@
+@@ -297,7 +274,7 @@
+ 	ld ix,(caos_ix)
+ C_ISRI:
+ 	call TestBreak
+-	ld hl,00080h
++	ld hl,iobuf
+ 	in a,(088h)
+ 	set 5,a
+ 	set 2,a
+@@ -327,8 +304,8 @@
+ 	jp nz,RetryISRI
  	inc a	
  	ld (nextBlkNum),a
- 	ld de,00080h
+-	ld de,00080h
 -	ld bc,l0b00h
++	ld de,iobuf
 +	ld bc,00b00h
  	ld hl,fileName
  CmpFNamChr:
  	ld a,(de)	
+@@ -399,14 +376,14 @@
+ 	jr c,C_CSRI
+ 	ld (SaveBlockAdr),hl
+ 	ld bc,00080h
+-	ld hl,00080h
++	ld hl,iobuf
+ 	ld de,(srcAddr_LoadSave)
+ 	ldir
+ 	ld (srcAddr_LoadSave),de
+ 	jr C_MBI
+ C_CSRI:
+ 	ld bc,(SaveBlockAdr)
+-	ld hl,00080h
++	ld hl,iobuf
+ 	ld de,(srcAddr_LoadSave)
+ 	ldir
+ 	ld e,00bh
 @@ -421,7 +398,6 @@
  	jp CCaos
  CAOS_UOT1:
@@ -4371,7 +4435,29 @@
  	call sub_3f29h
  sub_510eh:
  	call ChkComma_GetLex
-@@ -14518,7 +11516,6 @@
+@@ -14498,19 +11496,8 @@
+ 	push hl	
+ 	push de	
+ StartPASSrc:
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
+-	nop	
++	defs 13
++
+ PasEx:
+ 	ld hl,00000h
+ 	ld b,080h
+@@ -14518,7 +11505,6 @@
  	ld a,(hl)	
  	cp 07fh
  	inc hl	
@@ -4379,7 +4465,7 @@
  	jr z,PXKillProlog
  	djnz PXSrchProlog
  	jr PXCpChrMap
-@@ -14527,7 +11524,7 @@
+@@ -14527,7 +11513,7 @@
  PXCpChrMap:
  	ld hl,(CCTL0)
  	ld de,0ba00h
@@ -4388,7 +4474,152 @@
  	ldir
  	ld hl,PXUSASC
  	ld de,0bbd8h
-@@ -14715,7 +11712,7 @@
+@@ -14535,7 +11521,7 @@
+ 	ldir
+ 	ld hl,PXBASCI
+ 	ld de,PXSASCI
+-	ld bc,0000fh
++	ld bc,PXTAPE-PXSASCI
+ 	ldir
+ 	ld a,07fh
+ 	ld (PXSASCI),a
+@@ -14544,7 +11530,7 @@
+ 	in a,(c)
+ 	cp 0a7h
+ 	jp nz,PXASCI
+-	ld bc,000dfh
++	ld bc,SUBNEU-PXTAPE
+ 	ldir
+ 	ld a,07fh
+ 	ld (PXTAPE),a
+@@ -14572,66 +11558,36 @@
+ 	defw ISRI
+ 	defw CSRI
+ PXUSASC:
+-	defb 07ch
+-	defb 060h
+-	defb 060h
+-	defb 060h
+-	defb 060h
+-	defb 060h
+-	defb 07ch
+-	defb 000h
+-	defb 0c0h
+-	defb 060h
+-	defb 030h
+-	defb 018h
+-	defb 00ch
+-	defb 006h
+-	defb 002h
+-	defb 000h
+-	defb 07ch
+-	defb 00ch
+-	defb 00ch
+-	defb 00ch
+-	defb 00ch
+-	defb 00ch
+-	defb 07ch
+-	defb 000h
++	defb 07ch,060h,060h,060h,060h,060h,07ch,000h
++	defb 0c0h,060h,030h,018h,00ch,006h,002h,000h
++	defb 07ch,00ch,00ch,00ch,00ch,00ch,07ch,000h
+ PXBASCI:
++
++	org  0bc00h
++
++PXSASCI:
+ 	defw 00000h
+-	defb 041h
+-	defb 053h
+-	defb 043h
+-	defb 049h
+-	defb 049h
++	defb 'ASCII'
+ 	defb 001h
++PXASCI:
+ 	ld hl,0ba00h
+ 	ld (CCTL0),hl
+ 	ret	
++PXTAPE:
+ 	defw 00000h
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 054h
+-	defb 041h
+-	defb 050h
+-	defb 045h
++	defb 'PASTAPE'
+ 	defb 001h
+ 	ld hl,(SUBALT)
+ PXSetSUTAB:
+ 	ld (SUTAB),hl
+ 	ret	
++PXDISK:
+ 	defw 00000h
+-	defb 050h
+-	defb 041h
+-	defb 053h
+-	defb 044h
+-	defb 049h
+-	defb 053h
+-	defb 04bh
++	defb 'PASDISK'
+ 	defb 001h
+ 	ld hl,SUBNEU
+ 	jr PXSetSUTAB
+-ISRO_s:
++ISRO:
+ 	ld (ix+002h),000h
+ 	ld l,(ix+005h)
+ 	ld h,(ix+006h)
+@@ -14644,7 +11600,7 @@
+ 	dec e	
+ 	jr nz,PXSendName
+ 	ld d,00bh
+-PXNxtBlock_s:
++PXNxtBlock:
+ 	inc (ix+002h)
+ 	ld h,(ix+006h)
+ 	ld l,(ix+005h)
+@@ -14656,7 +11612,7 @@
+ 	inc b	
+ 	dec e	
+ 	jr nz,PXSendBlock
+-PXSendCtl_s:
++PXSendCtl:
+ 	ld bc,080f3h
+ 	out (c),d
+ PXWaitForReady:
+@@ -14679,7 +11635,7 @@
+ 	defb 019h
+ 	scf	
+ 	ret	
+-MBO_s:
++MBO:
+ 	ld d,003h
+ 	call PXNxtBlock
+ 	ret c	
+@@ -14688,29 +11644,26 @@
+ 	ret nc	
+ 	call PV1
+ 	defb 023h
+-	defb 008h
+-	defb 008h
+-	defb 008h
+-	defb 000h
++	defb 008h,008h,008h,000h
+ 	and a	
+ 	ret	
+-CSRO_s:
++CSRO:
+ 	call MBO
+ 	ret c	
+ 	ld d,043h
+-	jr PXSendCtl_s
+-ISRI_s:
++	jr PXSendCtl
++ISRI:
  	ld (ix+002h),000h
  	ld hl,fileName
  	ld bc,083f3h
@@ -4397,7 +4628,42 @@
  PXSendName2:
  	outi
  	inc b	
-@@ -14767,116 +11764,17 @@
+ 	inc b	
+ 	dec e	
+ 	jr nz,PXSendName2
+-PXRecvBlock_s:
++PXRecvBlock:
+ 	call PXSendCtl
+ 	ret c	
+ 	push hl	
+@@ -14729,7 +11682,7 @@
+ 	pop af	
+ 	pop hl	
+ 	ret	
+-MBI_s:
++MBI:
+ 	push de	
+ 	ld d,001h
+ 	call PXRecvBlock
+@@ -14740,131 +11693,28 @@
+ 	ret nc	
+ 	call PV1
+ 	defb 023h
+-	defb 008h
+-	defb 008h
+-	defb 008h
+-	defb 008h
+-	defb 000h
++	defb 008h,008h,008h,008h,000h
+ 	and a	
+ 	ret	
+-CSRI_s:
++CSRI:
+ 	call PV1
+ 	defb 02ch
+ 	ret	
+-SUBNEU_s:
++SUBNEU:
  
  ; BLOCK 'Rest' (start 0x5490 end 0x5500)
  Rest_first:

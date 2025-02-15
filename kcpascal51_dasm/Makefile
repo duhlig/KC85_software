@@ -26,7 +26,8 @@ test: p51.bin
 	diff <(xxd -p -c 1 pascal51_kcc.bin) <(xxd -p -c 1 p51.bin)
 
 p51.bin: pascal51.asm
-	pasmo pascal51.asm p51.bin
+	pasmo pascal51.asm p510.bin
+	./bincut.pl -i p510.bin -o p51.bin -b c,c,c,7c,0 -a 0,0,41,53,43,49,49
 
 p5a.kcc: p5a.asm
 	pasmo p5a.asm p5a.kcc
@@ -36,7 +37,7 @@ p5a.asm: pascal51.asm
 	patch p5a.asm p5a.patch
 
 clean:
-	-rm -f *~ p51.symout p51t.asm p51.bin pascal51.bak
+	-rm -f *~ p51.symout p51t.asm p510.bin p51.bin pascal51.bak
 
 distclean: clean
 	-rm -f pascal51_kcc.bin p51.asm pascal51.asm.orig pascal51.asm.rej

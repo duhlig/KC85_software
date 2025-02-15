@@ -1,11 +1,11 @@
-4c4,11
-< 	org	00200h
+5c5,12
+< iobuf:	equ 0x0080
 ---
-> 	org	00280h
 > 	defb 'PASCAL5AKCC'
 > 	defs 5
 > 	defb 3
-> 	defw 0x0300
-> 	defw 0x5590
-> 	defw 0x5400
+> 	defw 0x0280
+> 	defw 0x5510
+> 	defw 0x5380
 > 	defs 0x69
+> iobuf:	equ 0x0200

@@ -655,13 +655,13 @@ CSq: unlabeled first 0x52a8 unlabeled last 0x52a8 type bytedata
 xxTab4__: unlabeled start 0x3744 unlabeled last 0x3753 type pointers
 xxTab5__: unlabeled start 0x4c9c unlabeled last 0x4ca6 type bytedata
 
-PXSTAB: first 0x5382 unlabeled last 0x5389 type pointers
+PXSTAB: unlabeled first 0x5382 unlabeled last 0x5389 type pointers
 PXUSASC: unlabeled first 0x538a unlabeled last 0x53a1 type bytedata
-PXSASCI_PR: first 0x53a2 unlabeled last 0x53a3 type worddata
+PXSASCI_PR: unlabeled first 0x53a2 unlabeled last 0x53a3 type worddata
 PXSASCI_NM: unlabeled first 0x53a4 unlabeled last 0x53a9 type bytedata
-PXTAPE_PR: first 0x53b1 unlabeled last 0x53b2 type worddata
+PXTAPE_PR: unlabeled first 0x53b1 unlabeled last 0x53b2 type worddata
 PXTAPE_NM: unlabeled first 0x53b3 unlabeled last 0x53ba type bytedata
-PXDISK_PR: first 0x53c2 unlabeled last 0x53c3 type worddata
+PXDISK_PR: unlabeled first 0x53c2 unlabeled last 0x53c3 type worddata
 PXDISK_NM: unlabeled first 0x53c4 unlabeled last 0x53cb type bytedata
 PV1PrcNum: unlabeled first 0x5409 unlabeled last 0x5409 type bytedata
 PV1PrcNum: unlabeled first 0x541b unlabeled last 0x541b type bytedata
