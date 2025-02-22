@@ -34,18 +34,18 @@ Fepen.pas enthält absichtlich einen Syntaxfehler auf Zeile 1000. Dort fehlt das
 
 - Variante 1: Korrektur vor dem Übersetzen
 
-        E1000 \[Enter\]
-	X
-	; \[Enter\]
-	\[Enter\]
-	C
+        E1000 [Enter]
+        X
+        ; [Enter]
+        [Enter]
+        C
 
 - Variante 2: Fehler durch den Compiler finden lassen, korrigieren und
   neu übersetzen
 
         C
-	(Anzeige der Fehlermeldung in Zeile 1010)
-	P
-	; \[Enter\]
-	\[Enter\]
-	C
+        (Anzeige der Fehlermeldung in Zeile 1010)
+        P
+        ; [Enter]
+        [Enter]
+        C
