@@ -30,11 +30,22 @@ p51.bin: pascal51.asm
 	./bincut.pl -i p510.bin -o p51.bin -b c,c,c,7c,0 -a 0,0,41,53,43,49,49
 
 p5a.kcc: p5a.asm
-	pasmo p5a.asm p5a.kcc
+	pasmo p5a.asm p5a0.bin
+	./bincut.pl -i p5a0.bin -o p5a.kcc -b c,c,c,7c,0 -a 0,0,41,53,43,49,49
 
 p5a.asm: pascal51.asm
 	cp pascal51.asm p5a.asm
 	patch p5a.asm p5a.patch
+
+pas51x.kcc: pas51x.asm
+	pasmo -d pas51x.asm pas51x0.bin > pas51x_pasmo.asm
+	./bincut.pl -i pas51x0.bin -o pas51x.kcc -b c,c,c,7c,0 -a 0,0,41,53,43,49,49
+
+pas51x.asm: pascal51.asm
+	cp pas51x.asm pas51x.asm.$$(date -Iseconds).bak
+	cp pascal51.asm pas51x.asm
+	patch pas51x.asm p5a.patch
+	patch pas51x.asm pas51x.patch
 
 clean:
 	-rm -f *~ p51.symout p51t.asm p510.bin p51.bin pascal51.bak

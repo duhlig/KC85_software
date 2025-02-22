@@ -1,0 +1,279 @@
+--- p5a.asm	2025-02-16 20:15:51.325482923 +0100
++++ pas51x.asm	2025-02-22 21:55:15.472655276 +0100
+@@ -2,7 +2,7 @@
+ ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
+ 
+ 	org	00200h
+-	defb 'PASCAL5AKCC'
++	defb 'PAS51X  KCC'
+ 	defs 5
+ 	defb 3
+ 	defw PasPrgMenuHdr
+@@ -10,11 +10,6 @@
+ 	defw PasEx
+ 	defs 0x69
+ iobuf:	equ 0x0200
+-;iobuf+11:	equ 0x008b
+-;iobuf+16:	equ 0x0090
+-;iobuf+17:	equ 0x0091
+-;iobuf+19:	equ 0x0093
+-;iobuf+20:	equ 0x0094
+ CAOS_ARG1:	equ 0xb782
+ CAOS_ARG2:	equ 0xb784
+ CAOS_ARG3:	equ 0xb786
+@@ -27,26 +22,6 @@
+ CAOS_VERT:	equ 0xb7d5
+ CAOS_FARB:	equ 0xb7d6
+ SUBALT:	equ 0xb7fe
+-;;PXSASCI:	equ 0xbc00
+-;PXSASCI+1:	equ 0xbc01
+-;;PXASCI:	equ 0xbc08
+-;;PXTAPE:	equ 0xbc0f
+-;PXTAPE+1:	equ 0xbc10
+-;;PXDISK:	equ 0xbc20
+-;PXDISK+1:	equ 0xbc21
+-;;ISRO:	equ 0xbc2f
+-;;PXNxtBlock:	equ 0xbc47
+-;;PXSendCtl:	equ 0xbc5c
+-;;MBO:	equ 0xbc80
+-;;CSRO:	equ 0xbc96
+-;;ISRI:	equ 0xbc9e
+-;;PXRecvBlock:	equ 0xbcb2
+-;;MBI:	equ 0xbcd0
+-;;CSRI:	equ 0xbce9
+-;;SUBNEU:	equ 0xbcee
+-;SUBNEU+2:	equ 0xbcf0
+-;SUBNEU+10:	equ 0xbcf8
+-;SUBNEU+16:	equ 0xbcfe
+ PV1:	equ 0xf003
+ 
+ PasPrgMenuHdr:
+@@ -176,9 +151,63 @@
+ 	call CCaos
+ 	pop de	
+ 	pop af	
+-	ret	
++	ret
++GetCAOSVer:
++	ld a,(0e011h) ; ab KC 85/4 steht hier Menüwort „BASIC“ 
++	cp 7fh	      ; KC 85/4 ?				 
++	ld a,0	      ; KC 85/2 und KC 85/3 = Version 0.0	 
++	ret nz	      					 
++	ld a,(0edffh) ; CAOS-Versionsnummer                    
++	ret
++SetErrDCV:
++	call GetCAOSVer
++        ld hl,IOErrD1
++	cp 046h
++	jr c,SetErrDCV1
++	inc hl
++	jr z,SetErrDCV1
++	inc hl
++SetErrDCV1:
++	ld (SetErrD1+1),hl
++SetErrDev:
++	push hl
++	push de
++	push bc
++	ld a,(ix+8)  ; ix auf CAOS-Wert
++	and 01ch
++	jr nz,SetErrD1
++SetErrD0:
++	ld hl,IOErrD0
++	jr SetErrDx
++SetErrD1:
++	ld hl,IOErrD1 		; Adr. wird von SetErrDCV überschrieben
++SetErrDx:
++	ld de,ChkIOErr3
++	ldi
++	ldi
++	ldi
++	pop bc
++	pop de
++	pop hl
++;	ret
++IOErrD0:
++	ret
++IOErrD1:
++	ret
++	ret
++	ret nc
++	ret nc
++	ret nc
++ChkIOErr3:
++	ret nc
++ChkIOErr2:
++	ret nc
++ChkIOErr:
++	ret nc
++	jp Reset
+ Save:
+ 	ld ix,(caos_ix)
++	call SetErrDev
+ 	ld (SaveBlockAdr),hl
+ 	ld (iobuf+17),hl
+ 	ld hl,iobuf+11
+@@ -195,10 +224,10 @@
+ 	ld a,(fileExt)
+ 	cp 043h
+ 	jr nz,C_ISRO
+-	ld a,d	
+-	ld (iobuf+19),a
+-	ld hl,l04d5h
+-	ld (iobuf+20),hl
++;	ld a,d	
++;	ld (iobuf+19),a
++;	ld hl,l04d5h
++;	ld (iobuf+20),hl
+ 	ld hl,07f7fh
+ 	ld (PasPrgMenuHdr),hl
+ 	ld hl,00000h
+@@ -234,8 +263,10 @@
+ 	res 2,a
+ 	out (088h),a
+ 	ld bc,01f40h
++	ld hl,fileName
+ 	ld e,008h
+ 	call CCaos
++	call ChkIOErr2
+ SaveBlock:
+ 	ld hl,(SaveBlockAdr)
+ 	ld de,iobuf
+@@ -245,6 +276,7 @@
+ 	ld bc,000a0h
+ 	ld e,001h
+ 	call CCaos
++	call ChkIOErr2
+ 	in a,(088h)
+ 	set 5,a
+ 	set 2,a
+@@ -265,6 +297,7 @@
+ C_CSRO:
+ 	ld e,009h
+ 	call CCaos
++	call ChkIOErr2
+ 	ld a,012h
+ 	call OutChr
+ 	jp PrNL
+@@ -277,6 +310,8 @@
+ 	jp Reset
+ Load:
+ 	ld (srcAddr_LoadSave),hl
++	ld ix,(caos_ix)
++	call SetErrDev
+ RetryISRI:
+ 	ld ix,(caos_ix)
+ C_ISRI:
+@@ -293,9 +328,11 @@
+ 	res 5,a
+ 	res 2,a
+ 	out (088h),a
++	ld hl,fileName
+ 	ld e,00ah
+ 	call CCaos
+-	jr c,RetryISRI
++	call ChkIOErr
++	jr c,RetryISRI 		; nur noch bei DEV 0
+ 	in a,(088h)
+ 	set 5,a
+ 	set 2,a
+@@ -308,7 +345,7 @@
+ 	ld a,e	
+ ChkForBlock1:
+ 	cp 001h
+-	jp nz,RetryISRI
++	jp nz,RetryISRI		; erstmal so lassen
+ 	inc a	
+ 	ld (nextBlkNum),a
+ 	ld de,iobuf
+@@ -336,7 +373,7 @@
+ 	call PrNL
+ 	ld a,c	
+ 	or a	
+-	jp nz,RetryISRI
++	jp nz,RetryISRI		; erstmal so lassen
+ 	ld de,(iobuf+17)
+ 	ld hl,(iobuf+19)
+ 	or a	
+@@ -349,7 +386,8 @@
+ 	call TestBreak
+ 	ld e,005h
+ 	call CCaos
+-	jr c,C_MBI
++	call ChkIOErr
++	jr c,C_MBI 		; nur noch bei DEV 0
+ 	in a,(088h)
+ 	set 5,a
+ 	set 2,a
+@@ -395,6 +433,7 @@
+ 	ldir
+ 	ld e,00bh
+ 	call CCaos
++	call ChkIOErr3
+ 	ld a,012h
+ 	call OutChr
+ 	ld hl,(l06b6h)
+@@ -5371,9 +5410,9 @@
+ 	defb 00dh
+ banner:
+  	defb 00ch,012h
+- 	defb '**** KC-PASCAL V5.1 ****',00dh,00dh
+- 	defb 'BEARB. VON  +++ AM90 +++',00dh,00dh
+- 	defb '   (VERSION KC85/4)',00dh,000h
++ 	defb '**** KC-PASCAL V5.1b ****',00dh,00dh
++ 	defb '  BEARB. VON AM90, DU25',00dh,00dh
++ 	defb '   (VERSION KC85/4/5)',00dh,000h
+ CoVarInitData:
+ 	defb 020h
+ 	defw RL_PACKED
+@@ -11536,7 +11575,8 @@
+ 	ld bc,0fc80h
+ 	in a,(c)
+ 	cp 0a7h
+-	jp nz,PXASCI
++	ld c,0
++	jr nz,PXInitDev
+ 	ld bc,SUBNEU-PXTAPE
+ 	ldir
+ 	ld a,07fh
+@@ -11548,7 +11588,7 @@
+ 	ld (SUBALT),hl
+ 	ld de,SUBNEU
+ 	ld (SUTAB),de
+-	ld bc,00092h
++	ld bc,00092h		; abhängig von der CAOS-Version
+ 	ldir
+ 	ld hl,MBO
+ 	ld (SUBNEU+2),hl
+@@ -11558,6 +11598,9 @@
+ 	ld de,SUBNEU+16
+ 	ld c,008h
+ 	ldir
++	ld c,4
++PXInitDev:
++	call PXSetDev
+ 	jp PXASCI
+ PXSTAB:
+ 	defw ISRO
+@@ -11585,14 +11628,21 @@
+ 	defb 'PASTAPE'
+ 	defb 001h
+ 	ld hl,(SUBALT)
++	ld c,0
+ PXSetSUTAB:
+ 	ld (SUTAB),hl
++PXSetDev:
++	ld a,(ix+8)
++	and 0e3h
++	or c
++	ld (ix+8),a
+ 	ret	
+ PXDISK:
+ 	defw 00000h
+ 	defb 'PASDISK'
+ 	defb 001h
+ 	ld hl,SUBNEU
++	ld c,4
+ 	jr PXSetSUTAB
+ ISRO:
+ 	ld (ix+002h),000h
