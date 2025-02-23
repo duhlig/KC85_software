@@ -11,6 +11,8 @@ Notizen zum Programm. Zum Disassemblieren wird sie nicht gebraucht.
 
 # Anpassungen
 
+Die Anpassungen stecken in pas51x.asm. Um nicht selbst assemblieren zu müssen, kann pas51x.kcc verwendet werden.
+
 ## Version 5.1b
 
 ### Erweiterungen
