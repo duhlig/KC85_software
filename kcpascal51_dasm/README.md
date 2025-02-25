@@ -28,6 +28,21 @@ Die Anpassungen stecken in pas51x.asm. Um nicht selbst assemblieren zu müssen, 
 
 - Die Endeadresse im KCC-Header der generierten COM-Datei ist jetzt korrekt.
 
+## Version 5.1c
+
+### Erweiterungen
+
+- Das Kommando T (Translate) erkennt jetzt den 4 Parameter. Beginnt
+  der 4. Parameter mit "1", dann wird die KCC-Datei selbststartend. In
+  allen anderen Fällen bleibt es dabei, dass man das generierte
+  Programm nach dem Laden manuell starten muss.
+
+### Korrekturen
+
+- Der Vorblock wird mit 00H aufgefüllt.
+- Nach dem Laden des Quellcodes wird ein Zeilenumbruch ausgegeben.
+
+
 ## Testmöglichkeit
 
 Zum Test der angepassten KC-Pascal-Version sollte natürlich jeder sein eigenes Pascal-Programm schreiben und prüfen, dass ein korrektes KCC-Programm generiert wird. Hilfsweise kann fepen.pas benutzt werden.
