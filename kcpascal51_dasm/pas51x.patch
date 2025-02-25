@@ -1,5 +1,5 @@
---- p5a.asm	2025-02-16 20:15:51.325482923 +0100
-+++ pas51x.asm	2025-02-22 21:55:15.472655276 +0100
+--- p5a.asm	2025-02-25 07:20:06.998030291 +0100
++++ pas51x.asm	2025-02-25 21:55:19.165295369 +0100
 @@ -2,7 +2,7 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -113,7 +113,18 @@
  	ld (SaveBlockAdr),hl
  	ld (iobuf+17),hl
  	ld hl,iobuf+11
-@@ -195,10 +224,10 @@
+@@ -190,15 +219,23 @@
+ 	inc de	
+ 	ld (bin_end),de
+ 	ld (iobuf+19),de
++
++	ld a,(param4)		; 4. Param. bei Cmd T = 1 --> Autostart
++	cp '1'
+ 	ld a,002h
++	jr nz,NoAutoStart
++	inc a
++NoAutoStart:
+ 	ld (iobuf+16),a
  	ld a,(fileExt)
  	cp 043h
  	jr nz,C_ISRO
@@ -125,10 +136,36 @@
 +;	ld (iobuf+19),a
 +;	ld hl,l04d5h
 +;	ld (iobuf+20),hl
++	ld hl,PasPrgStartA
++	ld (iobuf+21),hl
  	ld hl,07f7fh
  	ld (PasPrgMenuHdr),hl
  	ld hl,00000h
-@@ -234,8 +263,10 @@
+@@ -222,6 +259,23 @@
+ 	ld bc,0000bh
+ 	ld de,iobuf
+ 	ldir
++	ld hl,version 		; Pascal-Version in den Vorblock
++	ld de,iobuf+23
++	ld bc,128-23
++	ld a,0dh
++ver_blk0:
++	cp (hl)
++	jr z,bkl0_rest
++	ldi
++	jr ver_blk0
++bkl0_rest:			; Rest mit 0 füllen
++	ex de,hl
++	ld (hl),0h
++	ld d,h
++	ld e,l
++	inc de
++	dec bc
++	ldir
+ 	ld hl,iobuf
+ 	in a,(088h)
+ 	set 5,a
+@@ -234,8 +288,10 @@
  	res 2,a
  	out (088h),a
  	ld bc,01f40h
@@ -139,7 +176,7 @@
  SaveBlock:
  	ld hl,(SaveBlockAdr)
  	ld de,iobuf
-@@ -245,6 +276,7 @@
+@@ -245,6 +301,7 @@
  	ld bc,000a0h
  	ld e,001h
  	call CCaos
@@ -147,7 +184,7 @@
  	in a,(088h)
  	set 5,a
  	set 2,a
-@@ -265,6 +297,7 @@
+@@ -265,6 +322,7 @@
  C_CSRO:
  	ld e,009h
  	call CCaos
@@ -155,7 +192,7 @@
  	ld a,012h
  	call OutChr
  	jp PrNL
-@@ -277,6 +310,8 @@
+@@ -277,6 +335,8 @@
  	jp Reset
  Load:
  	ld (srcAddr_LoadSave),hl
@@ -164,7 +201,7 @@
  RetryISRI:
  	ld ix,(caos_ix)
  C_ISRI:
-@@ -293,9 +328,11 @@
+@@ -293,9 +353,11 @@
  	res 5,a
  	res 2,a
  	out (088h),a
@@ -177,7 +214,7 @@
  	in a,(088h)
  	set 5,a
  	set 2,a
-@@ -308,7 +345,7 @@
+@@ -308,7 +370,7 @@
  	ld a,e	
  ChkForBlock1:
  	cp 001h
@@ -186,7 +223,7 @@
  	inc a	
  	ld (nextBlkNum),a
  	ld de,iobuf
-@@ -336,7 +373,7 @@
+@@ -336,7 +398,7 @@
  	call PrNL
  	ld a,c	
  	or a	
@@ -195,7 +232,7 @@
  	ld de,(iobuf+17)
  	ld hl,(iobuf+19)
  	or a	
-@@ -349,7 +386,8 @@
+@@ -349,7 +411,8 @@
  	call TestBreak
  	ld e,005h
  	call CCaos
@@ -205,28 +242,78 @@
  	in a,(088h)
  	set 5,a
  	set 2,a
-@@ -395,6 +433,7 @@
+@@ -395,8 +458,10 @@
  	ldir
  	ld e,00bh
  	call CCaos
 +	call ChkIOErr3
  	ld a,012h
  	call OutChr
++	call PrNL
  	ld hl,(l06b6h)
-@@ -5371,9 +5410,9 @@
+ l04d5h:
+ 	ret	
+@@ -422,6 +487,7 @@
+ 	set 2,a
+ 	out (088h),a
+ 	ld (CAOS_CURSO),hl
++IRMoff_ret:
+ 	in a,(088h)
+ 	res 5,a
+ 	res 2,a
+@@ -675,6 +741,8 @@
+ l06c3h:
+ 	call SaveCAOS_SP
+ 	jr Reset
++PasPrgStartA:
++	call IRMoff_ret
+ PasPrgStart:
+ 	jp 07cd5h
+ JEndPascal:
+@@ -697,8 +765,8 @@
+ 	jp SrcToLineBuf
+ JLdHLSrcEnd:
+ 	jp LdHLSrcEnd
+-sub_06e9h:
+-	jp l23e1h
++JGetPar3:
++	jp GetPar3
+ 	jp ExpandLine
+ 	jp ExpandLineSrc
+ JCompile:
+@@ -3949,7 +4017,7 @@
+ LdHLSrcEnd:
+ 	ld hl,(endPASSrc_adr)
+ 	ret	
+-l23e1h:
++GetPar3:
+ 	ld hl,param3
+ 	ret	
+ l23e5h:
+@@ -5371,9 +5439,10 @@
  	defb 00dh
  banner:
   	defb 00ch,012h
 - 	defb '**** KC-PASCAL V5.1 ****',00dh,00dh
 - 	defb 'BEARB. VON  +++ AM90 +++',00dh,00dh
 - 	defb '   (VERSION KC85/4)',00dh,000h
-+ 	defb '**** KC-PASCAL V5.1b ****',00dh,00dh
++version:
++ 	defb '**** KC-PASCAL V5.1c ****',00dh,00dh
 + 	defb '  BEARB. VON AM90, DU25',00dh,00dh
 + 	defb '   (VERSION KC85/4/5)',00dh,000h
  CoVarInitData:
  	defb 020h
  	defw RL_PACKED
-@@ -11536,7 +11575,8 @@
+@@ -5673,7 +5742,7 @@
+ 	exx	
+ 	push hl	
+ 	ex de,hl	
+-	call sub_06e9h
++	call JGetPar3
+ 	ld bc,00008h
+ 	ldir
+ 	ex de,hl	
+@@ -11522,7 +11591,8 @@
  	ld bc,0fc80h
  	in a,(c)
  	cp 0a7h
@@ -236,7 +323,7 @@
  	ld bc,SUBNEU-PXTAPE
  	ldir
  	ld a,07fh
-@@ -11548,7 +11588,7 @@
+@@ -11534,7 +11604,7 @@
  	ld (SUBALT),hl
  	ld de,SUBNEU
  	ld (SUTAB),de
@@ -245,7 +332,7 @@
  	ldir
  	ld hl,MBO
  	ld (SUBNEU+2),hl
-@@ -11558,6 +11598,9 @@
+@@ -11544,6 +11614,9 @@
  	ld de,SUBNEU+16
  	ld c,008h
  	ldir
@@ -255,7 +342,7 @@
  	jp PXASCI
  PXSTAB:
  	defw ISRO
-@@ -11585,14 +11628,21 @@
+@@ -11571,14 +11644,21 @@
  	defb 'PASTAPE'
  	defb 001h
  	ld hl,(SUBALT)

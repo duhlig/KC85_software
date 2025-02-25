@@ -47,6 +47,9 @@ pas51x.asm: pascal51.asm
 	patch pas51x.asm p5a.patch
 	patch pas51x.asm pas51x.patch
 
+pas51x.patch:
+	diff -du p5a.asm pas51x.asm > pas51x.patch 
+
 clean:
 	-rm -f *~ p51.symout p51t.asm p510.bin p51.bin pascal51.bak
 

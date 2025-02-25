@@ -219,7 +219,13 @@ KillMem:
 	inc de	
 	ld (bin_end),de
 	ld (iobuf+19),de
+
+	ld a,(param4)		; 4. Param. bei Cmd T = 1 --> Autostart
+	cp '1'
 	ld a,002h
+	jr nz,NoAutoStart
+	inc a
+NoAutoStart:
 	ld (iobuf+16),a
 	ld a,(fileExt)
 	cp 043h
@@ -228,6 +234,8 @@ KillMem:
 ;	ld (iobuf+19),a
 ;	ld hl,l04d5h
 ;	ld (iobuf+20),hl
+	ld hl,PasPrgStartA
+	ld (iobuf+21),hl
 	ld hl,07f7fh
 	ld (PasPrgMenuHdr),hl
 	ld hl,00000h
@@ -250,6 +258,23 @@ C_ISRO:
 	ld hl,fileName
 	ld bc,0000bh
 	ld de,iobuf
+	ldir
+	ld hl,version 		; Pascal-Version in den Vorblock
+	ld de,iobuf+23
+	ld bc,128-23
+	ld a,0dh
+ver_blk0:
+	cp (hl)
+	jr z,bkl0_rest
+	ldi
+	jr ver_blk0
+bkl0_rest:			; Rest mit 0 füllen
+	ex de,hl
+	ld (hl),0h
+	ld d,h
+	ld e,l
+	inc de
+	dec bc
 	ldir
 	ld hl,iobuf
 	in a,(088h)
@@ -436,6 +461,7 @@ C_CSRI:
 	call ChkIOErr3
 	ld a,012h
 	call OutChr
+	call PrNL
 	ld hl,(l06b6h)
 l04d5h:
 	ret	
@@ -461,6 +487,7 @@ sub_04e6h:
 	set 2,a
 	out (088h),a
 	ld (CAOS_CURSO),hl
+IRMoff_ret:
 	in a,(088h)
 	res 5,a
 	res 2,a
@@ -714,6 +741,8 @@ Init1:
 l06c3h:
 	call SaveCAOS_SP
 	jr Reset
+PasPrgStartA:
+	call IRMoff_ret
 PasPrgStart:
 	jp 07cd5h
 JEndPascal:
@@ -736,8 +765,8 @@ JSrcToLineBuf:
 	jp SrcToLineBuf
 JLdHLSrcEnd:
 	jp LdHLSrcEnd
-sub_06e9h:
-	jp l23e1h
+JGetPar3:
+	jp GetPar3
 	jp ExpandLine
 	jp ExpandLineSrc
 JCompile:
@@ -3988,7 +4017,7 @@ RunCmd:
 LdHLSrcEnd:
 	ld hl,(endPASSrc_adr)
 	ret	
-l23e1h:
+GetPar3:
 	ld hl,param3
 	ret	
 l23e5h:
@@ -5410,7 +5439,8 @@ banner_nl:
 	defb 00dh
 banner:
  	defb 00ch,012h
- 	defb '**** KC-PASCAL V5.1b ****',00dh,00dh
+version:
+ 	defb '**** KC-PASCAL V5.1c ****',00dh,00dh
  	defb '  BEARB. VON AM90, DU25',00dh,00dh
  	defb '   (VERSION KC85/4/5)',00dh,000h
 CoVarInitData:
@@ -5712,7 +5742,7 @@ l2ea7h:
 	exx	
 	push hl	
 	ex de,hl	
-	call sub_06e9h
+	call JGetPar3
 	ld bc,00008h
 	ldir
 	ex de,hl	
@@ -5758,23 +5788,9 @@ RunOrReset:
 	call PrNL
 	jp PasPrgStart
 TOk:
-
-; BLOCK 'TOk' (start 0x2f24 end 0x2f27)
-TOk_start:
-	defb 04fh
-	defb 06bh
-	defb 03fh
-	nop	
+	defb 'Ok?',000h
 TLauf:
-
-; BLOCK 'TLauf' (start 0x2f28 end 0x2f2d)
-TLauf_start:
-	defb 04ch
-	defb 061h
-	defb 075h
-	defb 066h
-	defb 03fh
-	nop	
+	defb 'Lauf?',000h
 CSq_JReset:
 	defb 003h
 	jp Reset

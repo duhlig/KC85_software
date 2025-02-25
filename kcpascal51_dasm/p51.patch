@@ -1,5 +1,5 @@
---- p51.asm	2025-02-13 21:23:01.822093584 +0100
-+++ pascal51.asm	2025-02-13 21:30:35.797342351 +0100
+--- p51.asm	2025-02-24 22:02:18.349587303 +0100
++++ pascal51.asm	2025-02-24 22:03:06.367191035 +0100
 @@ -2,11 +2,12 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -3881,7 +3881,27 @@
  CoVarInitData:
  	defb 020h
  	defw RL_PACKED
-@@ -8882,345 +6058,171 @@
+@@ -8536,17 +5712,9 @@
+ 	call PrNL
+ 	jp PasPrgStart
+ TOk:
+-	defb 04fh
+-	defb 06bh
+-	defb 03fh
+-	defb 000h
++	defb 'Ok?',000h
+ TLauf:
+-	defb 04ch
+-	defb 061h
+-	defb 075h
+-	defb 066h
+-	defb 03fh
+-	defb 000h
++	defb 'Lauf?',000h
+ CSq_JReset:
+ 	defb 003h
+ 	jp Reset
+@@ -8876,345 +6044,171 @@
  
  ; BLOCK 'compOptTab' (start 0x3165 end 0x3171)
  compOptTab_start:
@@ -4284,7 +4304,7 @@
  ChkTypeBool__:
  	ld de,00004h
  	jr ChkType__
-@@ -9843,7 +6845,6 @@
+@@ -9837,7 +6831,6 @@
  l35f0h:
  	defb 008h
  	dec b	
@@ -4292,7 +4312,7 @@
  	djnz l35ech
  	inc a	
  l35f5h:
-@@ -10103,7 +7104,7 @@
+@@ -10097,7 +7090,7 @@
  	add a,a	
  	ld l,a	
  	ld h,000h
@@ -4301,7 +4321,7 @@
  	add hl,de	
  	ld e,(hl)	
  	inc hl	
-@@ -10115,7 +7116,7 @@
+@@ -10109,7 +7102,7 @@
  	ret	
  sub_376dh:
  	ex af,af'	
@@ -4310,7 +4330,7 @@
  	call ChkLexem_GetLex
  	call WCaBreak_IfCoCo_C
  l3777h:
-@@ -10919,7 +7920,7 @@
+@@ -10913,7 +7906,7 @@
  	call WCaBreak_IfCoCo_C
  	call sub_3710h
  	push hl	
@@ -4319,7 +4339,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	call WrJump
-@@ -10932,7 +7933,7 @@
+@@ -10926,7 +7919,7 @@
  l3c8ah:
  	call sub_3710h
  	push hl	
@@ -4328,7 +4348,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  	cp 012h
-@@ -11021,7 +8022,7 @@
+@@ -11015,7 +8008,7 @@
  	push hl	
  	cp 0ach
  	jr z,l3d3ch
@@ -4337,7 +4357,7 @@
  	call ChkLexem_GetLex
  	call l3777h
  l3d32h:
-@@ -11384,7 +8385,7 @@
+@@ -11378,7 +8371,7 @@
  	ld hl,CSq_l4184h
  	call WCodeOverLastByte
  l3f78h:
@@ -4346,7 +4366,7 @@
  WCode_VarIdxTOS:
  	pop hl	
  	call GetCSqAddrByIdx
-@@ -11392,16 +8393,16 @@
+@@ -11386,16 +8379,16 @@
  l3f82h:
  	pop de	
  	call ChkType__
@@ -4366,7 +4386,7 @@
  	jr WCode_VarIdxTOS
  l3f9eh:
  	ld a,e	
-@@ -11416,7 +8417,7 @@
+@@ -11410,7 +8403,7 @@
  	call sub_343dh
  	ld hl,CSq_l35e8h
  	call WCode
@@ -4375,7 +4395,7 @@
  	jr WCode_VarIdxTOS
  l3fbbh:
  	pop hl	
-@@ -11427,7 +8428,7 @@
+@@ -11421,7 +8414,7 @@
  	cp 0f4h
  	ld a,e	
  	jr z,l3fd7h
@@ -4384,7 +4404,7 @@
  	call GetCSqAddrByIdx
  	jp CodeLdBC_0n_from_0x2b8b
  l3fd0h:
-@@ -11447,7 +8448,7 @@
+@@ -11441,7 +8434,7 @@
  	push hl	
  	ld a,l	
  	cp 0f2h
@@ -4393,7 +4413,7 @@
  	ld a,e	
  	jr c,WCode_VarIdxTOS
  	ld e,040h
-@@ -11723,7 +8724,6 @@
+@@ -11717,7 +8710,6 @@
  l419eh:
  	call l381ah
  	djnz l419eh
@@ -4401,7 +4421,7 @@
  	ret	
  l41a4h:
  	inc a	
-@@ -11946,7 +8946,6 @@
+@@ -11940,7 +8932,6 @@
  	ld e,(hl)	
  	inc hl	
  	ld d,(hl)	
@@ -4409,7 +4429,7 @@
  	push de	
  	inc hl	
  	ld b,(hl)	
-@@ -13129,7 +10128,7 @@
+@@ -13123,7 +10114,7 @@
  l4aafh:
  	ld a,c	
  ChkBegin:
@@ -4418,7 +4438,7 @@
  	call ChkLexem_GetLex
  	jp l3cd4h
  WCorrAddr:
-@@ -14008,7 +11007,6 @@
+@@ -14002,7 +10993,6 @@
  	jp l4e61h
  l4fffh:
  	push hl	
@@ -4426,7 +4446,7 @@
  	ld d,(ix+001h)
  	push de	
  	ld c,001h
-@@ -14170,7 +11168,7 @@
+@@ -14164,7 +11154,7 @@
  	jr l50f4h
  sub_5105h:
  	call NextChkOpBra_GetLex
@@ -4435,7 +4455,7 @@
  	call sub_3f29h
  sub_510eh:
  	call ChkComma_GetLex
-@@ -14498,19 +11496,8 @@
+@@ -14492,19 +11482,8 @@
  	push hl	
  	push de	
  StartPASSrc:
@@ -4457,7 +4477,7 @@
  PasEx:
  	ld hl,00000h
  	ld b,080h
-@@ -14518,7 +11505,6 @@
+@@ -14512,7 +11491,6 @@
  	ld a,(hl)	
  	cp 07fh
  	inc hl	
@@ -4465,7 +4485,7 @@
  	jr z,PXKillProlog
  	djnz PXSrchProlog
  	jr PXCpChrMap
-@@ -14527,7 +11513,7 @@
+@@ -14521,7 +11499,7 @@
  PXCpChrMap:
  	ld hl,(CCTL0)
  	ld de,0ba00h
@@ -4474,7 +4494,7 @@
  	ldir
  	ld hl,PXUSASC
  	ld de,0bbd8h
-@@ -14535,7 +11521,7 @@
+@@ -14529,7 +11507,7 @@
  	ldir
  	ld hl,PXBASCI
  	ld de,PXSASCI
@@ -4483,7 +4503,7 @@
  	ldir
  	ld a,07fh
  	ld (PXSASCI),a
-@@ -14544,7 +11530,7 @@
+@@ -14538,7 +11516,7 @@
  	in a,(c)
  	cp 0a7h
  	jp nz,PXASCI
@@ -4492,7 +4512,7 @@
  	ldir
  	ld a,07fh
  	ld (PXTAPE),a
-@@ -14572,66 +11558,36 @@
+@@ -14566,66 +11544,36 @@
  	defw ISRI
  	defw CSRI
  PXUSASC:
@@ -4573,7 +4593,7 @@
  	ld (ix+002h),000h
  	ld l,(ix+005h)
  	ld h,(ix+006h)
-@@ -14644,7 +11600,7 @@
+@@ -14638,7 +11586,7 @@
  	dec e	
  	jr nz,PXSendName
  	ld d,00bh
@@ -4582,7 +4602,7 @@
  	inc (ix+002h)
  	ld h,(ix+006h)
  	ld l,(ix+005h)
-@@ -14656,7 +11612,7 @@
+@@ -14650,7 +11598,7 @@
  	inc b	
  	dec e	
  	jr nz,PXSendBlock
@@ -4591,7 +4611,7 @@
  	ld bc,080f3h
  	out (c),d
  PXWaitForReady:
-@@ -14679,7 +11635,7 @@
+@@ -14673,7 +11621,7 @@
  	defb 019h
  	scf	
  	ret	
@@ -4600,7 +4620,7 @@
  	ld d,003h
  	call PXNxtBlock
  	ret c	
-@@ -14688,29 +11644,26 @@
+@@ -14682,29 +11630,26 @@
  	ret nc	
  	call PV1
  	defb 023h
@@ -4636,7 +4656,7 @@
  	call PXSendCtl
  	ret c	
  	push hl	
-@@ -14729,7 +11682,7 @@
+@@ -14723,7 +11668,7 @@
  	pop af	
  	pop hl	
  	ret	
@@ -4645,7 +4665,7 @@
  	push de	
  	ld d,001h
  	call PXRecvBlock
-@@ -14740,131 +11693,28 @@
+@@ -14734,131 +11679,28 @@
  	ret nc	
  	call PV1
  	defb 023h

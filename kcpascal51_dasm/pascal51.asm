@@ -690,8 +690,8 @@ JSrcToLineBuf:
 	jp SrcToLineBuf
 JLdHLSrcEnd:
 	jp LdHLSrcEnd
-sub_06e9h:
-	jp l23e1h
+JGetPar3:
+	jp GetPar3
 	jp ExpandLine
 	jp ExpandLineSrc
 JCompile:
@@ -3942,7 +3942,7 @@ RunCmd:
 LdHLSrcEnd:
 	ld hl,(endPASSrc_adr)
 	ret	
-l23e1h:
+GetPar3:
 	ld hl,param3
 	ret	
 l23e5h:
@@ -5666,7 +5666,7 @@ l2ea7h:
 	exx	
 	push hl	
 	ex de,hl	
-	call sub_06e9h
+	call JGetPar3
 	ld bc,00008h
 	ldir
 	ex de,hl	
@@ -5712,23 +5712,9 @@ RunOrReset:
 	call PrNL
 	jp PasPrgStart
 TOk:
-
-; BLOCK 'TOk' (start 0x2f24 end 0x2f27)
-TOk_start:
-	defb 04fh
-	defb 06bh
-	defb 03fh
-	nop	
+	defb 'Ok?',000h
 TLauf:
-
-; BLOCK 'TLauf' (start 0x2f28 end 0x2f2d)
-TLauf_start:
-	defb 04ch
-	defb 061h
-	defb 075h
-	defb 066h
-	defb 03fh
-	nop	
+	defb 'Lauf?',000h
 CSq_JReset:
 	defb 003h
 	jp Reset

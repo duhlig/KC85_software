@@ -524,7 +524,7 @@ JLdHLSrcEnd:	equ 0x06e6
 ; 0x2dd0	(call destination)
 ; 0x2c42	(call destination)
 
-sub_06e9h:	equ 0x06e9
+JGetPar3:	equ 0x06e9
 ; Used at following locations:
 ; 0x2ecb	(call destination)
 
@@ -2875,7 +2875,7 @@ LdHLSrcEnd:	equ 0x23dd
 ; Used at following locations:
 ; 0x06e6	(jp destination)
 
-l23e1h:	equ 0x23e1
+GetPar3:	equ 0x23e1
 ; Used at following locations:
 ; 0x06e9	(jp destination)
 
