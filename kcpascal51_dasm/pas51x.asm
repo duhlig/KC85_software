@@ -24,6 +24,20 @@ CAOS_FARB:	equ 0xb7d6
 SUBALT:	equ 0xb7fe
 PV1:	equ 0xf003
 
+IRM_ON	MACRO
+	in a,(088h)
+	set 5,a
+	set 2,a
+	out (088h),a
+	ENDM
+	
+IRM_OFF	MACRO
+	in a,(088h)
+	res 5,a
+	res 2,a
+	out (088h),a
+	ENDM
+	
 PasPrgMenuHdr:
 	defw 00000h
 PasPrgMenuName:
@@ -53,10 +67,7 @@ CCaos:
 	ld ix,(caos_ix)
 	ld (pascal_sp),sp
 	ld (tmp_reg_a),a
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld a,e	
 	ld (OSPrc),a
 	ld a,(tmp_reg_a)
@@ -68,10 +79,7 @@ OSPrc:
 	di	
 	ld (caos_sp),sp
 	ld (tmp_reg_a),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,(tmp_reg_a)
 	ld sp,(pascal_sp)
 	pop hl	
@@ -93,15 +101,9 @@ GetKey:
 	push de	
 	push ix
 	ld ix,(caos_ix)
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	res 0,(ix+008h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ei	
 	ld a,002h
 	ld e,014h
@@ -112,33 +114,21 @@ GetKeyTest:
 	call CCaos
 	cp 080h
 	jr c,CAOS_KBD
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	xor a	
 	ld (ix+00dh),a
 	res 0,(ix+008h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	jr GetKeyTest
 CAOS_KBD:
 	ld e,004h
 	call CCaos
 	cp 080h
 	jr nc,CAOS_KBD
-	ld e,a	
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	ld e,a
+	IRM_ON
 	res 0,(ix+008h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 	pop ix
 	pop de	
@@ -169,16 +159,19 @@ SetErrDCV:
 	inc hl
 SetErrDCV1:
 	ld (SetErrD1+1),hl
+	ret
 SetErrDev:
 	push hl
 	push de
 	push bc
-	ld a,(ix+8)  ; ix auf CAOS-Wert
-	and 01ch
-	jr nz,SetErrD1
-SetErrD0:
+	ld ix,(caos_ix)
 	ld hl,IOErrD0
-	jr SetErrDx
+	IRM_ON
+	ld e,(ix+8)
+	IRM_OFF
+	ld a,e
+	and 01ch
+	jr z,SetErrDx
 SetErrD1:
 	ld hl,IOErrD1 		; Adr. wird von SetErrDCV überschrieben
 SetErrDx:
@@ -199,15 +192,14 @@ IOErrD1:
 	ret nc
 	ret nc
 ChkIOErr3:
-	ret nc
+	ret nc 		; wird von SetErrDev überschrieben
 ChkIOErr2:
-	ret nc
+	ret nc 		; wird von SetErrDev überschrieben
 ChkIOErr:
-	ret nc
+	ret nc 		; wird von SetErrDev überschrieben
 	jp Reset
 Save:
-	ld ix,(caos_ix)
-	call SetErrDev
+	call SetErrDev		; setzt u.a. IX auf (caos_ix)
 	ld (SaveBlockAdr),hl
 	ld (iobuf+17),hl
 	ld hl,iobuf+11
@@ -277,16 +269,10 @@ bkl0_rest:			; Rest mit 0 füllen
 	dec bc
 	ldir
 	ld hl,iobuf
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld (ix+005h),l
 	ld (ix+006h),h
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld bc,01f40h
 	ld hl,fileName
 	ld e,008h
@@ -302,15 +288,9 @@ SaveBlock:
 	ld e,001h
 	call CCaos
 	call ChkIOErr2
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld e,(ix+002h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 	call PrByteHex
 	call PrSpace
@@ -335,44 +315,39 @@ TestBreak:
 	jp Reset
 Load:
 	ld (srcAddr_LoadSave),hl
-	ld ix,(caos_ix)
 	call SetErrDev
 RetryISRI:
 	ld ix,(caos_ix)
 C_ISRI:
 	call TestBreak
 	ld hl,iobuf
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	set 0,(ix+007h)
 	ld (ix+005h),l
 	ld (ix+006h),h
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld hl,fileName
 	ld e,00ah
 	call CCaos
 	call ChkIOErr
 	jr c,RetryISRI 		; nur noch bei DEV 0
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld e,(ix+002h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 ChkForBlock1:
 	cp 001h
 	jp nz,RetryISRI		; erstmal so lassen
 	inc a	
 	ld (nextBlkNum),a
+	
+	IRM_ON
+	ld e,(ix+8)		; welches Geraet?
+	IRM_OFF
+	ld a,e
+	and 01ch
+	jr nz,SkipCmpFNam	; kein Tape --> kein Vergleich des Dateinamens
+
 	ld de,iobuf
 	ld bc,00b00h
 	ld hl,fileName
@@ -399,6 +374,8 @@ CmpFNamNxtChr:
 	ld a,c	
 	or a	
 	jp nz,RetryISRI		; erstmal so lassen
+
+SkipCmpFNam:
 	ld de,(iobuf+17)
 	ld hl,(iobuf+19)
 	or a	
@@ -413,15 +390,9 @@ C_MBI:
 	call CCaos
 	call ChkIOErr
 	jr c,C_MBI 		; nur noch bei DEV 0
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld e,(ix+002h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 	ld hl,nextBlkNum
 	cp 0ffh
@@ -481,17 +452,11 @@ sub_04e6h:
 	ld a,(l178fh)
 	ld h,a	
 	ld a,(l178dh)
-	ld l,a	
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	ld l,a
+	IRM_ON
 	ld (CAOS_CURSO),hl
 IRMoff_ret:
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ret	
 sub_0502h:
 	ld a,(l178fh)
@@ -503,23 +468,14 @@ sub_0502h:
 	rlca	
 	rlca	
 	or l	
-	ld l,a	
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	ld l,a
+	IRM_ON
 	ld a,l	
 	ld (CAOS_COLOR),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ret	
 sub_0527h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
@@ -527,10 +483,7 @@ sub_0527h:
 	ld a,(CAOS_COLOR)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 sub_054bh:
 	push de	
 	ld e,030h
@@ -543,10 +496,7 @@ sub_0553h:
 	ld h,000h
 	jr z,l0588h
 	ld (l1791h),hl
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
@@ -554,10 +504,7 @@ sub_0553h:
 	ld a,(l1791h)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	call sub_054bh
 	ld hl,(l1791h)
 l0588h:
@@ -574,10 +521,7 @@ sub_0590h:
 	ld h,000h
 	jr z,l05c5h
 	ld (l1791h),hl
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
@@ -585,10 +529,7 @@ sub_0590h:
 	ld a,(l1791h)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	call sub_054bh
 	ld a,001h
 	ret	
@@ -596,28 +537,19 @@ l05c5h:
 	xor a	
 	ret	
 sub_05c7h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
 	ld (CAOS_VERT),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	push de	
 	ld e,02fh
 	call CCaos
 	pop de	
 	ret	
 sub_05ebh:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_ARG1),hl
 	ld hl,(l178fh)
@@ -629,20 +561,14 @@ sub_05ebh:
 	ld a,(CAOS_COLOR)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	push de	
 	ld e,03eh
 	call CCaos
 	pop de	
 	ret	
 sub_0623h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_ARG1),hl
 	ld hl,(l178fh)
@@ -652,44 +578,26 @@ sub_0623h:
 	ld a,(CAOS_COLOR)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	push de	
 	ld e,03fh
 	call CCaos
 	pop de	
 	ret	
 sub_0655h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld a,(l178dh)
-	ld (hl),a	
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	ld (hl),a
+	IRM_OFF
 	ret	
 sub_066ah:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld l,(hl)	
 	ld h,000h
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ret	
 GetRAMEnd:
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld hl,06000h
 l0689h:
 	ld e,(hl)	
@@ -774,7 +682,7 @@ JCompile:
 JCompileToRuntimeEnd:
 	jp SetBinStartToRuntimeEnd
 fileName:
-	defb 000h,000h,000h,000h,000h,000h,000h,000h
+	defb '        '
 fileExt:
 	defb 000h,000h,000h
 	defb 000h
@@ -848,7 +756,7 @@ SetFileName:
 	ld hl,fileName
 	push hl	
 SetFNClear:
-	ld (hl),000h
+	ld (hl),020h		; 20h statt 0 wg. ISRI und autom. Dateiendung COM
 	inc hl	
 	djnz SetFNClear
 	pop hl	
@@ -5440,7 +5348,7 @@ banner_nl:
 banner:
  	defb 00ch,012h
 version:
- 	defb '**** KC-PASCAL V5.1c ****',00dh,00dh
+ 	defb '**** KC-PASCAL V5.1d ****',00dh,00dh
  	defb '  BEARB. VON AM90, DU25',00dh,00dh
  	defb '   (VERSION KC85/4/5)',00dh,000h
 CoVarInitData:
@@ -11561,6 +11469,9 @@ StartPASSrc:
 	defs 13
 
 PasEx:
+	call SetErrDCV		; ruft GetCAOSVer auf
+	cp 046h
+	ret nc			; PasEx wird ab CAOS 4.6 nicht mehr gebraucht
 	ld hl,00000h
 	ld b,080h
 PXSrchProlog:

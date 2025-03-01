@@ -1,5 +1,5 @@
---- p5a.asm	2025-02-25 07:20:06.998030291 +0100
-+++ pas51x.asm	2025-02-25 21:55:19.165295369 +0100
+--- p5a.asm	2025-02-28 22:33:03.238492794 +0100
++++ pas51x.asm	2025-03-01 21:33:10.692101630 +0100
 @@ -2,7 +2,7 @@
  ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
  
@@ -47,12 +47,13 @@
 -;SUBNEU+16:	equ 0xbcfe
  PV1:	equ 0xf003
  
- PasPrgMenuHdr:
-@@ -176,9 +151,63 @@
+ IRM_ON	MACRO
+@@ -166,9 +141,65 @@
  	call CCaos
  	pop de	
  	pop af	
 -	ret	
+-Save:
 +	ret
 +GetCAOSVer:
 +	ld a,(0e011h) ; ab KC 85/4 steht hier Menüwort „BASIC“ 
@@ -71,16 +72,19 @@
 +	inc hl
 +SetErrDCV1:
 +	ld (SetErrD1+1),hl
++	ret
 +SetErrDev:
 +	push hl
 +	push de
 +	push bc
-+	ld a,(ix+8)  ; ix auf CAOS-Wert
-+	and 01ch
-+	jr nz,SetErrD1
-+SetErrD0:
+ 	ld ix,(caos_ix)
 +	ld hl,IOErrD0
-+	jr SetErrDx
++	IRM_ON
++	ld e,(ix+8)
++	IRM_OFF
++	ld a,e
++	and 01ch
++	jr z,SetErrDx
 +SetErrD1:
 +	ld hl,IOErrD1 		; Adr. wird von SetErrDCV überschrieben
 +SetErrDx:
@@ -101,19 +105,18 @@
 +	ret nc
 +	ret nc
 +ChkIOErr3:
-+	ret nc
++	ret nc 		; wird von SetErrDev überschrieben
 +ChkIOErr2:
-+	ret nc
++	ret nc 		; wird von SetErrDev überschrieben
 +ChkIOErr:
-+	ret nc
++	ret nc 		; wird von SetErrDev überschrieben
 +	jp Reset
- Save:
- 	ld ix,(caos_ix)
-+	call SetErrDev
++Save:
++	call SetErrDev		; setzt u.a. IX auf (caos_ix)
  	ld (SaveBlockAdr),hl
  	ld (iobuf+17),hl
  	ld hl,iobuf+11
-@@ -190,15 +219,23 @@
+@@ -180,15 +211,23 @@
  	inc de	
  	ld (bin_end),de
  	ld (iobuf+19),de
@@ -141,7 +144,7 @@
  	ld hl,07f7fh
  	ld (PasPrgMenuHdr),hl
  	ld hl,00000h
-@@ -222,6 +259,23 @@
+@@ -212,14 +251,33 @@
  	ld bc,0000bh
  	ld de,iobuf
  	ldir
@@ -163,11 +166,10 @@
 +	dec bc
 +	ldir
  	ld hl,iobuf
- 	in a,(088h)
- 	set 5,a
-@@ -234,8 +288,10 @@
- 	res 2,a
- 	out (088h),a
+ 	IRM_ON
+ 	ld (ix+005h),l
+ 	ld (ix+006h),h
+ 	IRM_OFF
  	ld bc,01f40h
 +	ld hl,fileName
  	ld e,008h
@@ -176,15 +178,15 @@
  SaveBlock:
  	ld hl,(SaveBlockAdr)
  	ld de,iobuf
-@@ -245,6 +301,7 @@
+@@ -229,6 +287,7 @@
  	ld bc,000a0h
  	ld e,001h
  	call CCaos
 +	call ChkIOErr2
- 	in a,(088h)
- 	set 5,a
- 	set 2,a
-@@ -265,6 +322,7 @@
+ 	IRM_ON
+ 	ld e,(ix+002h)
+ 	IRM_OFF
+@@ -243,6 +302,7 @@
  C_CSRO:
  	ld e,009h
  	call CCaos
@@ -192,29 +194,27 @@
  	ld a,012h
  	call OutChr
  	jp PrNL
-@@ -277,6 +335,8 @@
+@@ -255,6 +315,7 @@
  	jp Reset
  Load:
  	ld (srcAddr_LoadSave),hl
-+	ld ix,(caos_ix)
 +	call SetErrDev
  RetryISRI:
  	ld ix,(caos_ix)
  C_ISRI:
-@@ -293,9 +353,11 @@
- 	res 5,a
- 	res 2,a
- 	out (088h),a
+@@ -265,18 +326,28 @@
+ 	ld (ix+005h),l
+ 	ld (ix+006h),h
+ 	IRM_OFF
 +	ld hl,fileName
  	ld e,00ah
  	call CCaos
 -	jr c,RetryISRI
 +	call ChkIOErr
 +	jr c,RetryISRI 		; nur noch bei DEV 0
- 	in a,(088h)
- 	set 5,a
- 	set 2,a
-@@ -308,7 +370,7 @@
+ 	IRM_ON
+ 	ld e,(ix+002h)
+ 	IRM_OFF
  	ld a,e	
  ChkForBlock1:
  	cp 001h
@@ -222,27 +222,39 @@
 +	jp nz,RetryISRI		; erstmal so lassen
  	inc a	
  	ld (nextBlkNum),a
++	
++	IRM_ON
++	ld e,(ix+8)		; welches Geraet?
++	IRM_OFF
++	ld a,e
++	and 01ch
++	jr nz,SkipCmpFNam	; kein Tape --> kein Vergleich des Dateinamens
++
  	ld de,iobuf
-@@ -336,7 +398,7 @@
+ 	ld bc,00b00h
+ 	ld hl,fileName
+@@ -302,7 +373,9 @@
  	call PrNL
  	ld a,c	
  	or a	
 -	jp nz,RetryISRI
 +	jp nz,RetryISRI		; erstmal so lassen
++
++SkipCmpFNam:
  	ld de,(iobuf+17)
  	ld hl,(iobuf+19)
  	or a	
-@@ -349,7 +411,8 @@
+@@ -315,7 +388,8 @@
  	call TestBreak
  	ld e,005h
  	call CCaos
 -	jr c,C_MBI
 +	call ChkIOErr
 +	jr c,C_MBI 		; nur noch bei DEV 0
- 	in a,(088h)
- 	set 5,a
- 	set 2,a
-@@ -395,8 +458,10 @@
+ 	IRM_ON
+ 	ld e,(ix+002h)
+ 	IRM_OFF
+@@ -355,8 +429,10 @@
  	ldir
  	ld e,00bh
  	call CCaos
@@ -253,15 +265,15 @@
  	ld hl,(l06b6h)
  l04d5h:
  	ret	
-@@ -422,6 +487,7 @@
- 	set 2,a
- 	out (088h),a
+@@ -379,6 +455,7 @@
+ 	ld l,a
+ 	IRM_ON
  	ld (CAOS_CURSO),hl
 +IRMoff_ret:
- 	in a,(088h)
- 	res 5,a
- 	res 2,a
-@@ -675,6 +741,8 @@
+ 	IRM_OFF
+ 	ret	
+ sub_0502h:
+@@ -572,6 +649,8 @@
  l06c3h:
  	call SaveCAOS_SP
  	jr Reset
@@ -270,27 +282,25 @@
  PasPrgStart:
  	jp 07cd5h
  JEndPascal:
-@@ -697,8 +765,8 @@
- 	jp SrcToLineBuf
- JLdHLSrcEnd:
- 	jp LdHLSrcEnd
--sub_06e9h:
--	jp l23e1h
-+JGetPar3:
-+	jp GetPar3
- 	jp ExpandLine
- 	jp ExpandLineSrc
- JCompile:
-@@ -3949,7 +4017,7 @@
- LdHLSrcEnd:
- 	ld hl,(endPASSrc_adr)
- 	ret	
--l23e1h:
-+GetPar3:
- 	ld hl,param3
- 	ret	
- l23e5h:
-@@ -5371,9 +5439,10 @@
+@@ -603,7 +682,7 @@
+ JCompileToRuntimeEnd:
+ 	jp SetBinStartToRuntimeEnd
+ fileName:
+-	defb 000h,000h,000h,000h,000h,000h,000h,000h
++	defb '        '
+ fileExt:
+ 	defb 000h,000h,000h
+ 	defb 000h
+@@ -677,7 +756,7 @@
+ 	ld hl,fileName
+ 	push hl	
+ SetFNClear:
+-	ld (hl),000h
++	ld (hl),020h		; 20h statt 0 wg. ISRI und autom. Dateiendung COM
+ 	inc hl	
+ 	djnz SetFNClear
+ 	pop hl	
+@@ -5268,9 +5347,10 @@
  	defb 00dh
  banner:
   	defb 00ch,012h
@@ -298,22 +308,23 @@
 - 	defb 'BEARB. VON  +++ AM90 +++',00dh,00dh
 - 	defb '   (VERSION KC85/4)',00dh,000h
 +version:
-+ 	defb '**** KC-PASCAL V5.1c ****',00dh,00dh
++ 	defb '**** KC-PASCAL V5.1d ****',00dh,00dh
 + 	defb '  BEARB. VON AM90, DU25',00dh,00dh
 + 	defb '   (VERSION KC85/4/5)',00dh,000h
  CoVarInitData:
  	defb 020h
  	defw RL_PACKED
-@@ -5673,7 +5742,7 @@
- 	exx	
- 	push hl	
- 	ex de,hl	
--	call sub_06e9h
-+	call JGetPar3
- 	ld bc,00008h
- 	ldir
- 	ex de,hl	
-@@ -11522,7 +11591,8 @@
+@@ -11389,6 +11469,9 @@
+ 	defs 13
+ 
+ PasEx:
++	call SetErrDCV		; ruft GetCAOSVer auf
++	cp 046h
++	ret nc			; PasEx wird ab CAOS 4.6 nicht mehr gebraucht
+ 	ld hl,00000h
+ 	ld b,080h
+ PXSrchProlog:
+@@ -11419,7 +11502,8 @@
  	ld bc,0fc80h
  	in a,(c)
  	cp 0a7h
@@ -323,7 +334,7 @@
  	ld bc,SUBNEU-PXTAPE
  	ldir
  	ld a,07fh
-@@ -11534,7 +11604,7 @@
+@@ -11431,7 +11515,7 @@
  	ld (SUBALT),hl
  	ld de,SUBNEU
  	ld (SUTAB),de
@@ -332,7 +343,7 @@
  	ldir
  	ld hl,MBO
  	ld (SUBNEU+2),hl
-@@ -11544,6 +11614,9 @@
+@@ -11441,6 +11525,9 @@
  	ld de,SUBNEU+16
  	ld c,008h
  	ldir
@@ -342,7 +353,7 @@
  	jp PXASCI
  PXSTAB:
  	defw ISRO
-@@ -11571,14 +11644,21 @@
+@@ -11468,14 +11555,21 @@
  	defb 'PASTAPE'
  	defb 001h
  	ld hl,(SUBALT)

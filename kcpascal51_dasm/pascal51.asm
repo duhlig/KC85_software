@@ -42,6 +42,20 @@ SUBALT:	equ 0xb7fe
 ;SUBNEU+16:	equ 0xbcfe
 PV1:	equ 0xf003
 
+IRM_ON	MACRO
+	in a,(088h)
+	set 5,a
+	set 2,a
+	out (088h),a
+	ENDM
+	
+IRM_OFF	MACRO
+	in a,(088h)
+	res 5,a
+	res 2,a
+	out (088h),a
+	ENDM
+	
 PasPrgMenuHdr:
 	defw 00000h
 PasPrgMenuName:
@@ -71,10 +85,7 @@ CCaos:
 	ld ix,(caos_ix)
 	ld (pascal_sp),sp
 	ld (tmp_reg_a),a
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld a,e	
 	ld (OSPrc),a
 	ld a,(tmp_reg_a)
@@ -86,10 +97,7 @@ OSPrc:
 	di	
 	ld (caos_sp),sp
 	ld (tmp_reg_a),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,(tmp_reg_a)
 	ld sp,(pascal_sp)
 	pop hl	
@@ -111,15 +119,9 @@ GetKey:
 	push de	
 	push ix
 	ld ix,(caos_ix)
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	res 0,(ix+008h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ei	
 	ld a,002h
 	ld e,014h
@@ -130,33 +132,21 @@ GetKeyTest:
 	call CCaos
 	cp 080h
 	jr c,CAOS_KBD
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	xor a	
 	ld (ix+00dh),a
 	res 0,(ix+008h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	jr GetKeyTest
 CAOS_KBD:
 	ld e,004h
 	call CCaos
 	cp 080h
 	jr nc,CAOS_KBD
-	ld e,a	
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	ld e,a
+	IRM_ON
 	res 0,(ix+008h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 	pop ix
 	pop de	
@@ -216,16 +206,10 @@ C_ISRO:
 	ld de,iobuf
 	ldir
 	ld hl,iobuf
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld (ix+005h),l
 	ld (ix+006h),h
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld bc,01f40h
 	ld e,008h
 	call CCaos
@@ -238,15 +222,9 @@ SaveBlock:
 	ld bc,000a0h
 	ld e,001h
 	call CCaos
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld e,(ix+002h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 	call PrByteHex
 	call PrSpace
@@ -275,29 +253,17 @@ RetryISRI:
 C_ISRI:
 	call TestBreak
 	ld hl,iobuf
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	set 0,(ix+007h)
 	ld (ix+005h),l
 	ld (ix+006h),h
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld e,00ah
 	call CCaos
 	jr c,RetryISRI
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld e,(ix+002h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 ChkForBlock1:
 	cp 001h
@@ -343,15 +309,9 @@ C_MBI:
 	ld e,005h
 	call CCaos
 	jr c,C_MBI
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld e,(ix+002h)
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld a,e	
 	ld hl,nextBlkNum
 	cp 0ffh
@@ -409,16 +369,10 @@ sub_04e6h:
 	ld a,(l178fh)
 	ld h,a	
 	ld a,(l178dh)
-	ld l,a	
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	ld l,a
+	IRM_ON
 	ld (CAOS_CURSO),hl
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ret	
 sub_0502h:
 	ld a,(l178fh)
@@ -430,23 +384,14 @@ sub_0502h:
 	rlca	
 	rlca	
 	or l	
-	ld l,a	
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	ld l,a
+	IRM_ON
 	ld a,l	
 	ld (CAOS_COLOR),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ret	
 sub_0527h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
@@ -454,10 +399,7 @@ sub_0527h:
 	ld a,(CAOS_COLOR)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 sub_054bh:
 	push de	
 	ld e,030h
@@ -470,10 +412,7 @@ sub_0553h:
 	ld h,000h
 	jr z,l0588h
 	ld (l1791h),hl
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
@@ -481,10 +420,7 @@ sub_0553h:
 	ld a,(l1791h)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	call sub_054bh
 	ld hl,(l1791h)
 l0588h:
@@ -501,10 +437,7 @@ sub_0590h:
 	ld h,000h
 	jr z,l05c5h
 	ld (l1791h),hl
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
@@ -512,10 +445,7 @@ sub_0590h:
 	ld a,(l1791h)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	call sub_054bh
 	ld a,001h
 	ret	
@@ -523,28 +453,19 @@ l05c5h:
 	xor a	
 	ret	
 sub_05c7h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_HOR),hl
 	ld a,(l178fh)
 	ld (CAOS_VERT),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	push de	
 	ld e,02fh
 	call CCaos
 	pop de	
 	ret	
 sub_05ebh:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_ARG1),hl
 	ld hl,(l178fh)
@@ -556,20 +477,14 @@ sub_05ebh:
 	ld a,(CAOS_COLOR)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	push de	
 	ld e,03eh
 	call CCaos
 	pop de	
 	ret	
 sub_0623h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld hl,(l178dh)
 	ld (CAOS_ARG1),hl
 	ld hl,(l178fh)
@@ -579,44 +494,26 @@ sub_0623h:
 	ld a,(CAOS_COLOR)
 	and 0f8h
 	ld (CAOS_FARB),a
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	push de	
 	ld e,03fh
 	call CCaos
 	pop de	
 	ret	
 sub_0655h:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld a,(l178dh)
-	ld (hl),a	
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	ld (hl),a
+	IRM_OFF
 	ret	
 sub_066ah:
-	in a,(088h)
-	set 5,a
-	set 2,a
-	out (088h),a
+	IRM_ON
 	ld l,(hl)	
 	ld h,000h
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ret	
 GetRAMEnd:
-	in a,(088h)
-	res 5,a
-	res 2,a
-	out (088h),a
+	IRM_OFF
 	ld hl,06000h
 l0689h:
 	ld e,(hl)	
