@@ -42,6 +42,14 @@ Die Anpassungen stecken in pas51x.asm. Um nicht selbst assemblieren zu müssen, 
 - Der Vorblock wird mit 00H aufgefüllt.
 - Nach dem Laden des Quellcodes wird ein Zeilenumbruch ausgegeben.
 
+## Version 5.1d
+
+### Korrekturen
+
+- PasEx wird nur noch bis CAOS-Version 4.5 aufgerufen.
+- Der Dateiname im Vorblock wird mit 20h statt 0h aufgefüllt.
+- Neue Fehler aus Version 5.1c beim Load und Save wurden beseitigt.
+
 
 ## Testmöglichkeit
 
