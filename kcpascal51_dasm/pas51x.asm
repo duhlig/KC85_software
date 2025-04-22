@@ -7,9 +7,10 @@
 	defb 3
 	defw PasPrgMenuHdr
 	defw PXBASCI + Rest_first - PXSASCI
-	defw PasEx
+	defw pre_init
 	defs 0x69
 iobuf:	equ 0x0200
+CAOS_ARGN:	equ 0xb781
 CAOS_ARG1:	equ 0xb782
 CAOS_ARG2:	equ 0xb784
 CAOS_ARG3:	equ 0xb786
@@ -23,6 +24,8 @@ CAOS_VERT:	equ 0xb7d5
 CAOS_FARB:	equ 0xb7d6
 SUBALT:	equ 0xb7fe
 PV1:	equ 0xf003
+ZSUCH:	equ 0x1d
+OSTR:	equ 0x23
 
 IRM_ON	MACRO
 	in a,(088h)
@@ -39,9 +42,9 @@ IRM_OFF	MACRO
 	ENDM
 	
 PasPrgMenuHdr:
-	defw 00000h
+	defw 07f7fh
 PasPrgMenuName:
-	defs 8
+	defb 'EDAS',0,0c9h,0,0	; um DEVEX zu ueberreden
 	defb 000h
 	jp PasPrgStart
 MenuPRec:
@@ -63,7 +66,7 @@ CCaos:
 	push ix
 	push bc	
 	push de	
-	push hl	
+;	push hl			; fuer UDEVEX
 	ld ix,(caos_ix)
 	ld (pascal_sp),sp
 	ld (tmp_reg_a),a
@@ -72,17 +75,19 @@ CCaos:
 	ld (OSPrc),a
 	ld a,(tmp_reg_a)
 	ld sp,(caos_sp)
+	push hl			; fuer UDEVEX
 	ei	
 	call PV1
 OSPrc:
 	defb 000h
+	pop hl			; fuer UDEVEX
 	di	
 	ld (caos_sp),sp
 	ld (tmp_reg_a),a
 	IRM_OFF
 	ld a,(tmp_reg_a)
 	ld sp,(pascal_sp)
-	pop hl	
+;	pop hl			; fuer UDEVEX
 	pop de	
 	pop bc	
 	pop ix
@@ -149,6 +154,7 @@ GetCAOSVer:
 	ret nz	      					 
 	ld a,(0edffh) ; CAOS-Versionsnummer                    
 	ret
+;;; setze die Fehlerbehandlung in Abhängigkeit vom Device und der CAOS-Version
 SetErrDCV:
 	call GetCAOSVer
         ld hl,IOErrD1
@@ -1548,7 +1554,7 @@ InitLocVar_CaPrc__:
 	ld (hl),a	
 	ldir
 	ld hl,(retAddr__)
-sub_0c25h:
+jp_hl:
 	jp (hl)	
 MaskBytes__:
 	pop hl	
@@ -11421,7 +11427,7 @@ l52bbh:
 	push af	
 l52bch:
 	inc bc	
-	call sub_0c25h
+	call jp_hl
 l52c0h:
 	inc b	
 	ld a,l	
@@ -11468,6 +11474,140 @@ l52eeh:
 StartPASSrc:
 	defs 13
 
+;;; ======================================================
+;;; Autostart
+pre_init:
+	call DevEx
+	call PASCHR
+	;; call PasEx
+	ret
+	
+;;; ======================================================
+;;; DevEx
+
+DevEx:
+	;; M052 mit aktuellem ROM wird vorausgesetzt
+	;; Menuewort edas suchen
+	ld hl,0c000h
+	ld bc,02000h
+	ld de,medas		; "edas" ruft DevEx-Init auf
+	ld a,07fh		; CAOS-Menue-Prolog
+	call PV1
+	defb ZSUCH		; bei Erfolg: HL+1 = Startadr.
+	jr c,rufEdas		; CY=1: gefunden
+	call PV1
+	defb OSTR
+	defb 0dh,0ah,'kein M052 oder ROM zu alt',0dh,0ah,0
+	ret
+
+medas	defb 'edas',0
+
+rufEdas:
+	inc hl
+	call jp_hl		; DevEx-Init aufrufen
+	ld hl,PasPrgMenuHdr 	; ausnullen, EDAS-Menue-Eintrag wird nicht mehr gebraucht
+	ld b,10
+	xor a
+killPP:
+	ld (hl),a
+	inc hl
+	djnz killPP
+
+	;; Menuewort USB suchen und sichtbar machen
+	ld hl,0ba00h
+	ld bc,00500h
+	ld de,mUSB
+	ld a,0ddh		; CAOS-Menue-Prolog
+	call PV1
+	defb ZSUCH		; bei Erfolg: HL+1 = Startadr.
+	ret nc			; Fehlerbehandlung?
+
+	inc hl			; Prozedurbeginn
+	push hl
+	ld de,4			; 4 = laenge(0ddh,'USB',1) - Carry
+	sbc hl,de
+	ld (hl),07fh
+	dec hl
+	ld (hl),07fh
+
+	;; USB einschalten, dann steht SUDEV in SUTAB
+	pop hl
+	ld a,1
+	ld (CAOS_ARGN),a
+	ld (CAOS_ARG1),a 		; "USB 1" = USB ein
+	call jp_hl
+	ld a,(ix+8)
+	and 0e3h		; Device-Bits auf 0 setzen
+	or 08h			; Device 2 eintragen
+	ld (ix+8),a
+;	...
+	ld hl,(SUTAB)
+	ld de,094h
+	add hl,de
+	add hl,de		; mögliche Anfangsadr. für PasEx
+	call PV1
+	defb 01ah		; HLHX
+	call PV1
+	defb OSTR
+	defb 'f. PasEx',0dh,0ah,0
+
+	ret
+	
+mUSB	defb 'USB',0
+;	...
+
+;;; ======================================================
+;;; Sonderzeichen fuer Pascal, Routine an Ort und Stelle kopieren
+ochrpa  equ (0c000h - (OCHRPE - OCHRP))
+PASCHR:
+	;; Voraussetzung: SUTAB ist bereits im RAM, enthaelt aber
+	;; noch die Adr. der orig. Routine
+	ld hl,(SUTAB)
+	ld e,(hl)
+	inc hl
+	ld d,(hl)
+	dec hl
+	ex de,hl		; hl = orig. OCHR-Adr.
+	ld (ochrp1+1),hl	; 3 Code-Stellen patchen
+	ld (ochrp2+1),hl
+	ld (ochrp3+1),hl
+	ex de,hl		; hl = (SUTAB)
+	ld de,ochrpa
+	ld (hl),e
+	inc hl
+	ld (hl),d
+	ld hl,OCHRP
+	ld bc,OCHRPE - OCHRP
+	ldir
+	ret
+
+;;; ======================================================
+;;; Zeichensatz selektiv
+	;; org 0c000h - (OCHRPE - OCHRP)
+	;; kein Platz für kompletten Zeichensatz
+	;; --> die 3 veraenderten Zeichen separat behandeln
+OCHRP:	
+	cp 05bh			; erstes ersetztes Zeichen
+ochrp1:	jp c,0			; nein, Orig.-Routine benutzen
+	cp 05eh			; erstes nach den ersetzten Zeichen
+ochrp2:	jp nc,0			; ja, keine Sonderbehandlung, Orig.-Rou. benutzen
+	push hl
+	ld hl,(CCTL0)
+	push hl
+	ld hl,0c000h - 8*03eh	; scheinbarer Anfang von CCTL0/PAS
+	ld (CCTL0),hl
+ochrp3:	call 0
+	pop hl
+	ld (CCTL0),hl
+	pop hl
+	ret
+CCTL0P:	
+	defb 07ch,060h,060h,060h,060h,060h,07ch,000h
+	defb 0c0h,060h,030h,018h,00ch,006h,002h,000h
+	defb 07ch,00ch,00ch,00ch,00ch,00ch,07ch,000h
+OCHRPE:			      ; Ende
+
+;;; ============================================================
 PasEx:
 	call SetErrDCV		; ruft GetCAOSVer auf
 	cp 046h
@@ -11540,7 +11680,8 @@ PXUSASC:
 	defb 07ch,00ch,00ch,00ch,00ch,00ch,07ch,000h
 PXBASCI:
 
-	org  0bc00h
+;;; #########################################################
+;	org  0bc00h
 
 PXSASCI:
 	defw 00000h
@@ -11686,19 +11827,6 @@ CSRI:
 	ret	
 SUBNEU:
 
+
 ; BLOCK 'Rest' (start 0x5490 end 0x5500)
 Rest_first:
-	defb 00dh,00ah,009h,043h,050h,009h,037h,046h ; ...CP.7F 
-	defb 048h,009h,03bh,054h,065h,073h,074h,020h ; H.;Test  
-	defb 050h,072h,06fh,06ch,06fh,067h,03fh,00dh ; Prolog?. 
-	defb 00ah,009h,049h,04eh,043h,009h,048h,04ch ; ..INC.HL 
-	defb 00dh,00ah,009h,04ah,052h,009h,05ah,02ch ; ...JR.Z, 
-	defb 050h,041h,053h,030h,031h,00dh,00ah,009h ; PAS01... 
-	defb 044h,04ah,04eh,05ah,009h,050h,041h,053h ; DJNZ.PAS 
-	defb 030h,032h,00dh,00ah,009h,04ah,052h,009h ; 02...JR. 
-	defb 050h,041h,053h,030h,033h,00dh,00ah,050h ; PAS03..P 
-	defb 041h,053h,030h,031h,009h,04ch,044h,009h ; AS01.LD. 
-	defb 04dh,02ch,030h,009h,03bh,06ch,07ch,073h ; M,0.;l|s 
-	defb 063h,068h,065h,06eh,00dh,00ah,050h,041h ; chen..PA 
-	defb 053h,030h,033h,009h,04ch,044h,009h,048h ; S03.LD.H 
-	defb 04ch,02ch,028h,043h,043h,054h,04ch,030h ; L,(CCTL0 
