@@ -1,31 +1,18 @@
 ; z80dasm 1.1.6
 ; command line: z80dasm -b p51.block -g 0x200 -l -S p51.sym -s p51.symout -u -o pascal51.asm pascal51_kcc.bin
 
-	org	00200h
-	defb 'PAS51X  KCC'
+include pas_gdef.inc
+
+ORG 0x0200
+	defb "PAS51X  KCC"
 	defs 5
 	defb 3
 	defw PasPrgMenuHdr
-	defw PXBASCI + Rest_first - PXSASCI
+;	defw PXBASCI + Rest_first - PXSASCI
+	defw PasExB + HochE - HochA
 	defw pre_init
 	defs 0x69
 iobuf:	equ 0x0200
-CAOS_ARGN:	equ 0xb781
-CAOS_ARG1:	equ 0xb782
-CAOS_ARG2:	equ 0xb784
-CAOS_ARG3:	equ 0xb786
-CAOS_ARG4_9:	equ 0xb788
-CAOS_CURSO:	equ 0xb7a0
-CAOS_COLOR:	equ 0xb7a3
-CCTL0:	equ 0xb7a6
-SUTAB:	equ 0xb7b0
-CAOS_HOR:	equ 0xb7d3
-CAOS_VERT:	equ 0xb7d5
-CAOS_FARB:	equ 0xb7d6
-SUBALT:	equ 0xb7fe
-PV1:	equ 0xf003
-ZSUCH:	equ 0x1d
-OSTR:	equ 0x23
 
 IRM_ON	MACRO
 	in a,(088h)
@@ -42,18 +29,18 @@ IRM_OFF	MACRO
 	ENDM
 	
 PasPrgMenuHdr:
-	defw 07f7fh
+	defw 0
 PasPrgMenuName:
-	defb 'EDAS',0,0c9h,0,0	; um DEVEX zu ueberreden
+	defs 8
 	defb 000h
 	jp PasPrgStart
 MenuPRec:
 	defw 07f7fh
-	defb 'PASREC',000h
+	defb "PASREC",000h
 	jp Recall
 MenuPEnt:
 	defw 07f7fh
-	defb 'PASENTRY',000h
+	defb "PASENTRY",000h
 	jp Entry
 DoNopRET:
 	nop	
@@ -281,7 +268,7 @@ bkl0_rest:			; Rest mit 0 füllen
 	IRM_OFF
 	ld bc,01f40h
 	ld hl,fileName
-	ld e,008h
+	ld e,ISRO
 	call CCaos
 	call ChkIOErr2
 SaveBlock:
@@ -333,7 +320,7 @@ C_ISRI:
 	ld (ix+006h),h
 	IRM_OFF
 	ld hl,fileName
-	ld e,00ah
+	ld e,ISRI
 	call CCaos
 	call ChkIOErr
 	jr c,RetryISRI 		; nur noch bei DEV 0
@@ -687,11 +674,12 @@ JCompile:
 	jp Compile
 JCompileToRuntimeEnd:
 	jp SetBinStartToRuntimeEnd
-fileName:
-	defb '        '
-fileExt:
-	defb 000h,000h,000h
-	defb 000h
+;; fileName und fileExt liegen jetzt auf 0x0000 bzw. 0x0008
+;fileName:
+;	defb "        "
+;fileExt:
+;	defb 000h,000h,000h
+;	defb 000h
 l0704h:
 	defw 00000h
 caos_sp:
@@ -802,9 +790,9 @@ SetExtCOM:
 	ld hl,fileExtCOM
 	jr SetFileExt
 fileExtCOM:
-	defb 'COM'
+	defb "COM"
 fileExtPAS:
-	defb 'PAS'
+	defb "PAS"
 SaveSrcFile:
 	push ix
 	push iy
@@ -1004,12 +992,12 @@ tFalse:
 
 ; BLOCK 'TFalse' (start 0x08d4 end 0x08da)
 TFalse_start:
-	defb 'FALSE',000h
+	defb "FALSE",000h
 tTrue:
 
 ; BLOCK 'TTrue' (start 0x08da end 0x08df)
 TTrue_start:
-	defb 'TRUE',000h
+	defb "TRUE",000h
 PrRAM:
 	ld de,T_RAM
 	jr PrErr2
@@ -1068,25 +1056,25 @@ THalt:
 ; BLOCK 'TErrMsg' (start 0x0934 end 0x09b1)
 TErrMsg_start:
 	defb 00dh
-	defb 'Halt'
+	defb "Halt"
 T_beiPC:
-	defb ' bei PC=',000h
+	defb " bei PC=",000h
 TUeber:
-	defb 'Ueberlauf',000h
+	defb "Ueberlauf",000h
 T_RAM:
-	defb '>> RAM',000h
+	defb ">> RAM",000h
 TDiv0:
-	defb '/ durch Null',000h
+	defb "/ durch Null",000h
 TIdxLow:
-	defb 'Index zu niedrig',000h
+	defb "Index zu niedrig",000h
 TIdxHigh:
-	defb 'Index zu hoch',000h
+	defb "Index zu hoch",000h
 TMathErr:
-	defb 'mathematischer Fehler',000h
+	defb "mathematischer Fehler",000h
 TNumTooBig:
-	defb 'Zahl zu gro',07eh,000h,000h
+	defb "Zahl zu gro",07eh,000h,000h
 TNumExpected:
-	defb 'Zahl erwartet',000h
+	defb "Zahl erwartet",000h
 SelListElem__:
 	ld d,ixh
 	ld e,ixl
@@ -2470,8 +2458,8 @@ xxTab1___start:
 	defb 0e2h
 	defb 053h
 realStrPart:
-	defb ' 0.',000h
-        defb 'E+00',000h
+	defb " 0.",000h
+        defb "E+00",000h
 Sqrt__:
 	ld a,h	
 	or a	
@@ -2620,7 +2608,7 @@ l1271h:
 	call RealDiv__
 	push hl	
 	push de	
-	ld hl,l4ee2h
+	ld hl,l4ee2h		; #### muesste falsch sein: kein Label, sondern Zahl ###
 	ld de,06ad4h
 	jr l126dh
 l1283h:
@@ -2661,7 +2649,7 @@ l12b1h:
 	ld de,tExpErw
 	jp PrErr2
 tExpErw:
-	defb 'Exponent erwartet',000h
+	defb "Exponent erwartet",000h
 Frac__:
 	ld a,h	
 	or a	
@@ -3119,7 +3107,7 @@ Arctan__:
 	ld a,002h
 	ld (l1799h),a
 	exx	
-	ld hl,l49e6h
+	ld hl,l49e6h		; #### muesste falsch sein: kein Label, sondern Zahl ###
 	ld de,0ff9dh
 	push hl	
 	push de	
@@ -3419,12 +3407,12 @@ PasIDEStartAddr:
 	defw START_PASCAL
 RL_SETSYS:
 	defw 00000h
-	defb 'SETSY','S'+0x80
+	defb "SETSY",'S'+0x80
 	defb 006h
 	defw PaSetsys
 RL_GETSYS:
 	defw RL_SETSYS
-	defb 'GETSY','S'+0x80
+	defb "GETSY",'S'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3432,17 +3420,17 @@ RL_GETSYS:
 	defb 002h
 RL_PLOT:
 	defw RL_GETSYS
-	defb 'PLO','T'+0x80
+	defb "PLO",'T'+0x80
 	defb 006h
 	defw l5174h
 RL_CLRPLOT:
 	defw RL_PLOT
-	defb 'CLRPLO','T'+0x80
+	defb "CLRPLO",'T'+0x80
 	defb 006h
 	defw l51a0h
 RL_PTEST:
 	defw RL_CLRPLOT
-	defb 'PTES','T'+0x80
+	defb "PTES",'T'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3450,7 +3438,7 @@ RL_PTEST:
 	defb 003h
 RL_GETC:
 	defw RL_PTEST
-	defb 'GET','C'+0x80
+	defb "GET",'C'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3458,27 +3446,27 @@ RL_GETC:
 	defb 003h
 RL_SETC:
 	defw RL_GETC
-	defb 'SET','C'+0x80
+	defb "SET",'C'+0x80
 	defb 006h
 	defw l5160h
 RL_LINEPLOT:
 	defw RL_SETC
-	defb 'LINEPLO','T'+0x80
+	defb "LINEPLO",'T'+0x80
 	defb 006h
 	defw l51b4h
 RL_CIRCLE:
 	defw RL_LINEPLOT
-	defb 'CIRCL','E'+0x80
+	defb "CIRCL",'E'+0x80
 	defb 006h
 	defw l51d0h
 RL_GOTOXY:
 	defw RL_CIRCLE
-	defb 'GOTOX','Y'+0x80
+	defb "GOTOX",'Y'+0x80
 	defb 006h
 	defw l5136h
 RL_PI:
 	defw RL_GOTOXY
-	defb 'P','I'+0x80
+	defb "P",'I'+0x80
 	defb 001h
 	defb 002h
 	defb 000h
@@ -3488,12 +3476,12 @@ RL_PI:
 	defb 064h
 RL_FRAC:
 	defw RL_PI
-	defb 'FRA','C'+0x80
+	defb "FRA",'C'+0x80
 	defb 00bh
 	defw Frac__
 RL_READKBD:
 	defw RL_FRAC
-	defb 'READKB','D'+0x80
+	defb "READKB",'D'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -3501,7 +3489,7 @@ RL_READKBD:
 	defb 001h
 RL_SHR:
 	defw RL_READKBD
-	defb 'SH','R'+0x80
+	defb "SH",'R'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3509,7 +3497,7 @@ RL_SHR:
 	defb 003h
 RL_SHL:
 	defw RL_SHR
-	defb 'SH','L'+0x80
+	defb "SH",'L'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3517,7 +3505,7 @@ RL_SHL:
 	defb 003h
 RL_LO:
 	defw RL_SHL
-	defb 'L','O'+0x80
+	defb "L",'O'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3525,7 +3513,7 @@ RL_LO:
 	defb 002h
 RL_HI:
 	defw RL_LO
-	defb 'H','I'+0x80
+	defb "H",'I'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3533,7 +3521,7 @@ RL_HI:
 	defb 002h
 RL_SWAP:
 	defw RL_HI
-	defb 'SWA','P'+0x80
+	defb "SWA",'P'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3541,7 +3529,7 @@ RL_SWAP:
 	defb 002h
 RL_BXOR:
 	defw RL_SWAP
-	defb 'BXO','R'+0x80
+	defb "BXO",'R'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3549,7 +3537,7 @@ RL_BXOR:
 	defb 003h
 RL_BOR:
 	defw RL_BXOR
-	defb 'BO','R'+0x80
+	defb "BO",'R'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3557,7 +3545,7 @@ RL_BOR:
 	defb 003h
 RL_BAND:
 	defw RL_BOR
-	defb 'BAN','D'+0x80
+	defb "BAN",'D'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3565,37 +3553,37 @@ RL_BAND:
 	defb 003h
 RL_EXP:
 	defw RL_BAND
-	defb 'EX','P'+0x80
+	defb "EX",'P'+0x80
 	defb 00bh
 	defw Exp__
 RL_LN:
 	defw RL_EXP
-	defb 'L','N'+0x80
+	defb "L",'N'+0x80
 	defb 00bh
 	defw Ln__
 RL_ARCTAN:
 	defw RL_LN
-	defb 'ARCTA','N'+0x80
+	defb "ARCTA",'N'+0x80
 	defb 00bh
 	defw Arctan__
 RL_TAN:
 	defw RL_ARCTAN
-	defb 'TA','N'+0x80
+	defb "TA",'N'+0x80
 	defb 00bh
 	defw Tan__
 RL_COS:
 	defw RL_TAN
-	defb 'CO','S'+0x80
+	defb "CO",'S'+0x80
 	defb 00bh
 	defw Cos__
 RL_SIN:
 	defw RL_COS
-	defb 'SI','N'+0x80
+	defb "SI",'N'+0x80
 	defb 00bh
 	defw Sin__
 RL_INP:
 	defw RL_SIN
-	defb 'IN','P'+0x80
+	defb "IN",'P'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -3603,32 +3591,32 @@ RL_INP:
 	defb 002h
 RL_OUT:
 	defw RL_INP
-	defb 'OU','T'+0x80
+	defb "OU",'T'+0x80
 	defb 006h
 	defw l5290h
 RL_SIZE:
 	defw RL_OUT
-	defb 'SIZ','E'+0x80
+	defb "SIZ",'E'+0x80
 	defb 007h
 	defw l526bh
 RL_ADDR:
 	defw RL_SIZE
-	defb 'ADD','R'+0x80
+	defb "ADD",'R'+0x80
 	defb 007h
 	defw l527fh
 RL_INLINE:
 	defw RL_ADDR
-	defb 'INLIN','E'+0x80
+	defb "INLIN",'E'+0x80
 	defb 006h
 	defw l438ah
 RL_ENTIER:
 	defw RL_INLINE
-	defb 'ENTIE','R'+0x80
+	defb "ENTIE",'R'+0x80
 	defb 00ch
 	defw Entier__
 RL_USER:
 	defw RL_ENTIER
-	defb 'USE','R'+0x80
+	defb "USE",'R'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
@@ -3636,7 +3624,7 @@ RL_USER:
 	defb 002h
 RL_RANDOM:
 	defw RL_USER
-	defb 'RANDO','M'+0x80
+	defb "RANDO",'M'+0x80
 	defb 009h
 	defb 001h
 	defb 000h
@@ -3644,7 +3632,7 @@ RL_RANDOM:
 	defb 001h
 RL_KEYPRESSED:
 	defw RL_RANDOM
-	defb 'KEYPRESSE','D'+0x80
+	defb "KEYPRESSE",'D'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3652,7 +3640,7 @@ RL_KEYPRESSED:
 	defb 001h
 RL_HALT:
 	defw RL_KEYPRESSED
-	defb 'HAL','T'+0x80
+	defb "HAL",'T'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
@@ -3660,7 +3648,7 @@ RL_HALT:
 	defb 001h
 RL_EOLN:
 	defw RL_HALT
-	defb 'EOL','N'+0x80
+	defb "EOL",'N'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3668,7 +3656,7 @@ RL_EOLN:
 	defb 001h
 RL_PAGE:
 	defw RL_EOLN
-	defb 'PAG','E'+0x80
+	defb "PAG",'E'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
@@ -3676,79 +3664,79 @@ RL_PAGE:
 	defb 001h
 RL_SQRT:
 	defw RL_PAGE
-	defb 'SQR','T'+0x80
+	defb "SQR",'T'+0x80
 	defb 00bh
 	defw Sqrt__
 RL_ROUND:
 	defw RL_SQRT
-	defb 'ROUN','D'+0x80
+	defb "ROUN",'D'+0x80
 	defb 00ch
 	defw Round__
 RL_TRUNC:
 	defw RL_ROUND
-	defb 'TRUN','C'+0x80
+	defb "TRUN",'C'+0x80
 	defb 00ch
 	defw Trunc__
 RL_MAXINT:
 	defw RL_TRUNC
-	defb 'MAXIN','T'+0x80
+	defb "MAXIN",'T'+0x80
 	defb 001h
 	defb 001h
 	defb 000h
 	defw 07fffh
 RL_SUCC:
 	defw RL_MAXINT
-	defb 'SUC','C'+0x80
+	defb "SUC",'C'+0x80
 	defb 007h
 	defw l436ch
 RL_PRED:
 	defw RL_SUCC
-	defb 'PRE','D'+0x80
+	defb "PRE",'D'+0x80
 	defb 007h
 	defw l435bh
 RL_ORD:
 	defw RL_PRED
-	defb 'OR','D'+0x80
+	defb "OR",'D'+0x80
 	defb 007h
 	defw l434ch
 RL_PEEK:
 	defw RL_ORD
-	defb 'PEE','K'+0x80
+	defb "PEE",'K'+0x80
 	defb 007h
 	defw l4536h
 RL_POKE:
 	defw RL_PEEK
-	defb 'POK','E'+0x80
+	defb "POK",'E'+0x80
 	defb 006h
 	defw l3844h
 RL_RELEASE:
 	defw RL_POKE
-	defb 'RELEAS','E'+0x80
+	defb "RELEAS",'E'+0x80
 	defb 006h
 	defw l507bh
 RL_MARK:
 	defw RL_RELEASE
-	defb 'MAR','K'+0x80
+	defb "MAR",'K'+0x80
 	defb 006h
 	defw l5076h
 RL_NEW:
 	defw RL_MARK
-	defb 'NE','W'+0x80
+	defb "NE",'W'+0x80
 	defb 006h
 	defw l509eh
 RL_TOUT:
 	defw RL_NEW
-	defb 'TOU','T'+0x80
+	defb "TOU",'T'+0x80
 	defb 006h
 	defw l50fah
 RL_TIN:
 	defw RL_TOUT
-	defb 'TI','N'+0x80
+	defb "TI",'N'+0x80
 	defb 006h
 	defw l50eeh
 RL_CHR:
 	defw RL_TIN
-	defb 'CH','R'+0x80
+	defb "CH",'R'+0x80
 	defb 009h
 	defb 003h
 	defb 000h
@@ -3756,7 +3744,7 @@ RL_CHR:
 	defb 002h
 RL_ODD:
 	defw RL_CHR
-	defb 'OD','D'+0x80
+	defb "OD",'D'+0x80
 	defb 009h
 	defb 004h
 	defb 000h
@@ -3764,19 +3752,19 @@ RL_ODD:
 	defb 002h
 RL_ABS:
 	defw RL_ODD
-	defb 'AB','S'+0x80
+	defb "AB",'S'+0x80
 	defb 00dh
 	defw l52e3h
 	defw l52eeh
 RL_SQR:
 	defw RL_ABS
-	defb 'SQ','R'+0x80
+	defb "SQ",'R'+0x80
 	defb 00dh
 	defw l52dch
 	defw l52e8h
 RL_FALSE:
 	defw RL_SQR
-	defb 'FALS','E'+0x80
+	defb "FALS",'E'+0x80
 	defb 001h
 	defb 004h
 	defb 000h
@@ -3784,7 +3772,7 @@ RL_FALSE:
 	defb 001h
 RL_TRUE:
 	defw RL_FALSE
-	defb 'TRU','E'+0x80
+	defb "TRU",'E'+0x80
 	defb 001h
 	defb 004h
 	defb 000h
@@ -3792,7 +3780,7 @@ RL_TRUE:
 	defb 001h
 RL_BOOLEAN:
 	defw RL_TRUE
-	defb 'BOOLEA','N'+0x80
+	defb "BOOLEA",'N'+0x80
 	defb 003h
 	defb 004h
 	defb 000h
@@ -3804,7 +3792,7 @@ RL_BOOLEAN:
 	defb 000h
 RL_CHAR:
 	defw RL_BOOLEAN
-	defb 'CHA','R'+0x80
+	defb "CHA",'R'+0x80
 	defb 003h
 	defb 003h
 	defb 000h
@@ -3816,7 +3804,7 @@ RL_CHAR:
 	defb 000h
 RL_REAL:
 	defw RL_CHAR
-	defb 'REA','L'+0x80
+	defb "REA",'L'+0x80
 	defb 003h
 	defb 002h
 	defb 000h
@@ -3828,7 +3816,7 @@ RL_REAL:
 	defb 000h
 RL_INTEGER:
 	defw RL_REAL
-	defb 'INTEGE','R'+0x80
+	defb "INTEGE",'R'+0x80
 	defb 003h
 	defb 001h
 	defb 000h
@@ -3840,22 +3828,22 @@ RL_INTEGER:
 	defb 000h
 RL_READLN:
 	defw RL_INTEGER
-	defb 'READL','N'+0x80
+	defb "READL",'N'+0x80
 	defb 006h
 	defw l3ee5h
 RL_READ:
 	defw RL_READLN
-	defb 'REA','D'+0x80
+	defb "REA",'D'+0x80
 	defb 006h
 	defw l3e95h
 RL_WRITELN:
 	defw RL_READ
-	defb 'WRITEL','N'+0x80
+	defb "WRITEL",'N'+0x80
 	defb 006h
 	defw l3d6eh
 RL_WRITE:
 	defw RL_WRITELN
-	defb 'WRIT','E'+0x80
+	defb "WRIT",'E'+0x80
 	defb 006h
 	defw l3d81h
 
@@ -5020,44 +5008,44 @@ SetHLFirstSrcLine:
 	xor a	
 	jr SetHLFirstSrcLine
 cmdTab:
-	defb 'B'
+	defb "B"
 	defw JEndPascal
-	defb 'C'
+	defb "C"
 	defw DoCmdC
-	defb 'D'
+	defb "D"
 	defw DoCmdD
-	defb 'E'
+	defb "E"
 	defw DoCmdE
-	defb 'F'
+	defb "F"
 	defw DoCmdF
-	defb 'G'
+	defb "G"
 	defw DoCmdG
-	defb 'I'
+	defb "I"
 	defw DoCmdI
-	defb 'L'
+	defb "L"
 	defw DoCmdL
-	defb 'K'
+	defb "K"
 	defw DoCmdK
-	defb 'M'
+	defb "M"
 	defw DoCmdM
-	defb 'N'
+	defb "N"
 	defw DoCmdN
-	defb 'O'
+	defb "O"
 	defw DoCmdO
-	defb 'P'
+	defb "P"
 	defw DoCmdP
-	defb 'R'
+	defb "R"
 cmdTabRunAddr:
 	defw PasPrgStart
-	defb 'S'
+	defb "S"
 	defw DoCmdS
-	defb 'T'
+	defb "T"
 	defw DoCmdT
-	defb 'V'
+	defb "V"
 	defw DoCmdV
-	defb 'X'
+	defb "X"
 	defw DoCmdX
-	defb 'Z'
+	defb "Z"
 	defw DoCmdZ
 EdCmdTab:
 	defb 00bh
@@ -5066,30 +5054,30 @@ EdCmdTab:
 	defw sub_2619h
 	defb 008h
 	defw sub_2668h
-	defb 'C'
+	defb "C"
 	defw l2672h
 	defb 00dh
 	defw l28e8h
-	defb 'F'
+	defb "F"
 	defw l26e8h
-	defb 'I'
+	defb "I"
 	defw l267ch
-	defb 'K'
+	defb "K"
 	defw l2636h
-	defb 'L'
+	defb "L"
 	defw sub_29d4h
-	defb 'Q'
+	defb "Q"
 	defw l29f5h
-	defb 'S'
+	defb "S"
 	defw l2692h
-	defb 'R'
+	defb "R"
 	defw l2561h
-	defb 'X'
+	defb "X"
 	defw l2677h
-	defb 'Z'
+	defb "Z"
 	defw l2681h
 tPardon:
-	defb 'Pardon?',00dh,000h
+	defb "Pardon?",00dh,000h
 param3:
 	defb 00dh
 	defs 20
@@ -5354,9 +5342,9 @@ banner_nl:
 banner:
  	defb 00ch,012h
 version:
- 	defb '**** KC-PASCAL V5.1d ****',00dh,00dh
- 	defb '  BEARB. VON AM90, DU25',00dh,00dh
- 	defb '   (VERSION KC85/4/5)',00dh,000h
+ 	defb "**** KC-PASCAL V5.1d ****",00dh,00dh
+ 	defb "  BEARB. VON AM90, DU25",00dh,00dh
+ 	defb "   (VERSION KC85/4/5)",00dh,000h
 CoVarInitData:
 	defb 020h
 	defw RL_PACKED
@@ -5702,9 +5690,9 @@ RunOrReset:
 	call PrNL
 	jp PasPrgStart
 TOk:
-	defb 'Ok?',000h
+	defb "Ok?",000h
 TLauf:
-	defb 'Lauf?',000h
+	defb "Lauf?",000h
 CSq_JReset:
 	defb 003h
 	jp Reset
@@ -6034,171 +6022,171 @@ compOptTab:
 
 ; BLOCK 'compOptTab' (start 0x3165 end 0x3171)
 compOptTab_start:
-	defb 'L'
+	defb "L"
 	defb 001h
-	defb 'O'
+	defb "O"
 	defb 002h
-	defb 'C'
+	defb "C"
 	defb 004h
-	defb 'S'
+	defb "S"
 	defb 008h
-	defb 'I'
+	defb "I"
 	defb 010h
-	defb 'A'
+	defb "A"
 	defb 020h
 RL_PACKED:
 	defw 00000h
-	defb 'PACKE','D'+080h
+	defb "PACKE",'D'+080h
 	defb 023h
 RL_NIL:
 	defw RL_PACKED
-	defb 'NI','L'+080h
+	defb "NI",'L'+080h
 	defb 022h
 RL_FORWARD:
 	defw RL_NIL
-	defb 'FORWAR','D'+080h
+	defb "FORWAR",'D'+080h
 	defb 01dh
 RL_PROGRAM:
 	defw RL_FORWARD
-	defb 'PROGRA','M'+080h
+	defb "PROGRA",'M'+080h
 	defb 001h
 RL_IN:
 	defw RL_PROGRAM
-	defb 'I','N'+080h
+	defb "I",'N'+080h
 	defb 020h
 RL_OR:
 	defw RL_IN
-	defb 'O','R'+080h
+	defb "O",'R'+080h
 	defb 007h
 RL_OF:
 	defw RL_OR
-	defb 'O','F'+080h
+	defb "O",'F'+080h
 	defb 00bh
 RL_TO:
 	defw RL_OF
-	defb 'T','O'+080h
+	defb "T",'O'+080h
 	defb 00ch
 RL_DO:
 	defw RL_TO
-	defb 'D','O'+080h
+	defb "D",'O'+080h
 	defb 011h
 RL_IF:
 	defw RL_DO
-	defb 'I','F'+080h
+	defb "I",'F'+080h
 	defb 017h
 RL_SET:
 	defw RL_IF
-	defb 'SE','T'+080h
+	defb "SE",'T'+080h
 	defb 01bh
 RL_NOT:
 	defw RL_SET
-	defb 'NO','T'+080h
+	defb "NO",'T'+080h
 	defb 006h
 RL_MOD:
 	defw RL_NOT
-	defb 'MO','D'+080h
+	defb "MO",'D'+080h
 	defb 009h
 RL_DIV:
 	defw RL_MOD
-	defb 'DI','V'+080h
+	defb "DI",'V'+080h
 	defb 002h
 RL_VAR:
 	defw RL_DIV
-	defb 'VA','R'+080h
+	defb "VA",'R'+080h
 	defb 00ah
 RL_AND:
 	defw RL_VAR
-	defb 'AN','D'+080h
+	defb "AN",'D'+080h
 	defb 008h
 RL_FOR:
 	defw RL_AND
-	defb 'FO','R'+080h
+	defb "FO",'R'+080h
 	defb 016h
 RL_END:
 	defw RL_FOR
-	defb 'EN','D'+080h
+	defb "EN",'D'+080h
 	defb 010h
 RL_GOTO:
 	defw RL_END
-	defb 'GOT','O'+080h
+	defb "GOT",'O'+080h
 	defb 01ah
 RL_WITH:
 	defw RL_GOTO
-	defb 'WIT','H'+080h
+	defb "WIT",'H'+080h
 	defb 019h
 RL_TYPE:
 	defw RL_WITH
-	defb 'TYP','E'+080h
+	defb "TYP",'E'+080h
 	defb 01fh
 RL_CASE:
 	defw RL_TYPE
-	defb 'CAS','E'+080h
+	defb "CAS",'E'+080h
 	defb 014h
 RL_ELSE:
 	defw RL_CASE
-	defb 'ELS','E'+080h
+	defb "ELS",'E'+080h
 	defb 012h
 RL_THEN:
 	defw RL_ELSE
-	defb 'THE','N'+080h
+	defb "THE",'N'+080h
 	defb 00eh
 RL_LABEL:
 	defw RL_THEN
-	defb 'LABE','L'+080h
+	defb "LABE",'L'+080h
 	defb 021h
 RL_CONST:
 	defw RL_LABEL
-	defb 'CONS','T'+080h
+	defb "CONS",'T'+080h
 	defb 003h
 RL_ARRAY:
 	defw RL_CONST
-	defb 'ARRA','Y'+080h
+	defb "ARRA",'Y'+080h
 	defb 01ch
 RL_UNTIL:
 	defw RL_ARRAY
-	defb 'UNTI','L'+080h
+	defb "UNTI",'L'+080h
 	defb 00fh
 RL_WHILE:
 	defw RL_UNTIL
-	defb 'WHIL','E'+080h
+	defb "WHIL",'E'+080h
 	defb 015h
 RL_BEGIN:
 	defw RL_WHILE
-	defb 'BEGI','N'+080h
+	defb "BEGI",'N'+080h
 	defb 018h
 RL_RECORD:
  	defw RL_BEGIN
-	defb 'RECOR','D'+080h
+	defb "RECOR",'D'+080h
  	defb 01eh
 RL_DOWNTO:
 	defw RL_RECORD
-	defb 'DOWNT','O'+080h
+	defb "DOWNT",'O'+080h
 	defb 00dh
 RL_REPEAT:
  	defw RL_DOWNTO
-	defb 'REPEA','T'+080h
+	defb "REPEA",'T'+080h
  	defb 013h
 RL_FUNCTION:
  	defw RL_REPEAT
-	defb 'FUNCTIO','N'+080h
+	defb "FUNCTIO",'N'+080h
  	defb 005h
 ResWordsEntry2:
 RL_PROCEDURE:
  	defw RL_FUNCTION
-	defb 'PROCEDUR','E'+080h
+	defb "PROCEDUR",'E'+080h
  	defb 004h
 ResWordsEntry:
  	defw ResWordsEntry2
 tEadr:
-	defb 'Endadresse: ',000h
+	defb "Endadresse: ",000h
 tFeh1:
-	defb 'Fehler:',000h
+	defb "Fehler:",000h
 tFeh2:
-	defb '*FEHLER*',000h
+	defb "*FEHLER*",000h
 tKeTx:
-	defb 00dh,'Kein Text mehr!',000h
+	defb 00dh,"Kein Text mehr!",000h
 tTabU:
-	defb 'Tabellenueberlauf!',000h
+	defb "Tabellenueberlauf!",000h
 ChkTypeBool__:
 	ld de,00004h
 	jr ChkType__
@@ -11472,361 +11460,8 @@ l52eeh:
 	push hl	
 	push de	
 StartPASSrc:
-	defs 13
+;=;	defs 13
 
 ;;; ======================================================
 ;;; Autostart
-pre_init:
-	call DevEx
-	call PASCHR
-	;; call PasEx
-	ret
-	
-;;; ======================================================
-;;; DevEx
-
-DevEx:
-	;; M052 mit aktuellem ROM wird vorausgesetzt
-	;; Menuewort edas suchen
-	ld hl,0c000h
-	ld bc,02000h
-	ld de,medas		; "edas" ruft DevEx-Init auf
-	ld a,07fh		; CAOS-Menue-Prolog
-	call PV1
-	defb ZSUCH		; bei Erfolg: HL+1 = Startadr.
-	jr c,rufEdas		; CY=1: gefunden
-	call PV1
-	defb OSTR
-	defb 0dh,0ah,'kein M052 oder ROM zu alt',0dh,0ah,0
-	ret
-
-medas	defb 'edas',0
-
-rufEdas:
-	inc hl
-	call jp_hl		; DevEx-Init aufrufen
-	ld hl,PasPrgMenuHdr 	; ausnullen, EDAS-Menue-Eintrag wird nicht mehr gebraucht
-	ld b,10
-	xor a
-killPP:
-	ld (hl),a
-	inc hl
-	djnz killPP
-
-	;; Menuewort USB suchen und sichtbar machen
-	ld hl,0ba00h
-	ld bc,00500h
-	ld de,mUSB
-	ld a,0ddh		; CAOS-Menue-Prolog
-	call PV1
-	defb ZSUCH		; bei Erfolg: HL+1 = Startadr.
-	ret nc			; Fehlerbehandlung?
-
-	inc hl			; Prozedurbeginn
-	push hl
-	ld de,4			; 4 = laenge(0ddh,'USB',1) - Carry
-	sbc hl,de
-	ld (hl),07fh
-	dec hl
-	ld (hl),07fh
-
-	;; USB einschalten, dann steht SUDEV in SUTAB
-	pop hl
-	ld a,1
-	ld (CAOS_ARGN),a
-	ld (CAOS_ARG1),a 		; "USB 1" = USB ein
-	call jp_hl
-	ld a,(ix+8)
-	and 0e3h		; Device-Bits auf 0 setzen
-	or 08h			; Device 2 eintragen
-	ld (ix+8),a
-;	...
-	ld hl,(SUTAB)
-	ld de,094h
-	add hl,de
-	add hl,de		; mögliche Anfangsadr. für PasEx
-	call PV1
-	defb 01ah		; HLHX
-	call PV1
-	defb OSTR
-	defb 'f. PasEx',0dh,0ah,0
-
-	ret
-	
-mUSB	defb 'USB',0
-;	...
-
-;;; ======================================================
-;;; Sonderzeichen fuer Pascal, Routine an Ort und Stelle kopieren
-ochrpa  equ (0c000h - (OCHRPE - OCHRP))
-PASCHR:
-	;; Voraussetzung: SUTAB ist bereits im RAM, enthaelt aber
-	;; noch die Adr. der orig. Routine
-	ld hl,(SUTAB)
-	ld e,(hl)
-	inc hl
-	ld d,(hl)
-	dec hl
-	ex de,hl		; hl = orig. OCHR-Adr.
-	ld (ochrp1+1),hl	; 3 Code-Stellen patchen
-	ld (ochrp2+1),hl
-	ld (ochrp3+1),hl
-	ex de,hl		; hl = (SUTAB)
-	ld de,ochrpa
-	ld (hl),e
-	inc hl
-	ld (hl),d
-	ld hl,OCHRP
-	ld bc,OCHRPE - OCHRP
-	ldir
-	ret
-
-;;; ======================================================
-;;; Zeichensatz selektiv
-	;; org 0c000h - (OCHRPE - OCHRP)
-	;; kein Platz für kompletten Zeichensatz
-	;; --> die 3 veraenderten Zeichen separat behandeln
-OCHRP:	
-	cp 05bh			; erstes ersetztes Zeichen
-ochrp1:	jp c,0			; nein, Orig.-Routine benutzen
-	cp 05eh			; erstes nach den ersetzten Zeichen
-ochrp2:	jp nc,0			; ja, keine Sonderbehandlung, Orig.-Rou. benutzen
-	push hl
-	ld hl,(CCTL0)
-	push hl
-	ld hl,0c000h - 8*03eh	; scheinbarer Anfang von CCTL0/PAS
-	ld (CCTL0),hl
-ochrp3:	call 0
-	pop hl
-	ld (CCTL0),hl
-	pop hl
-	ret
-CCTL0P:	
-	defb 07ch,060h,060h,060h,060h,060h,07ch,000h
-	defb 0c0h,060h,030h,018h,00ch,006h,002h,000h
-	defb 07ch,00ch,00ch,00ch,00ch,00ch,07ch,000h
-OCHRPE:			      ; Ende
-
-;;; ============================================================
-PasEx:
-	call SetErrDCV		; ruft GetCAOSVer auf
-	cp 046h
-	ret nc			; PasEx wird ab CAOS 4.6 nicht mehr gebraucht
-	ld hl,00000h
-	ld b,080h
-PXSrchProlog:
-	ld a,(hl)	
-	cp 07fh
-	inc hl	
-	jr z,PXKillProlog
-	djnz PXSrchProlog
-	jr PXCpChrMap
-PXKillProlog:
-	ld (hl),000h
-PXCpChrMap:
-	ld hl,(CCTL0)
-	ld de,0ba00h
-	ld bc,00200h
-	ldir
-	ld hl,PXUSASC
-	ld de,0bbd8h
-	ld bc,00018h
-	ldir
-	ld hl,PXBASCI
-	ld de,PXSASCI
-	ld bc,PXTAPE-PXSASCI
-	ldir
-	ld a,07fh
-	ld (PXSASCI),a
-	ld (PXSASCI+1),a
-	ld bc,0fc80h
-	in a,(c)
-	cp 0a7h
-	ld c,0
-	jr nz,PXInitDev
-	ld bc,SUBNEU-PXTAPE
-	ldir
-	ld a,07fh
-	ld (PXTAPE),a
-	ld (PXTAPE+1),a
-	ld (PXDISK),a
-	ld (PXDISK+1),a
-	ld hl,(SUTAB)
-	ld (SUBALT),hl
-	ld de,SUBNEU
-	ld (SUTAB),de
-	ld bc,00092h		; abhängig von der CAOS-Version
-	ldir
-	ld hl,MBO
-	ld (SUBNEU+2),hl
-	ld hl,MBI
-	ld (SUBNEU+10),hl
-	ld hl,PXSTAB
-	ld de,SUBNEU+16
-	ld c,008h
-	ldir
-	ld c,4
-PXInitDev:
-	call PXSetDev
-	jp PXASCI
-PXSTAB:
-	defw ISRO
-	defw CSRO
-	defw ISRI
-	defw CSRI
-PXUSASC:
-	defb 07ch,060h,060h,060h,060h,060h,07ch,000h
-	defb 0c0h,060h,030h,018h,00ch,006h,002h,000h
-	defb 07ch,00ch,00ch,00ch,00ch,00ch,07ch,000h
-PXBASCI:
-
-;;; #########################################################
-;	org  0bc00h
-
-PXSASCI:
-	defw 00000h
-	defb 'ASCII'
-	defb 001h
-PXASCI:
-	ld hl,0ba00h
-	ld (CCTL0),hl
-	ret	
-PXTAPE:
-	defw 00000h
-	defb 'PASTAPE'
-	defb 001h
-	ld hl,(SUBALT)
-	ld c,0
-PXSetSUTAB:
-	ld (SUTAB),hl
-PXSetDev:
-	ld a,(ix+8)
-	and 0e3h
-	or c
-	ld (ix+8),a
-	ret	
-PXDISK:
-	defw 00000h
-	defb 'PASDISK'
-	defb 001h
-	ld hl,SUBNEU
-	ld c,4
-	jr PXSetSUTAB
-ISRO:
-	ld (ix+002h),000h
-	ld l,(ix+005h)
-	ld h,(ix+006h)
-	ld bc,083f3h
-	ld e,00bh
-PXSendName:
-	outi
-	inc b	
-	inc b	
-	dec e	
-	jr nz,PXSendName
-	ld d,00bh
-PXNxtBlock:
-	inc (ix+002h)
-	ld h,(ix+006h)
-	ld l,(ix+005h)
-	ld bc,081f2h
-	ld e,080h
-PXSendBlock:
-	outi
-	inc b	
-	inc b	
-	dec e	
-	jr nz,PXSendBlock
-PXSendCtl:
-	ld bc,080f3h
-	out (c),d
-PXWaitForReady:
-	push bc	
-	ld a,001h
-	call PV1
-	defb 014h
-	pop bc	
-	in a,(c)
-	bit 0,a
-	jr nz,PXWaitForReady
-	and a	
-	bit 7,a
-	ret z	
-	inc b	
-	in a,(c)
-	call PV1
-	defb 01ch
-	call PV1
-	defb 019h
-	scf	
-	ret	
-MBO:
-	ld d,003h
-	call PXNxtBlock
-	ret c	
-	ld a,002h
-	cp (ix+002h)
-	ret nc	
-	call PV1
-	defb 023h
-	defb 008h,008h,008h,000h
-	and a	
-	ret	
-CSRO:
-	call MBO
-	ret c	
-	ld d,043h
-	jr PXSendCtl
-ISRI:
-	ld (ix+002h),000h
-	ld hl,fileName
-	ld bc,083f3h
-	ld de,0090bh
-PXSendName2:
-	outi
-	inc b	
-	inc b	
-	dec e	
-	jr nz,PXSendName2
-PXRecvBlock:
-	call PXSendCtl
-	ret c	
-	push hl	
-	push af	
-	ld l,(ix+005h)
-	ld h,(ix+006h)
-	ld bc,080f2h
-	ld e,080h
-PXRecvByte:
-	ini
-	inc b	
-	inc b	
-	dec e	
-	jr nz,PXRecvByte
-	inc (ix+002h)
-	pop af	
-	pop hl	
-	ret	
-MBI:
-	push de	
-	ld d,001h
-	call PXRecvBlock
-	pop de	
-	ret c	
-	ld a,002h
-	cp (ix+002h)
-	ret nc	
-	call PV1
-	defb 023h
-	defb 008h,008h,008h,008h,000h
-	and a	
-	ret	
-CSRI:
-	call PV1
-	defb 02ch
-	ret	
-SUBNEU:
-
-
-; BLOCK 'Rest' (start 0x5490 end 0x5500)
-Rest_first:
+include pasex2/pasex2.asm
