@@ -40,30 +40,15 @@ p5a.asm: pascal51.asm
 	cp pascal51.asm p5a.asm
 	patch p5a.asm p5a.patch
 
-pas51x.kcc: pas51x.asm pas_gdef.inc pasex2/pasex2.asm pasex2/px2init.inc pasex2/px2kern.inc pasex2/px2sozei.inc pasex2/px2var.inc
-	$(asm) pasex2/px2init_dummy.asm pasex2/px2init_dummy.bin
-	$(asm) pasex2/px2kern_dummy.asm pasex2/px2kern_dummy.bin
-	$(asm) pasex2/px2sozei_dummy.asm pasex2/px2sozei_dummy.bin
-	printf "\torg 0x%4x\n" \
-	  $$(( 0xc000 - $$(stat -c %s pasex2/px2kern_dummy.bin) - \
-	       $$(stat -c %s pasex2/px2sozei_dummy.bin) )) > pasex2/px2org.inc
-	pasmo -d pas51x.asm pas51x0.bin > pas51x_pasmo.asm
-	./bincut.pl -i pas51x0.bin -o pas51x.kcc \
-	  -b $$( od -v -t x1 \
-                 -j $$(( $$(stat -c %s pasex2/px2init_dummy.bin) - 5 )) \
-	         pasex2/px2init_dummy.bin | \
-	         head -1 | cut -d \  -f 2- | tr ' ' , ) \
-	  -a $$( od -v -t x1 -N 5 pasex2/px2kern_dummy.bin | \
-	         head -1 | cut -d \  -f 2- | tr ' ' , )
 
 #pas51x.asm: pascal51.asm
 #	cp pas51x.asm pas51x.asm.$$(date -Iseconds).bak
 #	cp pascal51.asm pas51x.asm
 #	patch pas51x.asm p5a.patch
 #	patch pas51x.asm pas51x.patch
-
-pas51x.patch:
-	diff -du p5a.asm pas51x.asm > pas51x.patch 
+#
+#pas51x.patch:
+#	diff -du p5a.asm pas51x.asm > pas51x.patch 
 
 clean:
 	-rm -f *~ p51.symout p51t.asm p510.bin p51.bin pascal51.bak

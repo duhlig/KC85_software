@@ -196,4 +196,4 @@ PASCHR:
 	ret
 
 ;;; muss vor "org PasExR" stehen weil isso (um die 3 Codestellen zu patchen)
-include pasex2/px2sozei.inc
+include px2sozei.inc

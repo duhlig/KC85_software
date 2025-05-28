@@ -587,6 +587,8 @@ CSq: unlabeled first 0x3c61 unlabeled last 0x3c61 type bytedata
 CSq: unlabeled first 0x3c65 unlabeled last 0x3c65 type bytedata
 CSqP: unlabeled first 0x3c68 unlabeled last 0x3c68 type bytedata
 CSq: unlabeled first 0x3e3d unlabeled last 0x3e3d type bytedata
+CSq: unlabeled first 0x3e41 unlabeled last 0x3e41 type bytedata
+CSq: unlabeled first 0x3e48 unlabeled last 0x3e48 type bytedata
 CSq: unlabeled first 0x3e4e unlabeled last 0x3e4e type bytedata
 CSq: unlabeled first 0x3e53 unlabeled last 0x3e53 type bytedata
 CSq: unlabeled first 0x3e5e unlabeled last 0x3e5e type bytedata

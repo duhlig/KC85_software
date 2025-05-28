@@ -763,6 +763,8 @@ PrDezFillSpc:	equ 0x0830
 ; Used at following locations:
 ; 0x0826	(jr destination)
 
+PrInt:	equ 0x0836
+
 PrDezPos2:	equ 0x0846
 ; Used at following locations:
 ; 0x0838	(jr destination)
@@ -6141,19 +6143,19 @@ l3d57h:	equ 0x3d57
 ; Used at following locations:
 ; 0x3752	(defw directive)
 
-l3d6eh:	equ 0x3d6e
+CoWRITELN:	equ 0x3d6e
 ; Used at following locations:
 ; 0x1b29	(defw directive)
 
-l3d7bh:	equ 0x3d7b
+WrlnNoParam:	equ 0x3d7b
 ; Used at following locations:
 ; 0x3d73	(jr destination)
 
-l3d81h:	equ 0x3d81
+CoWRITE:	equ 0x3d81
 ; Used at following locations:
 ; 0x1b33	(defw directive)
 
-sub_3d84h:	equ 0x3d84
+CoWRITE2:	equ 0x3d84
 ; Used at following locations:
 ; 0x3df5	(jr destination)
 ; 0x3d78	(call destination)
@@ -6216,15 +6218,15 @@ l3e38h:	equ 0x3e38
 ; Used at following locations:
 ; 0x3e33	(jr destination)
 
-CSq_l3e3dh:	equ 0x3e3d
+CSq_PrNL:	equ 0x3e3d
 ; Used at following locations:
 ; 0x3d7b	(immediate value)
 
-l3e41h:	equ 0x3e41
+CSq_PrInt:	equ 0x3e41
 ; Used at following locations:
 ; 0x3da3	(immediate value)
 
-l3e48h:	equ 0x3e48
+CSq_l3e48h:	equ 0x3e48
 ; Used at following locations:
 ; 0x3dab	(immediate value)
 
@@ -6515,12 +6517,12 @@ FoundMinus__:	equ 0x405d
 ; Used at following locations:
 ; 0x4077	(jp destination)
 
-sub_4072h:	equ 0x4072
+ParseSimEx1:	equ 0x4072
 ; Used at following locations:
 ; 0x3ffe	(call destination)
 ; 0x3f57	(call destination)
 
-sub_4075h:	equ 0x4075
+ParseSimEx2:	equ 0x4075
 ; Used at following locations:
 ; 0x3f43	(call destination)
 

@@ -127,6 +127,8 @@ IX:
     bit_4: Comp-Opt. I
     bit_5: Comp-Opt. A
     bit_6: EOL im Line Buffer gelesen
+  +1:
+    bit_0:?
   +2:
     bit_1: bewirkt return(0aeh) in GetLexem --> Quelltextende?
     bit_3:?

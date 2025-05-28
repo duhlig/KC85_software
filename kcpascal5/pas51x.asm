@@ -874,6 +874,7 @@ PrDezFillSpc:
 	ld a,b	
 	call PrFillSpc
 	pop hl	
+PrInt:
 	bit 7,h
 	jr z,PrDezPos2
 	ld a,02dh
@@ -3840,12 +3841,12 @@ RL_WRITELN:
 	defw RL_READ
 	defb "WRITEL",'N'+0x80
 	defb 006h
-	defw l3d6eh
+	defw CoWRITELN
 RL_WRITE:
 	defw RL_WRITELN
 	defb "WRIT",'E'+0x80
 	defb 006h
-	defw l3d81h
+	defw CoWRITE
 
 ; BLOCK 'Symtab_open' (start 0x1b35 end 0x2355)
 Symtab_open_start:
@@ -5342,7 +5343,7 @@ banner_nl:
 banner:
  	defb 00ch,012h
 version:
- 	defb "**** KC-PASCAL V5.1d ****",00dh,00dh
+ 	defb "**** KC-PASCAL V5.1e ****",00dh,00dh
  	defb "  BEARB. VON AM90, DU25",00dh,00dh
  	defb "   (VERSION KC85/4/5)",00dh,000h
 CoVarInitData:
@@ -8027,18 +8028,18 @@ l3d57h:
 	defb 0c3h
 	call StoreDE
 	jp GetLexem
-l3d6eh:
+CoWRITELN:
 	call GetLexem
 	cp 0a8h
-	jr nz,l3d7bh
+	jr nz,WrlnNoParam
 	call GetLexem
-	call sub_3d84h
-l3d7bh:
-	ld hl,CSq_l3e3dh
+	call CoWRITE2
+WrlnNoParam:
+	ld hl,CSq_PrNL
 	jp WCode
-l3d81h:
+CoWRITE:
 	call NextChkOpBra_GetLex
-sub_3d84h:
+CoWRITE2:
 	call sub_3f3fh
 	dec b	
 	inc b	
@@ -8057,10 +8058,10 @@ l3d9ah:
 	jr l3dedh
 l3da1h:
 	cp 0bah
-	ld hl,l3e41h
+	ld hl,CSq_PrInt
 	jr nz,l3dc9h
 	call sub_3f0dh
-	ld hl,l3e48h
+	ld hl,CSq_l3e48h
 	cp 0bah
 	jr nz,l3dc9h
 	call GetLexem
@@ -8097,7 +8098,7 @@ l3dedh:
 	cp 0ach
 	jp nz,ChkCloBra_GetLex
 	call GetLexem
-	jr sub_3d84h
+	jr CoWRITE2
 l3df7h:
 	cp 0bah
 	jr nz,l3e0dh
@@ -8135,15 +8136,15 @@ l3e35h:
 l3e38h:
 	ld hl,l3e5ah
 	jr l3deah
-CSq_l3e3dh:
+CSq_PrNL:
 	defb 003h
 	call PrNL
-l3e41h:
-	ld b,0cdh
-	ld (hl),008h
+CSq_PrInt:
+	defb 006h
+	call PrInt
 	call PrSpace
-l3e48h:
-	dec b	
+CSq_l3e48h:
+	defb 005h
 	ld a,l	
 	pop hl	
 	call PrDez
@@ -8316,7 +8317,7 @@ sub_3f31h:
 sub_3f3fh:
 	res 0,(ix+001h)
 l3f43h:
-	call sub_4075h
+	call ParseSimEx2
 	cp 020h
 	jp z,l3febh
 	cp 077h
@@ -8328,7 +8329,7 @@ l3f43h:
 	ld h,000h
 	push hl	
 	push bc	
-	call sub_4072h
+	call PasrseSimEx1
 	ld e,a	
 	ld a,b	
 	or a	
@@ -8429,7 +8430,7 @@ l3ff7h:
 	ld hl,CSq_l4026h
 	call WCode
 	push bc	
-	call sub_4072h
+	call PasrseSimEx1
 	pop de	
 	call ChkType__
 	ld hl,CSq_l402ah
@@ -8498,9 +8499,9 @@ FoundMinus__:
 	ld hl,l4150h
 	call l33beh
 	jr l4089h
-sub_4072h:
+PasrseSimEx1:
 	call GetLexem
-sub_4075h:
+ParseSimEx2:
 	cp 0adh
 	jp z,FoundMinus__
 	cp 0abh
@@ -11464,4 +11465,4 @@ StartPASSrc:
 
 ;;; ======================================================
 ;;; Autostart
-include pasex2/pasex2.asm
+include pasex2/pasex2.inc
