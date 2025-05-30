@@ -3,6 +3,10 @@
 
 include pas_gdef.inc
 
+VERSION MACRO
+	defb "V5.1e"
+	ENDM
+	
 ORG 0x0200
 	defb "PAS51X  KCC"
 	defs 5
@@ -42,6 +46,9 @@ MenuPEnt:
 	defw 07f7fh
 	defb "PASENTRY",000h
 	jp Entry
+version:
+	VERSION
+	defb 0
 DoNopRET:
 	nop	
 	nop	
@@ -193,18 +200,16 @@ ChkIOErr:
 	jp Reset
 Save:
 	call SetErrDev		; setzt u.a. IX auf (caos_ix)
-	ld (SaveBlockAdr),hl
-	ld (iobuf+17),hl
+	;; Block 0 mit 0 füllen
+	push hl
 	ld hl,iobuf+11
-	ld b,005h
-KillMem:
-	ld (hl),000h
-	inc hl	
-	djnz KillMem
-	inc de	
-	ld (bin_end),de
-	ld (iobuf+19),de
-
+	ld b,128-11
+blk0_0:
+	ld (hl),0
+	inc hl
+	djnz blk0_0
+	pop hl
+	;; 
 	ld a,(param4)		; 4. Param. bei Cmd T = 1 --> Autostart
 	cp '1'
 	ld a,002h
@@ -212,13 +217,14 @@ KillMem:
 	inc a
 NoAutoStart:
 	ld (iobuf+16),a
+	ld (SaveBlockAdr),hl
+	ld (iobuf+17),hl
+	inc de	
+	ld (bin_end),de
+	ld (iobuf+19),de
 	ld a,(fileExt)
 	cp 043h
 	jr nz,C_ISRO
-;	ld a,d	
-;	ld (iobuf+19),a
-;	ld hl,l04d5h
-;	ld (iobuf+20),hl
 	ld hl,PasPrgStartA
 	ld (iobuf+21),hl
 	ld hl,07f7fh
@@ -244,23 +250,7 @@ C_ISRO:
 	ld bc,0000bh
 	ld de,iobuf
 	ldir
-	ld hl,version 		; Pascal-Version in den Vorblock
-	ld de,iobuf+23
-	ld bc,128-23
-	ld a,0dh
-ver_blk0:
-	cp (hl)
-	jr z,bkl0_rest
-	ldi
-	jr ver_blk0
-bkl0_rest:			; Rest mit 0 füllen
-	ex de,hl
-	ld (hl),0h
-	ld d,h
-	ld e,l
-	inc de
-	dec bc
-	ldir
+
 	ld hl,iobuf
 	IRM_ON
 	ld (ix+005h),l
@@ -5342,8 +5332,9 @@ banner_nl:
 	defb 00dh
 banner:
  	defb 00ch,012h
-version:
- 	defb "**** KC-PASCAL V5.1e ****",00dh,00dh
+ 	defb "**** KC-PASCAL "
+	VERSION
+	defb " ****",00dh,00dh
  	defb "  BEARB. VON AM90, DU25",00dh,00dh
  	defb "   (VERSION KC85/4/5)",00dh,000h
 CoVarInitData:
