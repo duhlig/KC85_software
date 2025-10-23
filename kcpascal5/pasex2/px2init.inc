@@ -8,7 +8,7 @@ pre_init:
 	;; CAOS-Versionskontrolle
 	call PxCVer
 	cp 046h			; Ab CAOS 4.6 werden...
-	jr nc,pri_46		; UDevEx und PasEx nicht mehr gebraucht.
+	jr nc,pri_su		; UDevEx und PasEx nicht mehr gebraucht.
 
 	ld hl,PasExB		; PasEx usw. hochladen
 	ld de,PasExR
@@ -38,14 +38,13 @@ pri_su:
 	ld hl,(SUTAB)
 	ld (SutabR),hl		; Merkzelle zur Wiederherstellung nach Reset
 
-	call tstD4
-	jr pri_ch
+	jp c,tstD4
+
 pri_46:	call PV1
 	defb OSTR
 	defb "Bitte CAOS-Devices statt PasEx benutzen.",0dh,0ah,0
-pri_ch:	call PASCHR
 	ret
-	
+
 PxCVer:
 	ld a,(0e011h) ; ab KC 85/4 steht hier Menüwort „BASIC“ 
 	cp 7fh	      ; KC 85/4 ?				 
@@ -101,7 +100,7 @@ loeEda:
 	inc hl
 	djnz loeEda
 
-	;; Menuewort USB suchen /*und sichtbar machen*/
+	;; Menuewort USB suchen
 	ld hl,0ba00h
 	ld bc,00500h
 	ld de,mUSB
@@ -110,13 +109,7 @@ loeEda:
 	defb ZSUCH		; bei Erfolg: HL+1 = Startadr.
 	ret nc			; Fehlerbehandlung?
 
-	inc hl			; Prozedurbeginn
-;	push hl
-;	ld de,4			; 4 = laenge(0ddh,'USB',1) - Carry
-;	sbc hl,de
-;	ld (hl),07fh
-;	dec hl
-;	ld (hl),07fh
+	inc hl			; HL = Prozedurbeginn
 
 	;; USB einschalten, dann steht SUDEV in SUTAB
 	ld a,1
@@ -134,6 +127,20 @@ loeEda:
 	
 mUSB:	defb "USB",0
 
+;;; ======================================================
+;;; Test auf D004
+
+tstD4:
+	;; Test auf D004
+	ld bc,0fc80h
+	in a,(c)
+	cp 0a7h
+	ret z			; D004 gefunden
+	xor a			; kein D004 gefunden -->
+	ld (Dev1Adr),a		; 1. Byte der Adr. auf 0
+	ret
+
+;;; ======================================================
 ;;; Adressen Dev0Adr, Dev1Adr oder Dev2Adr befüllen
 ;;; Parameter: DE = Zieladresse
 FuellA:
@@ -156,44 +163,3 @@ FuellA:
 	pop hl
 	ret
 
-;;; ======================================================
-;;; Test auf D004
-
-tstD4:
-	;; Test auf D004
-	ld bc,0fc80h
-	in a,(c)
-	cp 0a7h
-	ret z			; D004 gefunden
-	xor a			; kein D004 gefunden -->
-	ld (Dev1Adr),a		; 1. Byte der Adr. auf 0
-	ret
-
-;;; ======================================================
-;;; Sonderzeichen fuer Pascal, Routine an Ort und Stelle kopieren
-ochrpl  equ OCHRPE - OCHRP
-ochrpa  equ 0c000h - ochrpl
-PASCHR:
-	;; Voraussetzung: SUTAB ist bereits im RAM, enthaelt aber
-	;; noch die Adr. der orig. Routine
-	ld hl,(SUTAB)
-	ld e,(hl)
-	inc hl
-	ld d,(hl)
-	dec hl
-	ex de,hl		; hl = orig. OCHR-Adr.
-	ld (ochrp1+1),hl	; 3 Code-Stellen patchen
-	ld (ochrp2+1),hl
-	ld (ochrp3+1),hl
-	ex de,hl		; hl = (SUTAB)
-	ld de,ochrpa
-	ld (hl),e
-	inc hl
-	ld (hl),d
-	ld hl,OCHRP
-	ld bc,ochrpl
-	ldir
-	ret
-
-;;; muss vor "org PasExR" stehen weil isso (um die 3 Codestellen zu patchen)
-include px2sozei.inc

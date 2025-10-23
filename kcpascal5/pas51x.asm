@@ -12,9 +12,9 @@ ORG 0x0200
 	defs 5
 	defb 3
 	defw PasPrgMenuHdr
-;	defw PXBASCI + Rest_first - PXSASCI
 	defw PasExB + HochE - HochA
-	defw pre_init
+;	defw pre_init
+	defw autostart
 	defs 0x69
 iobuf:	equ 0x0200
 
@@ -601,14 +601,28 @@ l069ch:
 	dec hl	
 	push hl	
 	pop de	
-	ret	
-Entry:
+	ret
+Init0:
 	ld (caos_ix),ix
-	di	
+	di
+	;; einfach und unelegant SUTAB nach Reset wiederherstellen
+	IRM_ON
+	ld hl,(SutabR)		; Merkzelle zur Wiederherstellung nach Reset
+	ld (SUTAB),hl
+	ld (hl),low(ochrpa)	; f. CAOS>4.6 Zeichenroutine umbiegen
+	inc hl
+	ld (hl),high(ochrpa)	; ochrpa wird in sozei_ini.inc berechnet
+	IRM_OFF
+	ret
+Entry:
+;	ld (caos_ix),ix
+;	di
+	call Init0
 	jp Init1
 Recall:
-	ld (caos_ix),ix
-	di	
+;	ld (caos_ix),ix
+;	di
+	call Init0
 	jp l06c3h
 caos_ix:
 	defw 00000h
@@ -11456,4 +11470,9 @@ StartPASSrc:
 
 ;;; ======================================================
 ;;; Autostart
+autostart:
+	call pre_init
+	call PASCHR
+	ret
+include sozei_ini.inc
 include pasex2/pasex2.inc

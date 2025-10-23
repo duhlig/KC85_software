@@ -23,3 +23,6 @@ OSTR:		equ 0x23
 
 fileName:	equ 0x0000		; "neue Vereinbarung" zw. Pascal und PasEx2
 fileExt:	equ 0x0008    		; ABER: ist nicht 0-terminiert!
+
+ochrpa:		equ 0xbe00	; Anfang der fuer Pascal angepassten OCHR-Routine
+				; muss wg. Ein-Pass-Assembler vorab definiert werden
