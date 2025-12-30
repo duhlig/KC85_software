@@ -4,11 +4,11 @@
 include pas_gdef.inc
 
 VERSION MACRO
-	defb "V5.1e"
+	defb "V5.2"
 	ENDM
 	
 ORG 0x0200
-	defb "PAS51X  KCC"
+	defb "PASCAL52KCC"
 	defs 5
 	defb 3
 	defw PasPrgMenuHdr
@@ -223,7 +223,8 @@ NoAutoStart:
 	ld (bin_end),de
 	ld (iobuf+19),de
 	ld a,(fileExt)
-	cp 043h
+;	cp 'C'			; auf Dateiendung COM testen
+	cp 'K'			; auf Dateiendung KCC testen
 	jr nz,C_ISRO
 	ld hl,PasPrgStartA
 	ld (iobuf+21),hl
@@ -794,7 +795,8 @@ SetExtCOM:
 	ld hl,fileExtCOM
 	jr SetFileExt
 fileExtCOM:
-	defb "COM"
+;	defb "COM" 		; passt besser zu CP/M
+	defb "KCC" 		; passt besser zu CAOS, D004 und M052
 fileExtPAS:
 	defb "PAS"
 SaveSrcFile:

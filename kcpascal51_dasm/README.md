@@ -53,24 +53,8 @@ Die Anpassungen stecken in pas51x.asm. Um nicht selbst assemblieren zu müssen, 
 
 ## Testmöglichkeit
 
-Zum Test der angepassten KC-Pascal-Version sollte natürlich jeder sein eigenes Pascal-Programm schreiben und prüfen, dass ein korrektes KCC-Programm generiert wird. Hilfsweise kann fepen.pas benutzt werden.
-
-Fepen.pas enthält absichtlich einen Syntaxfehler auf Zeile 1000. Dort fehlt das abschließende Semikolon. Damit wird man zu einem Kurztest des Editors gezwungen.
-
-- Variante 1: Korrektur vor dem Übersetzen
-
-        E1000 [Enter]
-        X
-        ; [Enter]
-        [Enter]
-        C
-
-- Variante 2: Fehler durch den Compiler finden lassen, korrigieren und
-  neu übersetzen
-
-        C
-        (Anzeige der Fehlermeldung in Zeile 1010)
-        P
-        ; [Enter]
-        [Enter]
-        C
+Zum Test der angepassten KC-Pascal-Version sollte natürlich jeder sein
+eigenes Pascal-Programm schreiben und prüfen, dass ein korrektes
+KCC-Programm generiert wird. Hilfsweise kann fepen.pas benutzt werden
+(siehe
+https://github.com/duhlig/KC85_software/tree/main/kcpascal5/beispiele).
