@@ -11,19 +11,20 @@ liegt die Weiterentwicklung. Die Dokumentation steht auf
 https://github.com/duhlig/KC85_software/tree/main/_Papier/kcpascal_dok
 bereit.
 
-# Anpassungen
-
-Die Anpassungen stecken in pas51x.asm. Um nicht selbst assemblieren zu müssen, kann pas51x.kcc verwendet werden.
+# Änderungshistorie
 
 ## Version 5.2
 
 ### Erweiterungen
 
-- Kommando T (Translate) generiert eine KCC- statt COM-Datei.
-- PasEx2 funktioniert grundlegend. Doku siehe oben.
+- Kommando T (Translate) verwendet die Dateierweiterung KCC statt COM.
+- PasEx2 funktioniert grundlegend. Details siehe Doku.
+- Beispielprogramme
+  - fepen: verwendet REAL und möglichst viele Syntax-Konstrukte.
+  - gruss: TIN und TOUT, Test von PasEx2 möglich
 
 
-## Testmöglichkeit
+# Testmöglichkeit
 
 Zum Test der angepassten KC-Pascal-Version sollte natürlich jeder sein
 eigenes Pascal-Programm schreiben und prüfen, dass ein korrektes
