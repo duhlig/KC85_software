@@ -834,8 +834,8 @@ SaveCom:
 	call SetFileName
 	call Save
 	jp JEndPascal
-InitRuntimeErr__:
-	ld a,0c3h
+InitIBufAndRTErr:
+	ld a,0c3h		; JMP
 	ld (JReadEditIBuf__),a
 	ld hl,ReadEditIBuf__
 	ld (JReadEditIBuf__+1),hl
@@ -1092,70 +1092,73 @@ NxtListElem:
 	ld d,(hl)	
 	djnz NxtListElem
 	ret	
-Mul8x8:
+Mul16x8usgn:			; HL := (unsigned) HL * DE mit D=0
+				; CY=1 bei Überlauf/Fehler
 	xor a	
-	sbc hl,de
+	sbc hl,de		; größeren Faktor ermitteln
 	add hl,de	
-	jr nc,l09c3h
-	ex de,hl	
-l09c3h:
-	or d	
-	scf	
-	ret nz	
-	or e	
-	ld e,d	
-	jr nz,l09d1h
-	ex de,hl	
+	jr nc,M8uChkVal
+	ex de,hl		; tauschen wg. Geschwindigkeit und für Test auf Wertebereich
+M8uChkVal:
+	or d			; kleinerer Faktor > 255?
+	scf			; Fehler signalisieren
+	ret nz			; Faktoren zu groß
+	or e			; e = 0?, außerdem a := e
+	ld e,d			; e := 0
+	jr nz,M8uNxtBit		; nein, e<>0 --> weiterrechnen
+	ex de,hl		; HL := 0
 	ret	
-l09cch:
-	ex de,hl	
+M8uF2ToResult:
+	ex de,hl		; Zwischenprodukt liegt in DE
 	add hl,de	
 	ex de,hl	
-l09cfh:
-	add hl,hl	
-	ret c	
-l09d1h:
-	rra	
-	jr nc,l09cfh
+M8uDblF2:
+	add hl,hl		; "Faktor" 2 verdoppeln
+	ret c			; Fehler: Überlauf
+M8uNxtBit:
+	rra			; CY ist hier vorher immer 0 -> wirk wie srl a
+	jr nc,M8uDblF2
 	or a	
-	jr nz,l09cch
-	add hl,de	
+	jr nz,M8uF2ToResult
+	add hl,de		; letzte Addition und Bereitstellung des Ergebnisses
 	ret	
 JErrOverflow:
 	jp ErrOverflow
-Mul16x8sgn:
+Mul16x8sgn:			; HL := (signed) HL * DE mit -256 < DE < 256
+				; Runtime Error bei Überlauf/Fehler
 	ld a,d	
 	xor h	
-	ld b,a	
+	ld b,a			; Bit 7 von B enthält das Vorzeichen des Ergebnisses.
 	call AbsHL
 	ex de,hl	
 	call AbsHL
 	xor a	
 	sbc hl,de
-	add hl,de	
-	jr nc,l09edh
+	add hl,de		; kleineren Faktor ermitteln
+	jr nc,M8sChkVal
 	ex de,hl	
-l09edh:
+M8sChkVal:
 	or d	
 	jr nz,JErrOverflow
-	or e	
-	ld e,d	
-	jp nz,l09fdh
-	ex de,hl	
+	or e			; A := E und Z-Flag ggf. setzen
+	ld e,d			; DE := 0
+	jp nz,M8sNxtBit
+	ex de,hl		; x * 0 = 0 -> Ende
 	ret	
-l09f7h:
-	ex de,hl	
+M8SF2ToResult:
+	ex de,hl		; Zwischenprodukt liegt in DE	
 	add hl,de	
 	ex de,hl	
-l09fah:
-	add hl,hl	
-	jr c,JErrOverflow
-l09fdh:
-	rra	
-	jr nc,l09fah
+M8sDblF2:
+	add hl,hl		; "Faktor" 2 verdoppeln
+	jr c,JErrOverflow	; Fehler: Überlauf
+M8sNxtBit:
+	rra			; CY ist hier vorher immer 0 -> wirk wie srl a	
+	jr nc,M8sDblF2
 	or a	
-	jr nz,l09f7h
-	adc hl,de
+	jr nz,M8SF2ToResult
+	adc hl,de		; CY müsste hier immer 0 sein, oder?
+				; Aber adc setzt das Overflow-Flag (wird hier nicht ausgewertet).
 	jr c,JErrOverflow
 	jp m,JErrOverflow
 	or b	
@@ -1218,7 +1221,7 @@ l0a49h:
 	jr NegHL
 CurrCharIsNum:
 	call GetCurIBufChr
-IsNum:
+IsNum:				; Return: CY=1 wenn Ziffer
 	cp 030h
 	ccf	
 	ret nc	
@@ -1636,11 +1639,11 @@ l0c82h:
 sub_0c87h:
 	push hl	
 	ld hl,0ffcfh
-	ld de,(l178bh)
+	ld de,(FreeMem__)
 	sbc hl,de
 	ex de,hl	
 	add hl,bc	
-	ld (l178bh),hl
+	ld (FreeMem__),hl
 	pop hl	
 	ld (hl),e	
 	inc hl	
@@ -3114,7 +3117,7 @@ Arctan__:
 	ld a,002h
 	ld (l1799h),a
 	exx	
-	ld hl,l49e6h		; #### muesste falsch sein: kein Label, sondern Zahl ###
+	ld hl,049e6h
 	ld de,0ff9dh
 	push hl	
 	push de	
@@ -3364,7 +3367,7 @@ l1769h:
 	defs 32
 retAddr__:
 	defw 00000h
-l178bh:
+FreeMem__:				; Hier wird bei Programmstart ein Wert hinterlegt, der bei CloseCompi ausgerechnet wird. (-51-binEndAddr)
 	defw 00000h
 l178dh:
 	defw 00000h
@@ -3423,7 +3426,7 @@ RL_GETSYS:
 	defb 009h
 	defb 001h
 	defb 000h
-	defw l515bh
+	defw PaGetsys
 	defb 002h
 RL_PLOT:
 	defw RL_GETSYS
@@ -3710,7 +3713,7 @@ RL_PEEK:
 	defw RL_ORD
 	defb "PEE",'K'+0x80
 	defb 007h
-	defw l4536h
+	defw Peek
 RL_POKE:
 	defw RL_PEEK
 	defb "POK",'E'+0x80
@@ -3788,51 +3791,35 @@ RL_TRUE:
 RL_BOOLEAN:
 	defw RL_TRUE
 	defb "BOOLEA",'N'+0x80
-	defb 003h
-	defb 004h
-	defb 000h
-	defb 000h
-	defb 001h
-	defb 001h
-	defb 001h
-	defb 001h
-	defb 000h
+	defb 003h		; "Type"
+	defw 00004h		; "BOOLEAN"
+	defw 00100h		; min. Wert
+	defw 00101h		; max. Wert
+	defw 00001h		; Länge
 RL_CHAR:
 	defw RL_BOOLEAN
 	defb "CHA",'R'+0x80
-	defb 003h
-	defb 003h
-	defb 000h
-	defb 000h
-	defb 0ffh
-	defb 0ffh
-	defb 0ffh
-	defb 001h
-	defb 000h
+	defb 003h		; "Type"
+	defw 00003h		; "CHAR"
+	defw 0ff00h		; min. Wert
+	defw 0ffffh		; max. Wert
+	defw 00001h		; Länge
 RL_REAL:
 	defw RL_CHAR
 	defb "REA",'L'+0x80
-	defb 003h
-	defb 002h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 000h
-	defb 004h
-	defb 000h
+	defb 003h		; "Type"
+	defw 00002h		; "REAL"
+	defw 00000h		; unbenutzt
+	defw 00000h		; unbenutzt
+	defw 00004h		; Länge
 RL_INTEGER:
 	defw RL_REAL
 	defb "INTEGE",'R'+0x80
-	defb 003h
-	defb 001h
-	defb 000h
-	defb 001h
-	defb 080h
-	defb 0ffh
-	defb 07fh
-	defb 002h
-	defb 000h
+	defb 003h		; "Type"
+	defw 00001h		; "INTEGER"
+	defw 08001h		; min. Wert, -32767
+	defw 07fffh		; max. Wert,  32767
+	defw 00002h		; Länge
 RL_READLN:
 	defw RL_INTEGER
 	defb "READL",'N'+0x80
@@ -5132,7 +5119,8 @@ l2b4ah:
 listPageSize:
 	nop	
 GetSrcChr:
-	jp 05491h
+	;; Return: A = aktuelles Zeichen im Quelltext (liefert Leerz. am Zeilenende)
+	jp 05491h		; entweder GetChr_SrcToLinB oder GetChr_LinBToSrc
 curIdentifier:
 	defs 10
 SP_safe:
@@ -5143,7 +5131,7 @@ curNum:
 	defw 00000h
 curRealHWord:
 	defw 00000h
-l2b61h:
+NxtVarAddr__:
 	defw 00000h
 l2b63h:
 	defw 00000h
@@ -5151,33 +5139,33 @@ memEnd:
 	defw 00000h
 l2b67h:
 	defw 00000h
-lastChrRead__:
+lastChrRead__:			; ab hier...
 	defb 020h
 labelListAddr:
-	defw 00000h
+	defw 00000h		;     init: RL_PACKED
 SymTabAddr__:
-	defw 00000h
+	defw 00000h		;     init: RL_WRITE
 TopOfHeapAddr__:
-	defw 00000h
-	defw 00000h
+	defw 00000h		;     init: Symtab_open_start
+	defw 00000h		;     init: StartPASSrc
 BlockLevel__:
 	defb 000h
 lastError__:
 	defb 000h
-l2b74h:
+NxtEnumTypNum:
 	defb 006h
 l2b75h:
-	defb 000h
+	defb 000h		;     init: 0efh
 l2b76h:
-	defw 00000h
+	defw 00000h		; ...bis hier wird durch CoInit mit CoVarInitData überschrieben
 lineBufPtr:
 	defw 00000h
 	defw 00000h
 compiBinStart__:
 	defw 00000h
-l2b7eh:
+SymtabEntryAddr__:
 	defw 00000h
-l2b80h:
+EnumVal__:
 	defb 000h
 	defb 000h
 	defb 000h
@@ -5193,35 +5181,26 @@ l2b89h:
 	nop	
 l2b8bh:
 	add a,080h
-l2b8dh:
-	nop	
-	nop	
-binMoveDistance__:
-	nop	
-	nop	
-binMoveDistanceNeg__:
-	nop	
-	nop	
-l2b93h:
-	nop	
-	nop	
-	nop	
-	nop	
-	nop	
-	nop	
-	nop	
-	nop	
-	nop	
+PasPrgMainA:
+	;; Merkzelle für Sprung auf erste Anweisung im Hauptteil
+	defw 00000h
+binMoveDistance:
+	;; bei Kommando C (Compile) -> 0
+	;; bei T (Translate) -> Abstand für Code-Verschiebung ans Runtime-Ende
+	defw 00000h
+binMoveDistNeg:			; := -binMoveDistance
+	defw 00000h
+PeekTypeStruct:			; wird bei PEEK benutzt, um Typinformationen abzulegen
+	defs 9
 nextLineAddr:
-	nop	
-	nop	
+	defw 00000h
 l2b9eh:
 	ret	
 	inc hl	
 InitEditor__:
 	call JResetPrintFlag
 sub_2ba3h:
-	ld a,0c3h
+	ld a,0c3h		; JMP
 	ld (GetSrcChr),a
 	ld hl,GetChr_LinBToSrc
 	ld (GetSrcChr+1),hl
@@ -5288,9 +5267,9 @@ Compile:
 	call CoInit
 l2bfeh:
 	call sub_4781h
-	cp 0aeh
+	cp 0aeh			; "." gefunden?
 	jp z,CloseCompi
-	ld e,00bh
+	ld e,00bh		; Error: "'.' wird erwartet"
 	call CompileErr
 	jr l2bfeh
 CoInit:
@@ -5323,13 +5302,13 @@ CoInit:
 	ld de,(compiBinStart__)
 	or a	
 	sbc hl,de
-	ld (binMoveDistance__),hl
+	ld (binMoveDistance),hl
 	ex de,hl	
 	xor a	
 	ld l,a	
 	ld h,a	
 	sbc hl,de
-	ld (binMoveDistanceNeg__),hl
+	ld (binMoveDistNeg),hl
 	ld hl,(stack_adr)
 	jr z,StackAtRamEnd
 	ld hl,(ram_end)
@@ -5371,11 +5350,11 @@ CoErNumTooBig:
 l2ce6h:
 	call CompileErr
 	jp l30a8h
-l2cech:
+l2cech:				; beim Parsen eines REAL keine Ziffer nach dem Punkt gefunden
 	set 1,(ix+002h)
 ChkExponent:
 	ld c,d	
-	cp 045h
+	cp 045h			; 'E'?
 	jr z,GetExp
 	ld (lastChrRead__),a
 	xor a	
@@ -5417,10 +5396,10 @@ TooManyDigits:
 	call GetCIsNum
 	jr c,TooManyDigits
 ChkDecPt:
-	cp 02eh
-	jr nz,ChkExponent
-	call GetCIsNum
-	jr nc,l2cech
+	cp 02eh			; "."?
+	jr nz,ChkExponent	; nein, dann noch auf Exponent testen
+	call GetCIsNum		; CY=1 wenn Ziffer
+	jr nc,l2cech		; keine Ziffer --> ???
 	dec b	
 	inc b	
 	ld c,d	
@@ -5446,12 +5425,12 @@ TooManyFractDigits:
 	jr c,TooManyFractDigits
 ChkExpF:
 	ld d,c	
-	cp 045h
+	cp 045h			; 'E'?
 	jr nz,FractEnds
 GetExp:
 	push de	
 	call GetSrcChr
-	cp 02dh
+	cp 02dh			; "-"?
 	jr nz,PosExp
 	call GetSrcChr
 	call Get2C_Dec
@@ -5463,7 +5442,7 @@ FractEnds:
 	ld a,d	
 	jr GetFloatEnds
 PosExp:
-	cp 02bh
+	cp 02bh			; "+"?
 	call z,GetSrcChr
 	call Get2C_Dec
 	pop af	
@@ -5474,6 +5453,7 @@ l2d83h:
 	ld e,01fh
 	jp l2ce6h
 Get2C_Dec:
+	;; Return: B = Wert der gelesenen Zahl (Wert steht auch in lastChrRead__)
 	call IsNum
 	jr nc,l2d83h
 	sub 030h
@@ -5494,7 +5474,8 @@ Get2C_Dec:
 	jp c,CoErNumTooBigA
 OneDigit:
 	ld (lastChrRead__),a
-	ret	
+	ret
+;;; -----------------------------------------------------
 PrSrcLine:
 	push de	
 	call Break
@@ -5532,7 +5513,7 @@ l2dd0h:
 	jr z,Quiet1
 	call GetTargetAddrInHL__
 	ex de,hl	
-	call PrWordHex
+	call PrWordHex		; Zieladr. im Compilat ausgeben
 	call PrSrcLine
 Quiet1:
 	pop bc	
@@ -5603,23 +5584,23 @@ CSq_Init:
 	defb 006h
 	call SaveCAOS_SP
 	call JResetPrintFlag
-CSq_InitJRTErr:
-	defb 006h
-	call InitRuntimeErr__
+CSq_InitJRT2:
+	defb 006h		; überlappt mit nächster Routine!?
+	call InitIBufAndRTErr
 CloseCompi:
 	ld hl,tEadr
-	call OutZStr
-	ld hl,CSq_JReset
+	call OutZStr		; "Endadresse: " anzeigen
+	ld hl,CSq_JReset	; Programmabschluss ins Binary schreiben
 	call WCode
 	ex de,hl	
 	dec de	
-	call PrWordHex
+	call PrWordHex		; Endadr. des Binarys anzeigen
 	call PrNL
-	ld hl,0ffcdh
+	ld hl,0ffcdh		; HL := -51
 	or a	
-	sbc hl,de
+	sbc hl,de		; ?? HL := -51 - BinEndAddr ??
 	ex de,hl	
-	ld hl,(l2b8dh)
+	ld hl,(PasPrgMainA)
 	dec hl	
 	dec hl	
 	call WrDE_ByTargAddr_pl2
@@ -5636,7 +5617,7 @@ CloseCompi:
 	call PrDez
 	jp Reset
 l2ea7h:
-	ld hl,(binMoveDistance__)
+	ld hl,(binMoveDistance)
 	ld a,h	
 	or l	
 	jr z,RunOrReset
@@ -5782,13 +5763,13 @@ IsNum_ToNum:
 	ret c	
 	sub 030h
 	ret	
-GetCIsNum:
+GetCIsNum:			; Return: CY=1 wenn Ziffer
 	call GetSrcChr
 	jp IsNum
 LxSrcEnd__:
-	ld a,0aeh
+	ld a,0aeh		; Return: '.' gefunden
 	jp GetLexEnd
-GetLexem:
+GetLexem:			; Return: A = Lexemcode
 	push hl	
 	push de	
 	push bc	
@@ -5801,55 +5782,55 @@ LxSkipSpace:
 	call GetSrcChr
 	jr LxSkipSpace
 SignificantChr:
-	cp 041h
-	jr c,LxNumOrPkt
-	cp 05bh
-	jr nc,LxLowCOrPkt
+	cp 041h			; < 'A'?
+	jr c,LxNumOrPkt		; ja -> Sonderzeichen (Teil 1) prüfen
+	cp 05bh			; > 'Z'?
+	jr nc,LxLowCOrPkt	; ja -> Sonderzeichen (Teil 2) prüfen
 l2fe0h:
 	call LxIdentifier
-	jp l303ah
+	jp LxSetLastChr
 LxLowCOrPkt:
-	cp 07bh
-	jr z,l2ff4h
-	jp nc,l305fh
-	cp 061h
-	jr nc,l2fe0h
-	jp l305fh
-l2ff4h:
+	cp 07bh			; "{" ?
+	jr z,LxComStart		; Beginn eines Kommentars
+	jp nc,LxSymbol		; Sonderzeichen |, } oder ~
+	cp 061h			; "a"
+	jr nc,l2fe0h		; Kleinbuchstaben -> Teil eines Identifiers
+	jp LxSymbol		; Sonderzeichen [, \, ], ^, _ oder `
+LxComStart:				; Beginn eines Kommentars
 	call GetSrcChr
-	cp 024h
-	jr nz,l300eh
+	cp 024h			; "$"?
+	jr nz,LxChkComEnd
 	ld de,(lineBufPtr)
 	call ReadCompOpt
 	ld (lineBufPtr),de
 	call SetAToSpaceIfEOL
-	jr l300eh
-l300bh:
+	jr LxChkComEnd
+LxComNxtC:
 	call GetSrcChr
-l300eh:
-	cp 07dh
-	jr z,l301dh
-	cp 02ah
-	jr nz,l300bh
+LxChkComEnd:
+	cp 07dh			; "}"? 
+	jr z,LxComEnd		; Kommentar zu Ende
+	cp 02ah			; "*"?
+	jr nz,LxComNxtC
 	call GetSrcChr
-	cp 029h
-	jr nz,l300eh
-l301dh:
+	cp 029h			; ")"
+	jr nz,LxChkComEnd
+LxComEnd:
 	call GetSrcChr
 	jp LxSkipSpace
 LxNumOrPkt:
 	call IsNum
 	jr c,GetUnsigNum
-	cp 03ah
+	cp 03ah			; ":" gelesen?
 	jr nz,l306ah
 	call GetSrcChr
-	ld c,0bah
-	cp 03dh
-	jr nz,l303ah
-	ld c,07dh
+	ld c,0bah		; Lexem-Code für ":"
+	cp 03dh			; "=" gelesen?
+	jr nz,LxSetLastChr
+	ld c,07dh		; Lexem-Code für ":="
 l3037h:
 	call GetSrcChr
-l303ah:
+LxSetLastChr:
 	ld (lastChrRead__),a
 	ld a,c	
 GetLexEnd:
@@ -5863,20 +5844,20 @@ l3046h:
 	jp z,l30d9h
 	cp 023h
 	jr z,l30b2h
-	cp 028h
-	jr nz,l305fh
+	cp 028h			; "("?
+	jr nz,LxSymbol
 	call GetSrcChr
-	cp 02ah
-	jp z,l2ff4h
+	cp 02ah			; "*"?
+	jp z,LxComStart
 	ld c,0a8h
-	jr l303ah
-l305fh:
+	jr LxSetLastChr
+LxSymbol:
 	add a,080h
 	ld c,a	
 	cp 0aeh
 	jr nz,l3037h
 	ld a,020h
-	jr l303ah
+	jr LxSetLastChr
 l306ah:
 	jr c,l3046h
 	ld c,078h
@@ -5890,16 +5871,16 @@ l306ah:
 	jr z,l3037h
 	ld c,07ah
 	cp 03dh
-	jr nz,l303ah
+	jr nz,LxSetLastChr
 	ld c,07ch
 	jr l3037h
 l3089h:
 	cp 03eh
-	jr nz,l305fh
+	jr nz,LxSymbol
 	call GetSrcChr
 	cp 03dh
 	ld c,079h
-	jr nz,l303ah
+	jr nz,LxSetLastChr
 	ld c,07bh
 	jr l3037h
 GetUnsigNum:
@@ -5938,7 +5919,7 @@ CoErrHexExpected:
 l30d1h:
 	ld c,07fh
 	ld (curRealHWord),hl
-	jp l303ah
+	jp LxSetLastChr
 l30d9h:
 	call WrJump
 	ld (curRealHWord),hl
@@ -5998,7 +5979,7 @@ CErrStrLiEnd:
 	jr OnEndOfStr__
 LxIdentifier:
 	ld hl,curIdentifier
-	ld b,00ah
+	ld b,00ah		; max. 10 signifikante Zeichen pro Identifier
 LxIdNextChr:
 	ld (hl),a	
 	call GetCIsAlNum
@@ -6011,18 +5992,18 @@ LxIdSkipTrailingChr:
 	jr c,LxIdSkipTrailingChr
 LxIdAllChrsRead:
 	push af	
-	set 7,(hl)
+	set 7,(hl)		; Wortende kennzeichnen
 	ld a,(curIdentifier)
-	cp 061h
-	jr nc,LxIdSetLxCode
+	cp 061h			; beginnt mit einem Kleinbuchstaben?
+	jr nc,LxIdSetLxCode	; dann kann es kein reserv. Wort sein
 	ld hl,ResWordsEntry2
 	push de	
 	call SearchInSymTab__
 	pop de	
 LxIdSetLxCode:
-	ld c,000h
+	ld c,000h		; Lexem-Code für selbstdef. oder unbekannte Identifier
 	jr nc,LxIdEnd
-	ld c,(hl)	
+	ld c,(hl)		; in Symtab gefunden -> Lexem-Code auslesen
 LxIdEnd:
 	pop af	
 	ret	
@@ -6195,12 +6176,12 @@ tKeTx:
 	defb 00dh,"Kein Text mehr!",000h
 tTabU:
 	defb "Tabellenueberlauf!",000h
-ChkTypeBool__:
+ChkTypeBool:
 	ld de,00004h
-	jr ChkType__
-ChkType0001:
+	jr ChkType
+ChkTypeInt:
 	ld de,00001h
-ChkType__:
+ChkType:
 	ex de,hl	
 	or a	
 	sbc hl,bc
@@ -6255,15 +6236,18 @@ ChkLexem_GetLex:
 	jp z,GetLexem
 	jp CompileErr
 IdentToSymtab:
+	;; Parameter: A: Lexem-Code (wenn <> 0 dann Error)
+	;;            DE: Länge Symtab-Eintrag ohne (=nach) Identifier ??
+	;; Return: HL = Adr. nach Identifier
 	push de	
 	ld hl,(TopOfHeapAddr__)
 	ld de,(SymTabAddr__)
 	ld (SymTabAddr__),hl
-	ld (hl),e	
+	ld (hl),e		; Verknüpfung zum Vorgänger
 	inc hl	
 	ld (hl),d	
 	inc hl	
-	or a	
+	or a			; Identifier?
 	jr nz,ItS_ErrIdExpected
 	ex de,hl	
 	ld hl,curIdentifier
@@ -6272,21 +6256,21 @@ ItS_StoreChr:
 	ld a,(hl)	
 	ldi
 	or a	
-	jp p,ItS_StoreChr
+	jp p,ItS_StoreChr	; Identifier-Abschluss mit Bit7 erkennen
 ItS_ChkHeapEnd:
-	pop hl	
-	add hl,de	
+	pop hl			; Parameter DE von IdentToSymtab holen
+	add hl,de		; HL = geplantes Ende (+1) des Symtab-Eintrags
 	ld (TopOfHeapAddr__),hl
-	ld hl,(heapEndAddr)
-	ld bc,0fff4h
+	ld hl,(heapEndAddr)	; vorgegebenes Ende der Symtab
+	ld bc,0fff4h		; -12
 	add hl,bc	
-	sbc hl,de
+	sbc hl,de		; DE = Ende des Identifiers
 	ex de,hl	
 	ret nc	
 	ld hl,tTabU
 	jp OutErrAndReset
 ItS_ErrIdExpected:
-	ld e,004h
+	ld e,004h		; Error: "Name wird erwartet"
 	call CompileErr
 	ld (hl),080h
 	inc hl	
@@ -6388,26 +6372,28 @@ WCodeOverLastByte:
 WrJump:
 	ld hl,CSq_JP
 WCode:
+	;; Parameter  IN: HL = Adr. auf zu schreibende Code-Seq.
+	;;           OUT: HL = akt. Code-Adr. _nach_ Verschiebung
 	push hl	
 WCode1:
 	exx	
 WCode2:
 	ex (sp),hl	
-	ld c,(hl)	
-	inc hl	
-	ld b,000h
-	pop de	
+	ld c,(hl)		; Länge der Code-Sequenz
+	inc hl			; Anfang der Code-Sequenz
+	ld b,000h		; Länge ist < 256
+	pop de			; aktuelle Code-Schreib-Adr.
 	ldir
-	ex de,hl	
-	exx	
+	ex de,hl		; neue Code-Schreib-Adr. ...
+	exx			; ... in HL' sichern
 GetTargetAddrInHL__:
 	exx	
 	push hl	
-	ld bc,(binMoveDistance__)
-	add hl,bc	
+	ld bc,(binMoveDistance)
+	add hl,bc		; akt. Code-Adr. _nach_ Verschiebung...
 	ex (sp),hl	
 	exx	
-	pop hl	
+	pop hl			; ...als Return-Wert liefern
 	ret	
 StoreAToHL2:
 	exx	
@@ -6481,7 +6467,7 @@ WrA_ByTargAddr:
 	pop bc	
 	ret	
 TargAddrToCompAddr:
-	ld bc,(binMoveDistanceNeg__)
+	ld bc,(binMoveDistNeg)
 	add hl,bc	
 	ret	
 sub_343dh:
@@ -6531,47 +6517,47 @@ PCVNegInt:
 ParseConstVal:
 	or a	
 	jr z,PCVIdent
-	cp 0abh
+	cp 0abh			; "+"?
 	jr z,PCVPosNum
-	cp 0adh
+	cp 0adh			; "-"?
 	jr z,PCVNegNum
 	ld hl,(curRealHWord)
-	cp 075h
+	cp 075h			; string literal?
 	jr z,l34d8h
 	ld bc,00001h
-	cp 07fh
+	cp 07fh			; positive integer?
 	jr z,PCVEnds__
-	inc c	
+	inc c			; BC = 0002h
 	ld de,(curNum)
-	cp 07eh
+	cp 07eh			; unsigned number?
 	jr z,PCVEnds__
-	inc c	
-	cp 076h
+	inc c			; BC = 0003h
+	cp 076h			; character?
 	jr z,PCVEnds__
-	ld e,00dh
+	ld e,00dh		; Error: "Eine Konstante wird erwartet."
 	jp CompileErr
 PCVIdent:
 	call GetIdentInfoInABC
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
-	dec a	
-	jr z,l34cfh
-	cp 008h
-	jr nz,l34c8h
-	ld hl,l52ceh
+	dec a			; War Ident ein Const?
+	jr z,PCVConstId
+	cp 008h			; oder eine Fnc?
+	jr nz,PCValErr		; nein?
+	ld hl,l52ceh		; doch! War es CHR?
 	sbc hl,de
-	jr nz,l34c8h
+	jr nz,PCValErr		; andere Fnc als CHR sind bei CONST-Def. nicht erlaubt
 	call NextChkOpBra_GetLex
 	call ParseConstVal
-	call ChkType0001
+	call ChkTypeInt
 	ld bc,00003h
 	jp ChkCloBra_GetLex
-l34c8h:
-	ld e,00eh
+PCValErr:
+	ld e,00eh		; Error: "Dieser Name ist keine Konstante."
 	call CompileErr
 	jr PCVEnds__
-l34cfh:
+PCVConstId:
 	inc hl	
 	ld a,(hl)	
 	inc hl	
@@ -6661,19 +6647,19 @@ WCaBreak_IfCoCo_C:
 CSq_CallBreak:
 	defb 003h
 	call Break
-ChkScalar:
+ChkScalar:			; erwartet BC = 00xxh außer 0002h (REAL), sonst Fehler
 	push af	
 	xor a	
 	cp b	
 	jr nz,CErrScalarExpected
 	ld a,c	
 	cp 002h
-	jr nz,l355bh
+	jr nz,ChkScalarEnd
 CErrScalarExpected:
-	ld e,02fh
+	ld e,02fh		; Error: "Ein Skalartyp außer realen Zahlen wird erwartet."
 	pop af	
 	jp CompileErr
-l355bh:
+ChkScalarEnd:
 	pop af	
 	ret	
 l355dh:
@@ -7030,7 +7016,7 @@ TabCSq_first:
 sub_3710h:
 	call GetLexem
 	call sub_3f3fh
-	call ChkTypeBool__
+	call ChkTypeBool
 	ld hl,CSq_l3722h
 	call WCodeOverLastByte
 	dec hl	
@@ -7056,7 +7042,7 @@ l3725h:
 	call GetLexem
 	ld de,0ba16h
 	call ChkLexem_GetLex
-	jr l3777h
+	jr ParseStmt__
 xxTab4__:
 	defw l3cb4h
 	defw l399dh
@@ -7091,7 +7077,7 @@ sub_376dh:
 	ld de,01110h
 	call ChkLexem_GetLex
 	call WCaBreak_IfCoCo_C
-l3777h:
+ParseStmt__:
 	res 0,(ix+001h)
 	or a	
 	ld hl,l2b89h
@@ -7106,7 +7092,7 @@ l3777h:
 	jp z,l42fdh
 	cp 005h
 	jp z,l3887h
-	ld e,007h
+	ld e,007h		; Error: "Eine Anweisung darf nicht mit diesem Namen beginnen"
 	call sub_4e7dh
 l379fh:
 	push hl	
@@ -7309,7 +7295,7 @@ l38c0h:
 	ld de,00005h
 	add hl,de	
 l38d6h:
-	call sub_4d6dh
+	call SetHLAfterNameEnd
 	push bc	
 	ld e,a	
 	dec hl	
@@ -7326,7 +7312,7 @@ l38d6h:
 	push bc	
 	call sub_5027h
 	pop de	
-	call ChkType__
+	call ChkType
 	jr l3914h
 l38f3h:
 	call sub_3f29h
@@ -7415,17 +7401,17 @@ CSq_PushIX_CallX:
 l3975h:
 	call ParseConstVal
 	push hl	
-	ld hl,l2b80h
+	ld hl,EnumVal__
 	ld e,(hl)	
 	ld d,000h
-	call ChkType__
+	call ChkType
 	pop de	
 	call JCodeNextByte
 	defb 0feh
 	call l381ah
 	ld hl,CSq_l3a62h
-	call WCode
-	cp 0bah
+	call WCode		;
+	cp 0bah			; Lexem-Code für ":"?
 	jr z,l3999h
 	call ChkComma_GetLex
 	jr l3975h
@@ -7447,18 +7433,18 @@ l399dh:
 	call ChkLexem_GetLex
 	ld b,a	
 	ld a,c	
-	ld (l2b80h),a
+	ld (EnumVal__),a
 l39bah:
 	dec a	
 	ld a,b	
 	jr nz,l3975h
 l39beh:
 	call ParseConstVal
-	call ChkType0001
+	call ChkTypeInt
 	call WLdDEnnIsHL
 	ld hl,CSq_l3a5ch
 	call WCode
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	jr z,l39d6h
 	call ChkComma_GetLex
 	jr l39beh
@@ -7484,13 +7470,13 @@ l39ech:
 	pop bc	
 	dec de	
 	push de	
-	ld hl,l2b80h
+	ld hl,EnumVal__
 	ld b,(hl)	
 	push bc	
 	call GetLexem
-	call l3777h
+	call ParseStmt__
 	pop bc	
-	ld hl,l2b80h
+	ld hl,EnumVal__
 	ld (hl),b	
 	call WrJump
 	dec hl	
@@ -7515,7 +7501,7 @@ l39ech:
 	jr z,l3a29h
 	call ChkSemi_GetLex
 	ld b,a	
-	ld a,(l2b80h)
+	ld a,(EnumVal__)
 	jp l39bah
 l3a29h:
 	inc hl	
@@ -7553,7 +7539,7 @@ l3a49h:
 	push hl	
 	push bc	
 	call GetLexem
-	call l3777h
+	call ParseStmt__
 	pop bc	
 	jr l3a3bh
 CSq_l3a5ch:
@@ -7574,7 +7560,7 @@ sub_3a68h:
 	pop af	
 	ret	
 sub_3a6eh:
-	ld hl,(l2b7eh)
+	ld hl,(SymtabEntryAddr__)
 	call sub_34fah
 	jr z,l3aabh
 	sub b	
@@ -7630,16 +7616,16 @@ CSq_l3abch:
 	ex de,hl	
 l3ac1h:
 	call GetLexem
-	or a	
-	ld e,004h
+	or a			; Ist es ein Identifier?
+	ld e,004h		; Error: "Name wird erwartet"
 	call nz,CompileErr
 	call GetIdentInfoInABC
 	cp 002h
-	ld e,007h
+	ld e,007h		; Error: "Eine Anweisung darf nicht mit diesem Namen beginnen."
 	call nz,CompileErr
-	ld a,c	
-	ld (l2b80h),a
-	ld (l2b7eh),hl
+	ld a,c			; C = Typ ??
+	ld (EnumVal__),a
+	ld (SymtabEntryAddr__),hl
 	call GetLexem
 	call ChkColEq_GetLex
 	call sub_3f13h
@@ -7647,15 +7633,15 @@ l3ac1h:
 	ld (Merker1),hl
 	exx	
 	call sub_3a68h
-	cp 00dh
+	cp 00dh			; DOWNTO
 	jr z,l3af7h
-	cp 00ch
-	ld e,011h
+	cp 00ch			; TO
+	ld e,011h		; Error: "'TO' oder 'DOWNTO' wird erwartet"
 	call nz,CompileErr
 l3af7h:
 	push af	
 	call GetLexem
-	ld hl,(l2b80h)
+	ld hl,(EnumVal__)		; Typ?? s.o.
 	ld h,000h
 	exx	
 	push hl	
@@ -7705,7 +7691,7 @@ l3b46h:
 	dec hl	
 	push hl	
 	push af	
-	ld hl,(l2b7eh)
+	ld hl,(SymtabEntryAddr__)
 	jr l3b81h
 l3b4eh:
 	pop af	
@@ -7726,16 +7712,16 @@ l3b61h:
 	call JCodeNextByte
 	defb 0c5h
 	push af	
-	ld hl,(l2b7eh)
+	ld hl,(SymtabEntryAddr__)
 	push hl	
-	ld a,(l2b80h)
+	ld a,(EnumVal__)
 	push af	
 	call sub_376dh
 	ex af,af'	
 	pop af	
 	ld c,a	
 	pop hl	
-	ld (l2b7eh),hl
+	ld (SymtabEntryAddr__),hl
 l3b81h:
 	call sub_34fah
 	jr z,l3bd9h
@@ -7894,7 +7880,7 @@ l3c69h:
 	push hl	
 	ld de,01110h
 	call ChkLexem_GetLex
-	call l3777h
+	call ParseStmt__
 	call WrJump
 	pop de	
 	ex de,hl	
@@ -7907,7 +7893,7 @@ l3c8ah:
 	push hl	
 	ld de,00e0fh
 	call ChkLexem_GetLex
-	call l3777h
+	call ParseStmt__
 	cp 012h
 	jr nz,l3cach
 	call WrJump
@@ -7918,7 +7904,7 @@ l3c8ah:
 	dec de	
 	push de	
 	call GetLexem
-	call l3777h
+	call ParseStmt__
 l3cach:
 	call GetTargetAddrInHL__
 	ex de,hl	
@@ -7930,7 +7916,7 @@ l3cb4h:
 	call GetLexem
 	call WCaBreak_IfCoCo_C
 l3cbeh:
-	call l3777h
+	call ParseStmt__
 	cp 00fh
 	jr z,l3ccah
 	call ChkSemi_GetLex
@@ -7941,12 +7927,12 @@ l3ccah:
 	jp WrDE_ByTargAddr
 l3cd1h:
 	call GetLexem
-l3cd4h:
-	call l3777h
-	cp 010h
+ParseMainBlock:
+	call ParseStmt__
+	cp 010h			; "END"?
 	jp z,GetLexem
 	call ChkSemi_GetLex
-	jr l3cd4h
+	jr ParseMainBlock
 l3ce1h:
 	pop af	
 	ld e,039h
@@ -7996,7 +7982,7 @@ sub_3ce7h:
 	jr z,l3d3ch
 	ld de,01110h
 	call ChkLexem_GetLex
-	call l3777h
+	call ParseStmt__
 l3d32h:
 	pop hl	
 	ld bc,00000h
@@ -8009,9 +7995,9 @@ l3d3ch:
 	jr l3d32h
 sub_3d41h:
 	ld a,c	
-	call sub_4d6dh
+	call SetHLAfterNameEnd
 	ld c,a	
-	ld de,00008h
+	ld de,00008h		; ??? Platz für Symtab-Struktur?
 	add hl,de	
 	ld (hl),c	
 	inc hl	
@@ -8064,12 +8050,12 @@ l3d9ah:
 	call CompileErr
 	jr l3dedh
 l3da1h:
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	ld hl,CSq_PrInt
 	jr nz,l3dc9h
 	call sub_3f0dh
 	ld hl,CSq_l3e48h
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	jr nz,l3dc9h
 	call GetLexem
 	or a	
@@ -8091,7 +8077,7 @@ l3dd6h:
 	ld de,CSq_l3e5eh
 	ld hl,CSq_l3e68h
 l3ddch:
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	jr nz,l3dc9h
 	push hl	
 	push de	
@@ -8107,10 +8093,10 @@ l3dedh:
 	call GetLexem
 	jr CoWRITE2
 l3df7h:
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	jr nz,l3e0dh
 	call sub_3f0dh
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	ld hl,CSq_l3e77h
 	jr nz,l3dc9h
 	call sub_3f0dh
@@ -8124,7 +8110,7 @@ l3e15h:
 	dec b	
 	dec b	
 	jp nz,l3d9ah
-	cp 0bah
+	cp 0bah			; Lexem-Code für ":"?
 	jr nz,l3e35h
 	push bc	
 	call sub_3f0dh
@@ -8205,7 +8191,7 @@ sub_3e87h:
 	ld e,01ah
 	jp nz,CompileErr
 	call GetIdentInfoInABC
-	ld e,01ah
+	ld e,01ah		; Error: "Bei diesem READ-Aufruf wird eine Variable erwartet"
 	jp sub_4e7dh
 l3e95h:
 	call NextChkOpBra_GetLex
@@ -8313,7 +8299,7 @@ sub_3f29h:
 	call sub_3f31h
 l3f2dh:
 	pop de	
-	jp ChkType__
+	jp ChkType
 sub_3f31h:
 	ld hl,00002h
 	or a	
@@ -8364,13 +8350,13 @@ WCode_VarIdxTOS:
 	jp WCodeOverLastByte
 l3f82h:
 	pop de	
-	call ChkType__
+	call ChkType
 	ld bc,TabCSq-000d6h
 	jr WCode_VarIdxTOS
 l3f8bh:
 	ld a,e	
 	pop de	
-	call ChkType__
+	call ChkType
 	bit 4,(ix+000h)
 	ld bc,TabCSq-000eeh
 	jr z,WCode_VarIdxTOS
@@ -8379,7 +8365,7 @@ l3f8bh:
 l3f9eh:
 	ld a,e	
 	pop de	
-	call ChkType__
+	call ChkType
 	bit 7,d
 	jr nz,l3fdbh
 	dec d	
@@ -8439,7 +8425,7 @@ l3ff7h:
 	push bc	
 	call PasrseSimEx1
 	pop de	
-	call ChkType__
+	call ChkType
 	ld hl,CSq_l402ah
 	call WCode
 	ld c,a	
@@ -8525,9 +8511,9 @@ l4089h:
 	jr z,l40a5h
 	cp 007h
 	ret nz	
-	call ChkTypeBool__
+	call ChkTypeBool
 	call GetTerm
-	call ChkTypeBool__
+	call ChkTypeBool
 	ld hl,CSq_l416fh
 l40a0h:
 	call WCodeOverLastByte
@@ -8602,7 +8588,7 @@ l411ch:
 	push bc	
 	call GetTerm
 	pop de	
-	call ChkType__
+	call ChkType
 	pop de	
 	bit 2,d
 	ld hl,CSq_StorNotDEAndM
@@ -8748,17 +8734,17 @@ ChkTermOp:
 	jr z,l422bh
 	cp 008h
 	ret nz	
-	call ChkTypeBool__
+	call ChkTypeBool
 	call GetFactor
-	call ChkTypeBool__
+	call ChkTypeBool
 	ld hl,CSq_l42edh
 	call WCodeOverLastByte
 	jr ChkTermOp
 l41fch:
-	call ChkType0001
+	call ChkTypeInt
 	push af	
 	call GetFactor
-	call ChkType0001
+	call ChkTypeInt
 	call sub_41bbh
 	jr z,l4213h
 	ex de,hl	
@@ -8818,7 +8804,7 @@ l4271h:
 l4274h:
 	call GetFactor
 	pop de	
-	call ChkType__
+	call ChkType
 	ld hl,CSq_StorAndM
 	call CodeLdBC_0n_from_0x2b8b
 	jr l4271h
@@ -9019,7 +9005,7 @@ l438dh:
 	jr l438dh
 NOTFactor__:
 	call GetFactor
-	call ChkTypeBool__
+	call ChkTypeBool
 	ld hl,CSqNOT
 	jp WCodeOverLastByte
 GetExpr__:
@@ -9051,7 +9037,7 @@ ChkFactor:
 	jr z,FoundUnsigNum__
 	cp 006h
 	jr z,NOTFactor__
-	ld e,00ch
+	ld e,00ch		; Error: "Ein Faktor wird erwartet."
 	call CompileErr
 	jp l344bh
 WLdChr:
@@ -9071,19 +9057,20 @@ l4406h:
 FoundIdent_2__:
 	call GetIdentInfoInABC
 	cp 001h
-	ret m	
+	ret m			; "selbstdefinierter" Identifier gefunden
 	jp nz,l44c7h
+	;; nein, Konstante gefunden
 	set 3,(ix+002h)
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
 	ld a,b	
-	or a	
+	or a			; ?? "selbstdef." Typ ??
 	jr nz,l4406h
 	ld a,c	
-	dec a	
+	dec a			; Integer?
 	jr z,l4445h
-	dec a	
+	dec a			; Real?
 	jr z,l447bh
 	ld a,d	
 	ld (l2b8bh+1),a
@@ -9182,12 +9169,12 @@ l44c2h:
 	inc c	
 	jp WCode
 l44c7h:
-	cp 009h
+	cp 009h			; Fnc
 	jp z,l42fdh
 	cp 00ah
 	jp z,l456fh
 	jr nc,l4518h
-	cp 007h
+	cp 007h			; Fnc
 	jp z,l376bh
 	cp 005h
 	jr z,l4482h
@@ -9241,7 +9228,7 @@ l4518h:
 	jp nz,WCodeOverLastByte
 	ex de,hl	
 	jp l33beh
-l4536h:
+Peek:
 	ld a,(l2b76h)
 	push af	
 	call NextChkOpBra_GetLex
@@ -9249,9 +9236,9 @@ l4536h:
 	pop de	
 	ld (ix+001h),d
 	call ChkComma_GetLex
-	ld hl,l2b93h
+	ld hl,PeekTypeStruct
 	push hl	
-	call sub_4af1h
+	call ParseTypeDef__
 	call ChkCloBra_GetLex
 	pop hl	
 	ld c,(hl)	
@@ -9275,7 +9262,7 @@ l4565h:
 	inc b	
 	jp CodeLdBC_0n_from_0x2b8b
 l456fh:
-	ld e,00ch
+	ld e,00ch		; Error: "Ein Faktor wird erwartet"
 	call sub_4e7dh
 l4574h:
 	bit 7,b
@@ -9546,7 +9533,7 @@ GetRange__:
 	ld a,(l2b8bh)
 	call sub_467bh
 	call GetLexem
-	cp 0ddh
+	cp 0ddh			; "]"?
 	jr z,l46e6h
 l4701h:
 	call sub_3f16h
@@ -9648,7 +9635,7 @@ ChkLabelNum__:
 	ld (TopOfHeapAddr__),hl
 	call WrJump
 	call GetLexem
-	cp 0ach
+	cp 0ach			; Ist es ","?
 	jr z,ChkLabelNum__
 	call GetTargetAddrInHL__
 	ex de,hl	
@@ -9656,21 +9643,21 @@ ChkLabelNum__:
 	call WrDE_ByTargAddr_pl2
 	call ChkSemi_GetLex
 ChkConst:
-	cp 003h
-	jr nz,ChkType
+	cp 003h			; CONST?
+	jr nz,ChkTypedefs
 	call GetLexem
 ParseConst:
 	call IdentToSymtab
 	push hl	
 	call GetLexem
-	cp 07dh
+	cp 07dh			; Ist es ":="?
 	jr nz,PConChkEq
-	ld e,005h
+	ld e,005h		; Error: "In der Dekl. einer Konst. muss '=' und nicht ':=' verwendet werden"
 	call CompileErr
 	jr PConChkVal
 PConChkEq:
-	cp 078h
-	ld e,006h
+	cp 078h			; Ist es "="?
+	ld e,006h		; Error: "'=' wird erwartet"
 	call nz,CompileErr
 PConChkVal:
 	call GetLexem
@@ -9704,72 +9691,72 @@ l480bh:
 	call ChkSemi_GetLex
 	or a	
 	jr z,ParseConst
-ChkType:
-	cp 01fh
-	jr nz,l483ah
+ChkTypedefs:
+	cp 01fh			; "TYPE"
+	jr nz,WrPrgInit
 	call GetLexem
-l481fh:
+ParseType:
 	ld de,00009h
 	call IdentToSymtab
-	ld (hl),003h
+	ld (hl),003h		; Typ "TYPE" in Symtab kodieren
 	inc hl	
 	call GetLexem
-	ld de,07806h
+	ld de,07806h		; teste auf "=", sonst Fehler 6
 	call ChkLexem_GetLex
-	call sub_4af1h
+	call ParseTypeDef__
 	call ChkSemi_GetLex
-	or a	
-	jr z,l481fh
-l483ah:
-	ld hl,sub_4af1h
+	or a			; Identifier gefunden?
+	jr z,ParseType
+WrPrgInit:
+	ld hl,ParseTypeDef__
 	ld (CallDest_04da2+1),hl
-	ld d,a	
+	ld d,a			; Lexem-Code für ChkVar aufheben
 	ld a,(BlockLevel__)
 	or a	
-	ld hl,0fffch
-	jr nz,l4865h
-	ld hl,(binMoveDistance__)
+	ld hl,0fffch		; hl := -4
+	jr nz,ChkVar		; jump if BlockLevel > 0
+	ld hl,(binMoveDistance)
 	ld a,h	
 	or l	
 	ld hl,CSq_Init
-	call nz,WCode
-	ld hl,CSq_InitJRTErr
+	call nz,WCode		; nur bei Translate einfügen, nicht bei Compile
+	ld hl,CSq_InitJRT2
 	call WCode
 	call WrJump
 	dec hl	
-	ld (l2b8dh),hl
+	ld (PasPrgMainA),hl
 	ld hl,(memEnd)
-l4865h:
-	ld a,d	
-	ld (l2b61h),hl
-	cp 00ah
-	jr nz,l4879h
+ChkVar:
+	ld a,d			; gemerkten Lexem-Code holen
+	ld (NxtVarAddr__),hl
+	cp 00ah			; "VAR"
+	jr nz,ParsePrcFnc1
 	call GetLexem
-FoundIdent:
-	call ParseVar
+ChkVarFoundIdent:
+	call ParseInParOrVarDef__
 	call ChkSemi_GetLex
-	or a	
-	jr z,FoundIdent
-l4879h:
-	ld hl,(l2b61h)
+	or a			; Identifier?
+	jr z,ChkVarFoundIdent
+ParsePrcFnc1:
+	ld hl,(NxtVarAddr__)
 	push hl	
 	ld hl,BlockLevel__
 	inc (hl)	
-ParseBlock__:
-	cp 004h
+ParsePrcFnc:
+	cp 004h			; "PROCEDURE"?
 	jr z,ParsePrc
-	cp 005h
-	jp nz,ParseFnc
+	cp 005h			; "FUNCTION"?
+	jp nz,WrBlockFrame__
 ParsePrc:
-	push af	
+	push af			; Lexem-Code zur Unterscheidung von Prc und Fnc aufheben
 	call GetLexem
-	or a	
-	ld e,004h
+	or a			; Identifier?
+	ld e,004h		; Error: "Name wird erwartet"
 	call nz,CompileErr
 	ld hl,(SymTabAddr__)
-	call SearchInSymTab__
-	jp c,l49ddh
-l489dh:
+	call SearchInSymTab__	; CY=1 wenn gefunden
+	jp c,FoundPrcFncName
+l489dh:				; Name nicht oder mit anderem Lexem-Typ gefunden
 	xor a	
 	ld de,0000ah
 	call IdentToSymtab
@@ -9796,16 +9783,16 @@ l489dh:
 	cp 0a8h
 	jp nz,l4a1eh
 	ld hl,00000h
-	ld (l2b61h),hl
+	ld (NxtVarAddr__),hl
 	ld hl,l4d5fh
 	ld (CallDest_04da2+1),hl
-l48d3h:
+ParseParams__:
 	call GetLexem
-	cp 00ah
-	jr z,l48dfh
-	call ParseVar
+	cp 00ah			; "VAR"?
+	jr z,ParseVarParam__
+	call ParseInParOrVarDef__
 	jr l48eeh
-l48dfh:
+ParseVarParam__:
 	ld d,00ah
 	call GetLexem
 	call sub_4d77h
@@ -9813,8 +9800,8 @@ l48dfh:
 	dec hl	
 	call sub_4dc5h
 l48eeh:
-	cp 0bbh
-	jr z,l48d3h
+	cp 0bbh			; ";"?
+	jr z,ParseParams__
 	call ChkCloBra_GetLex
 	pop bc	
 	push af	
@@ -9884,12 +9871,12 @@ l492dh:
 	ld e,029h
 	call nz,CompileErr
 	call GetIdentInfoInABC
-	cp 003h
-	ld e,01eh
+	cp 003h			; War das ein Type?
+	ld e,01eh		; Error: "Dieser Name ist kein Typ"
 	call nz,CompileErr
 	ld a,b	
 	or a	
-	ld e,02eh
+	ld e,02eh		; Error: "Ein Skalartyp (einschl REAL) wird erwartet"
 	call nz,CompileErr
 	ex de,hl	
 	dec de	
@@ -9902,7 +9889,7 @@ l492dh:
 	call GetLexem
 l496fh:
 	call ChkSemi_GetLex
-	cp 01dh
+	cp 01dh			; FORWARD?
 	jr nz,l4988h
 	pop hl	
 	dec hl	
@@ -9913,7 +9900,7 @@ l496fh:
 	call GetLexem
 l4982h:
 	call ChkSemi_GetLex
-	jp ParseBlock__
+	jp ParsePrcFnc
 l4988h:
 	ld hl,(labelListAddr)
 	push hl	
@@ -9929,7 +9916,7 @@ l4988h:
 	pop hl	
 	ld (labelListAddr),hl
 	ld c,a	
-	ld de,(l2b61h)
+	ld de,(NxtVarAddr__)
 	xor a	
 	ld l,a	
 	ld h,a	
@@ -9963,15 +9950,15 @@ l49d8h:
 	pop af	
 	push bc	
 	jp l496fh
-l49ddh:
-	ld d,(hl)	
-	pop af	
-	push af	
+FoundPrcFncName:
+	;; zu definierende Prc oder Fnc wurde in der Symtab gefunden
+	ld d,(hl)		; Typ des Symtab-Eintrags holen
+	pop af			; gemerkten Lexem-Code holen
+	push af			; und wieder zurücklegen
 	cp d	
-	jp nz,l489dh
+	jp nz,l489dh		; gleicher Name für untersch. Lexem-Typen
 	pop af	
 	inc hl	
-l49e6h:
 	inc hl	
 	inc hl	
 	ld e,(hl)	
@@ -10003,7 +9990,7 @@ l49e6h:
 	ld e,00bh
 l4a0dh:
 	set 6,(hl)
-	call sub_4d6dh
+	call SetHLAfterNameEnd
 	add hl,de	
 	djnz l4a0dh
 l4a15h:
@@ -10030,21 +10017,21 @@ sub_4a2bh:
 	ld e,00bh
 l4a37h:
 	res 6,(hl)
-	call sub_4d6dh
+	call SetHLAfterNameEnd
 	add hl,de	
 	djnz l4a37h
 	pop hl	
 	ret	
-ParseFnc:
+WrBlockFrame__:
 	ld hl,BlockLevel__
 	dec (hl)	
 	jr z,WCorrAddr
 	ld hl,0000ah
-	add hl,sp	
+	add hl,sp		; HL = TOS+5
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
-	ld hl,0fff9h
+	ld hl,0fff9h		; -7
 	add hl,de	
 	ld c,(hl)	
 	inc hl	
@@ -10065,10 +10052,10 @@ ParseFnc:
 	pop bc	
 	ld hl,00004h
 	add hl,bc	
-	ld (l2b61h),hl
+	ld (NxtVarAddr__),hl
 	ld c,a	
-	bit 3,(ix+000h)
-	jr nz,l4a98h
+	bit 3,(ix+000h)		; Stack-Test durchführen?
+	jr nz,l4a98h		; ja
 	ld a,h	
 	inc a	
 	jr nz,l4a98h
@@ -10079,35 +10066,35 @@ ParseFnc:
 	srl a
 	jr nc,l4a8fh
 	call JCodeNextByte
-	defb 03bh
+	defb 03bh		; DEC SP
 	or a	
 l4a8fh:
 	jr z,l4aafh
 	call JCodeNextByte
-	defb 0e5h
+	defb 0e5h		; PUSH HL
 	dec a	
 	jr l4a8fh
 l4a98h:
 	call WLdHLnnIsHL
 	call JCodeNextByte
-	defb 039h
+	defb 039h		; ADD HL,SP
 	call JCodeNextByte
-	defb 0f9h
-	bit 3,(ix+000h)
-	jr z,l4aafh
-	ld hl,CSq_l4ae8h
+	defb 0f9h		; LD SP,HL
+	bit 3,(ix+000h)		; Stack-Test durchführen?
+	jr z,l4aafh		; nein
+	ld hl,CSq_ChkFreeMem__
 	call WCode
 l4aafh:
 	ld a,c	
 ChkBegin:
-	ld de,01819h
+	ld de,01819h		; teste auf "BEGIN", sonst Fehler 19
 	call ChkLexem_GetLex
-	jp l3cd4h
+	jp ParseMainBlock
 WCorrAddr:
 	pop bc	
 	call GetTargetAddrInHL__
 	ex de,hl	
-	ld hl,(l2b8dh)
+	ld hl,(PasPrgMainA)
 	call WrDE_ByTargAddr_pl1
 	ld hl,CSq_LdMemHL_LdIX
 	call WCode
@@ -10121,64 +10108,64 @@ WCorrAddr:
 	jr ChkBegin
 CSq_LdMemHL_LdIX:
 	defb 005h
-	ld (l178bh),hl
+	ld (FreeMem__),hl		; FreeMem
 	defb 0ddh,021h
 CSq_IXisSPpl4:
 	defb 008h
 	push ix
 	ld ix,00004h
 	add ix,sp
-CSq_l4ae8h:
+CSq_ChkFreeMem__:
 	defb 008h
-	ld de,(l178bh)
+	ld de,(FreeMem__)
 	add hl,de	
 	call nc,PrRAM
-sub_4af1h:
-	cp 023h
-	call z,GetLexem
-	cp 01ch
-	jr z,l4b4eh
-	cp 01eh
-	jp z,l4bf8h
-	cp 0deh
-	jr z,l4b3ah
-	cp 01bh
-	jp nz,l4ca7h
-	call NextChkOF_GetLex
-	call l4ca7h
+ParseTypeDef__:			; Parameter: A = Lexemtyp, HL = Adr. in Symtab nach Typ
+	cp 023h			; "PACKED"
+	call z,GetLexem		; "PACKED" akzeptieren und ignorieren
+	cp 01ch			; "ARRAY"
+	jr z,PTArray
+	cp 01eh			; "RECORD"
+	jp z,PTRecord
+	cp 0deh			; "^"?
+	jr z,PTPointer
+	cp 01bh			; "SET"
+	jp nz,ParseSimpleType	; nein -> bleibt noch simple type
+	call NextChkOF_GetLex	; "OF"
+	call ParseSimpleType
 	ld c,(hl)	
 	inc hl	
-	ld b,(hl)	
-	call ChkScalar
-	inc (hl)	
+	ld b,(hl)		; BC = Typcode (1-4 = INT., REAL, CHAR, BOOL.; >5 = Enum)
+	call ChkScalar		; erwartet BC = 00xxh aber nicht 0002h
+	inc (hl)		; SET-Typ = 01xxh mit xx wie Basistyp
 	inc hl	
 	inc hl	
-	ld b,(hl)	
+	ld b,(hl)		; B = oberes Byte d. Minimumwerts (?!)
 	inc hl	
 	inc hl	
 	dec c	
-	jr z,l4b2ah
+	jr z,PaTSetInt		; War Typecode = 1, also INTEGER?
+	srl b			; nein, dann ist es ein 1-Byte-Typ
 	srl b
 	srl b
-	srl b
-	inc b	
-l4b24h:
-	inc hl	
+	inc b			; B = Anzahl Bytes für das Set
+PaTSetTLen:
+	inc hl			; Typ-Länge schreiben
 	ld (hl),b	
 	inc hl	
 	ld (hl),000h
 	ret	
-l4b2ah:
+PaTSetInt:
 	dec b	
-	inc b	
-	ld e,028h
+	inc b	       		; Minimumwert negativ oder > 255?
+	ld e,028h		; Error: "Das SET ist zu groß (>256 Elemente)."
 	call nz,CompileErr
 	dec (hl)	
-	inc (hl)	
+	inc (hl)		; Maximumwert > 255?
 	call nz,CompileErr
-	ld b,020h
-	jr l4b24h
-l4b3ah:
+	ld b,020h		; immer 32 Bytes für Integer
+	jr PaTSetTLen
+PTPointer:
 	call GetLexem
 	call l4d5fh
 	inc hl	
@@ -10190,66 +10177,70 @@ l4b3ah:
 	inc hl	
 	ld (hl),000h
 	ret	
-l4b4eh:
+PTArray:			; HL = Adr. in Symtab nach Typ
 	call GetLexem
-	ld de,0db22h
+	ld de,0db22h		; "[" sonst Error: "'[' wird erwartet"
 	call ChkLexem_GetLex
-sub_4b57h:
+PTArrDim:
 	ld de,(TopOfHeapAddr__)
-	ld (hl),e	
+	ld (hl),e		; Startadr. der Dimensionsdefinition schreiben
 	inc hl	
 	ld (hl),d	
-	push de	
-	push hl	
+	push de			; DimTDefAdr
+	push hl			; ArrSyTStrucAdr+1
 	ex de,hl	
-	call l4ca7h
-	inc hl	
+	call ParseSimpleType
+	inc hl			; HL zeigt jetzt auf Typcode für die Dimension, oberes Byte
 	ld c,a	
-	ld a,(hl)	
+	ld a,(hl)		; Simple Type hat einen Code <256
 	or a	
 	ld a,c	
-	ld e,024h
+	ld e,024h		; Error: "Ein Array-Index muss vom Typ SCALAR sein."
 	call nz,CompileErr
 	inc hl	
 	ld c,(hl)	
 	inc hl	
-	ld b,(hl)	
+	ld b,(hl)		; BC = Minimumwert der Dim.
 	inc hl	
 	ld e,(hl)	
 	inc hl	
-	ld d,(hl)	
+	ld d,(hl)		; DE = Maximumwert der Dim.
 	inc hl	
-	push hl	
-	push de	
-	ld de,00008h
+	push hl			; HL zeigt auf Lä. des Typs der Dimension
+	                        ; Länge wird nicht gebraucht. Dort beginnt die Typbesch.
+	                        ; des nä. Dim-typs oder Basistyps.
+	push de			; DE = Maximumwert der Dim.
+	ld de,00008h		; ???Platz für <irgendwas> reservieren???
 	add hl,de	
 	ld (TopOfHeapAddr__),hl
 	pop hl	
-	sbc hl,bc
-	inc hl	
+	sbc hl,bc		; HL = Max. - Min. für den Typ der Dimension
+	inc hl			; HL = Dimensionsgröße in Elementen
 	ex (sp),hl	
-	push hl	
-	cp 0ddh
-	jr z,l4be9h
-	cp 0ach
-	jr nz,l4bf1h
+	push hl			; Stack ab TOS: Adr. nä. Dim od. Basistyp ;
+	                        ;     Dimensionsgröße ; ArrSyTStrucAdr+1 ; DimTDefAdr
+	cp 0ddh			; "]"?
+	jr z,PTArrDimEnd
+	cp 0ach			; ","?
+	jr nz,PTArrDimErr
 	call GetLexem
-	call sub_4b57h
-l4b94h:
-	pop hl	
-	ld de,00006h
-	add hl,de	
+	call PTArrDim
+PTArrCalcSize:			; Basistyp oder vorhergehende Dimension
+	pop hl			; HL = Adr. Basistypdef. od. nä. Dim. in Symtab
+	ld de,00006h		; Aufbau Symtab-Struktur für Typen:
+	                        ;     Typcode/Adr., Min, Max, Lä.
+	add hl,de		; HL = Adr. Typlänge
 	ld e,(hl)	
 	inc hl	
-	ld d,(hl)	
-	pop hl	
-	push af	
-	call Mul8x8
-	pop af	
-	ld e,035h
+	ld d,(hl)		; DE = Länge jedes Array-Elements
+	pop hl			; HL = Anz. Elemente in der Dimension
+	push af			; A = aktueller Lexem-Code - sichern
+	call Mul16x8usgn	; HL := HL * DE
+	pop af			; Hier wird doch auch das Fehlersignal in CY überschrieben?!
+	ld e,035h		; Error: "Das Array ist zu groß."
 	call c,CompileErr
 	ex de,hl	
-	pop hl	
+	pop hl			; Adr. der akt. Dim. in der Symtab (ArrSyTStrucAdr+1)
 	inc hl	
 	ld (hl),e	
 	inc hl	
@@ -10259,55 +10250,55 @@ l4b94h:
 	inc hl	
 	ld (hl),e	
 	inc hl	
-	ld (hl),d	
+	ld (hl),d		; Lä. für Mult. in der vorhergehenden Dimension wegschreiben
 	ex (sp),hl	
-	push hl	
-	ld de,l4c9ch
-	ld bc,00004h
-	push af	
-l4bbch:
+	push hl			; Stack: DimTDefAdr (=HL) / ArrSyTStrucAdr+7
+	ld de,StringMagic
+	ld bc,00004h		; Typcode und Minimumwert = 4 Byte
+	push af			; Stack: Lexemcode / DimTDefAdr / ArrSyTStrucAdr+7
+PTArrChkDim:
 	ld a,(de)	
 	inc de	
 	cpi
-	jr nz,l4be5h
-	jp pe,l4bbch
-	ld a,(hl)	
+	jr nz,PTArrEnd		; kann kein String sein
+	jp pe,PTArrChkDim
+	ld a,(hl)		; A := Stringlänge
 	ex af,af'	
 	inc hl	
-	ld bc,00007h
-l4bcbh:
+	ld bc,00007h		; 7 Byte, siehe Kommentar zu StrinMagic
+PTArrChkBasTyp:
 	ld a,(de)	
 	inc de	
 	cpi
-	jr nz,l4be5h
-	jp pe,l4bcbh
+	jr nz,PTArrEnd		; kann kein String sein
+	jp pe,PTArrChkBasTyp
 	ex af,af'	
-	ld c,a	
-	pop af	
-	pop hl	
-	ld (TopOfHeapAddr__),hl
-	pop hl	
+	ld c,a			; C := Stringlänge
+	pop af			; A := Lexemcode
+	pop hl			; HL := DimTDefAdr
+	ld (TopOfHeapAddr__),hl	; Heap wieder freigeben, Kodierung für Strings ist kürzer
+	pop hl			; HL := ArrSyTStrucAdr+7
 	ld de,0fffah
-	add hl,de	
-	ld (hl),002h
+	add hl,de		; HL := HL - 6 == ArrSyTStrucAdr+1
+	ld (hl),002h		; "String"
 	dec hl	
-	ld (hl),c	
+	ld (hl),c		; Stringlänge
 	ret	
-l4be5h:
-	pop af	
-	pop hl	
+PTArrEnd:
+	pop af			; A := Lexemcode
+	pop hl			; Stackbereinigung
 	pop hl	
 	ret	
-l4be9h:
+PTArrDimEnd:
 	call NextChkOF_GetLex
-l4bech:
-	call sub_4af1h
-	jr l4b94h
-l4bf1h:
-	ld e,026h
+PTArrRecovErr:
+	call ParseTypeDef__
+	jr PTArrCalcSize
+PTArrDimErr:
+	ld e,026h		; Error: "In der Deklaration eines Arrays wird ']' oder ',' verlangt."
 	call CompileErr
-	jr l4bech
-l4bf8h:
+	jr PTArrRecovErr
+PTRecord:
 	ld de,(TopOfHeapAddr__)
 	inc de	
 	inc de	
@@ -10316,7 +10307,7 @@ l4bf8h:
 	ld (hl),d	
 	inc hl	
 	push hl	
-	ld hl,sub_4af1h
+	ld hl,ParseTypeDef__
 	ld (CallDest_04da2+1),hl
 	ld hl,00000h
 	ld (l2b63h),hl
@@ -10345,11 +10336,11 @@ l4c2ah:
 	inc hl	
 	ld (hl),000h
 l4c36h:
-	cp 0bbh
+	cp 0bbh			; ";"?
 	ret nz	
 	call GetLexem
 	or a	
-	jr nz,l4c36h
+	jr nz,l4c36h		; kein Identifier
 	ld de,(TopOfHeapAddr__)
 	inc de	
 	inc de	
@@ -10361,7 +10352,7 @@ sub_4c4ah:
 	ld hl,(l2b63h)
 	push hl	
 	ld d,00fh
-	ld hl,0000dh
+	ld hl,0000dh		; Länge Symtab-Eintrag
 	call sub_4d7ah
 	ex (sp),hl	
 	ld (l2b63h),hl
@@ -10404,37 +10395,32 @@ l4c5fh:
 	ld de,0000eh
 	add hl,de	
 	push bc	
-	call sub_4d6dh
+	call SetHLAfterNameEnd
 	ex de,hl	
-	ld hl,(l2b7eh)
+	ld hl,(SymtabEntryAddr__)
 	ld bc,00006h
 	ldir
 	pop bc	
 	ex de,hl	
 	jr l4c5fh
-l4c9ch:
-	defb 001h
-	defb 000h
-	defb 001h
-	defb 000h
-	defb 000h
-	defb 003h
-	defb 000h
-	defb 000h
-	defb 0ffh
-	defb 0ffh
-	defb 0ffh
-l4ca7h:
+StringMagic:			; Magic Bytes, um "ARRAY[1..x] OF CHAR" zu erkennen
+	defw 00001h		; Typcode der Dimension INTEGER
+	defw 00001h		; Minimumwert 1
+	defb 000h		; oberes Byte des Maximumwerts --> Stringlänge < 256!
+	defw 00003h		; Typcode Basistyp CHAR
+	defw 0ff00h		; Minimumwert 0 (oberes Byte zählt nicht)
+	defw 0ffffh		; Maximumwert 255 (oberes Byte zählt nicht)
+ParseSimpleType:		; HL wird (wahrsch.!!!) nicht verändert
 	push hl	
-	or a	
-	jr z,l4cefh
-	cp 0a8h
-	jr z,l4d13h
-	push hl	
+	or a			; Identifier?
+	jr z,PaSiTChkTypId
+	cp 0a8h			; "("?
+	jr z,PaSiTEnum
+	push hl			; bleibt noch constant .. constant
 	call ParseConstVal
 	pop de	
 	ex de,hl	
-l4cb5h:
+RangeToSymtab:
 	call ChkScalar
 	ld (hl),c	
 	inc hl	
@@ -10446,18 +10432,18 @@ l4cb5h:
 	inc hl	
 	push hl	
 	push de	
-	ld de,0ae25h
+	ld de,0ae25h		; "."?
 	call ChkLexem_GetLex
-	call ChkLexem_GetLex
+	call ChkLexem_GetLex	; --> --> ".."?
 	push bc	
 	call ParseConstVal
 	pop de	
-	call ChkType__
+	call ChkType
 	pop de	
 	or a	
 	sbc hl,de
 	add hl,de	
-	ld e,027h
+	ld e,027h		; Error: "Obergrenze ist größer als die untere"
 	call m,CompileErr
 	ex de,hl	
 	pop hl	
@@ -10466,9 +10452,9 @@ l4cb5h:
 	ld (hl),d	
 l4ce2h:
 	inc hl	
-	dec c	
+	dec c			; War C = 1?
 	ld bc,00002h
-	jr z,l4ceah
+	jr z,l4ceah		; ja
 	dec c	
 l4ceah:
 	ld (hl),c	
@@ -10476,67 +10462,67 @@ l4ceah:
 	ld (hl),b	
 	pop hl	
 	ret	
-l4cefh:
+PaSiTChkTypId:
 	call GetIdentInfoInABC
-	dec a	
-	jr z,l4d09h
-l4cf5h:
-	cp 002h
-	ld e,01eh
+	dec a			; constant name?
+	jr z,PaSiTConstNRange
+PaSiTTypId:
+	cp 002h			; Typ? (s.o.: dec, also original 3)
+	ld e,01eh		; Error: "Dieser Name ist kein Typ"
 	call nz,CompileErr
-	dec hl	
-	dec hl	
-	pop de	
+	dec hl			; HL war vorher Ende d. gefund. Id. + 3
+	dec hl			; HL = Anfang der Typinfo des gefund. Id. in der Symtab
+	pop de			; DE = Anfang der Info des neuen Id. in der Symtab
 	push de	
 	ld bc,00008h
 	ldir
 	pop hl	
 	jp GetLexem
-l4d09h:
+PaSiTConstNRange:
 	call GetLexem
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
 	pop hl	
 	push hl	
-	jr l4cb5h
-l4d13h:
-	xor a	
-	ld (l2b80h),a
-	ld hl,l2b74h
+	jr RangeToSymtab
+PaSiTEnum:
+	xor a			; Werte einer Aufzählung beginnen mit 0
+	ld (EnumVal__),a
+	ld hl,NxtEnumTypNum
 	ld c,(hl)	
 	inc (hl)	
 	ld b,000h
-l4d1eh:
+PaSiTEnumElem:
 	call GetLexem
 	push bc	
-	ld de,00005h
+	ld de,00005h		; Länge Symtab-Eintrag
 	call IdentToSymtab
 	pop bc	
-	ld (hl),001h
+	ld (hl),001h		; Identifier-Typ = constant
 	inc hl	
 	ld (hl),c	
 	inc hl	
-	ld (hl),b	
+	ld (hl),b		; Enum-Typ-Nr. hinterlegen
 	inc hl	
-	ld a,(l2b80h)
-	ld (hl),a	
+	ld a,(EnumVal__)
+	ld (hl),a		; Wert ablegen
 	inc a	
-	ld (l2b80h),a
+	ld (EnumVal__),a
 	inc hl	
-	push hl	
+	push hl			; Adr. zum Eintragen des max. Wertes merken
 	call GetLexem
-	cp 0ach
-	jr z,l4d1eh
+	cp 0ach			; ","?
+	jr z,PaSiTEnumElem
 	call ChkCloBra_GetLex
-	ld d,a	
-	ld a,(l2b80h)
-	ld b,a	
-	dec a	
-l4d4ah:
-	pop hl	
-	ld (hl),a	
-	djnz l4d4ah
+	ld d,a			; nä. Lexemtyp für später sichern
+	ld a,(EnumVal__)
+	ld b,a			; Anz. Enum-Werte wird zum Zähler
+	dec a			; korrigieren auf max. Enum-Wert
+PaSiTEnumSetMax:
+	pop hl			; an jedes Enum-Element...
+	ld (hl),a		; ...den Max-Wert schreiben
+	djnz PaSiTEnumSetMax
 	pop hl	
 	push hl	
 	ld (hl),c	
@@ -10550,62 +10536,64 @@ l4d4ah:
 	ld (hl),a	
 	inc hl	
 	ld (hl),a	
-	ld a,d	
+	ld a,d			; nä. Lexemtyp wieder herstellen
 	jr l4ce2h
 l4d5fh:
 	push hl	
-	or a	
-	ld e,02ch
+	or a			; Identifier?
+	ld e,02ch		; Error: "Der Parameter muss vom Typ Name sein"
 	call nz,CompileErr
 	call GetIdentInfoInABC
 	dec a	
-	jp l4cf5h
-sub_4d6dh:
+	jp PaSiTTypId
+SetHLAfterNameEnd:
 	ld c,a	
-l4d6eh:
+SetNE_NxtChr:
 	ld a,(hl)	
 	inc hl	
 	or a	
-	jp p,l4d6eh
+	jp p,SetNE_NxtChr
 	ld a,c	
 	inc hl	
 	ret	
 sub_4d77h:
-	ld hl,0000ah
-sub_4d7ah:
+	;; Parameter: D = 2 bei In-Parametern oder glob. Var. und 0ah bei VAR-Parametern
+	ld hl,0000ah		; Länge Symtab-Eintrag
+sub_4d7ah:			; D kann auch 0fh sein! Dann ist HL = 0000dh
 	push de	
 	ex de,hl	
 	ld hl,(TopOfHeapAddr__)
 	inc hl	
 	inc hl	
-	ex (sp),hl	
-	push hl	
-l4d83h:
-	push de	
-	call IdentToSymtab
+	ex (sp),hl		; HL = Parameter D (E ist irrelevant)
+	push hl			; wird durch nächste Stackbereinigung wieder entsorgt
+ParseVarName:
+	push de		   	; Stack ab TOS: Lä. SyT-Eintrag, Par. D, Adr. nä. Id-Name
+	call IdentToSymtab	; Parameter: A = 0, DE = Länge Symtab-Eintrag
+				; Return: HL = Adr. nach Identifier
 	pop de	
-	pop af	
+	pop af			; A = Parameter D (also Wert 2, 0ah oder 0fh)
 	push af	
-	ld (hl),a	
+	ld (hl),a		; Lexem-Typ in Symtab schreiben
 	call GetLexem
-	cp 0bah
-	jr z,l4d99h
+	cp 0bah			; ":"?
+	jr z,VarNameListEnd
 	push de	
 	call ChkComma_GetLex
 	pop de	
-	jr l4d83h
-l4d99h:
-	pop af	
-	call GetLexem
-	inc hl	
-	pop de	
+	jr ParseVarName
+VarNameListEnd:
+	pop af			; Stackbereinigung?
+	call GetLexem		; muss Type Identifier oder Beginn einer Typedef. liefern
+	inc hl			; Adr. nach Lexem-Typ in der Symtab
+	pop de			; müsste Symtab-Typ sein
 	push hl	
 	push de	
 CallDest_04da2:
-	call sub_4af1h
-	pop hl	
-	call sub_4d6dh
-	ld (l2b7eh),hl
+	call ParseTypeDef__	; wird modifiziert! zu ParseTypeDef__ oder l4d5fh
+	pop hl			; = Adr. des ersten Identifiers in dieser Var-Def.
+	call SetHLAfterNameEnd
+	ld (SymtabEntryAddr__),hl
 	ex de,hl	
 	pop hl	
 	push hl	
@@ -10619,20 +10607,20 @@ CallDest_04da2:
 	dec hl	
 	pop de	
 	ret	
-ParseVar:
+ParseInParOrVarDef__:
 	ld d,002h
-	call sub_4d77h
+	call sub_4d77h		; ?? Variable in Symtab anlegen
 	ld b,(hl)	
 	dec hl	
-	ld c,(hl)	
+	ld c,(hl)		; BC = Variablenlänge
 sub_4dc5h:
 	push de	
 	ex de,hl	
 l4dc7h:
-	ld hl,(l2b61h)
+	ld hl,(NxtVarAddr__)
 	or a	
 	sbc hl,bc
-	ld (l2b61h),hl
+	ld (NxtVarAddr__),hl
 	ex de,hl	
 	ld (hl),e	
 	inc hl	
@@ -10648,9 +10636,9 @@ l4dc7h:
 	ld de,0000bh
 	add hl,de	
 	push bc	
-	call sub_4d6dh
+	call SetHLAfterNameEnd
 	ex de,hl	
-	ld hl,(l2b7eh)
+	ld hl,(SymtabEntryAddr__)
 	ld bc,00009h
 	ldir
 	dec de	
@@ -10684,11 +10672,11 @@ l4e14h:
 	pop hl	
 	call GetLexem
 	or a	
-	ld e,037h
+	ld e,037h		; Error: "Ein Feldname wird erwartet"
 	call nz,CompileErr
 	call GetIdentInfoInABC
-	ld e,037h
-	cp 00fh
+	ld e,037h		; Error: "Ein Feldname wird erwartet"
+	cp 00fh			; Feldname ??
 	call nz,CompileErr
 	ld de,00004h
 	add hl,de	
@@ -11000,7 +10988,7 @@ l5021h:
 	pop bc	
 	pop bc	
 	ret	
-	ld e,041h
+	ld e,041h		; ??? Error 65 ist nicht dokumentiert
 sub_5027h:
 	or a	
 	jp nz,CompileErr
@@ -11056,10 +11044,10 @@ l506ah:
 	ld a,e	
 	ret	
 l5076h:
-	ld hl,l508eh
+	ld hl,CSq_GetFreeMem__
 	jr l507eh
 l507bh:
-	ld hl,CSq_l5096h
+	ld hl,CSq_StoFreeMem__
 l507eh:
 	push hl	
 	call NextChkOpBra_GetLex
@@ -11068,18 +11056,18 @@ l507eh:
 	call ChkCloBra_GetLex
 	pop hl	
 	jp WCodeOverLastByte
-l508eh:
-	rlca	
-	ld de,(l178bh)
+CSq_GetFreeMem__:
+	defb 007h
+	ld de,(FreeMem__)
 	ld (hl),e	
 	inc hl	
 	ld (hl),d	
-CSq_l5096h:
+CSq_StoFreeMem__:
 	defb 007h
 	ld e,(hl)	
 	inc hl	
 	ld d,(hl)	
-	ld (l178bh),de
+	ld (FreeMem__),de
 l509eh:
 	call NextChkOpBra_GetLex
 	ld e,045h
@@ -11181,7 +11169,7 @@ CSq_l5153h:
 	ld (l178dh),hl
 	pop hl	
 	call sub_0655h
-l515bh:
+PaGetsys:
 	inc b	
 	call sub_066ah
 	push hl	
@@ -11349,7 +11337,7 @@ CSq_l5242h:
 	call sub_0c87h
 l5246h:
 	inc bc	
-	call Mul8x8
+	call Mul16x8usgn
 CSq_l524ah:
 	defb 003h
 	pop de	
