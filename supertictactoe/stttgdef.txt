@@ -1,0 +1,53 @@
+(* vor Translate: Z 49151,32767 *)
+(*$L-,C-*)
+PROGRAM superttt;
+
+ CONST
+  x0=10; y0=6; abstand=2;
+  (* Einheit: Zeichen *)
+  sfh=4; (*Spielfeldhintergrundfarbe*)
+  ARGC=#B780;
+  WININ=#3C; WINAK=#3D;
+  BLSU=148;
+  BLTTT=336;
+  BLBI=2544;
+  
+ TYPE
+  TSta=(L,O,U,X);
+   (*Status: leer,O,unentschieden,X*)
+  Tsuper=RECORD
+   st:TSta;
+   freie:INTEGER;
+   tx,ty,ad0r:INTEGER
+    (*Text-X/Y f. Platz 1,
+      Adr. 0 f. Rahmen*)
+  END;
+  Thf=(hell,dunkel,aktiv,inaktiv,hO,hX,dL);
+  Tstr8=ARRAY[1..8] OF CHAR;
+  Tstr16=ARRAY[1..16] OF CHAR;
+  Tstr64=ARRAY[1..64] OF CHAR;
+  Tpfad=ARRAY[1..32] OF CHAR;
+
+ VAR
+  superst: ARRAY[1..9] OF Tsuper;
+  sttt: ARRAY[1..9,1..9] OF TSta;
+   (* Dimensionen: Feld, Platz *)
+  amZug:TSta; (*Wer ist am Zug?*)
+  imFeld:INTEGER; (*...in welchem Feld? (0=frei) *)
+  feldrSpbar:INTEGER; (*In wie vielen
+    Feldern kann noch gespielt werden?
+    Wenn 0, dann unentschieden.*)
+  abbruch:BOOLEAN;
+  ta:CHAR; (*letzter Tastendruck*)
+  platz:INTEGER; (*aktuell gewaehlter Platz*)
+  badr,bh,byr:INTEGER; (*im Bild:
+    IRM-Adr., Hoehe, Y relativ*)
+  bz:INTEGER; (*Zaehler f. Kompri.*)
+  afn:INTEGER; (*Adr. Feldnummern*)
+  hfarbe:INTEGER; (*Hintergrundfarbe,
+   fuer Feldnummern und Feldrahmen*)
+  sadr:INTEGER; (*zeigt in eins der
+   folgenden bi-ARRAYs*)
+  bisu:ARRAY[0..BLSU] OF CHAR;
+  bittt:ARRAY[0..BLTTT] OF CHAR;
+  bibi:ARRAY[0..BLBI] OF CHAR;

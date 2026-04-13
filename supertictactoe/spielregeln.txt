@@ -1,0 +1,51 @@
+Die Spielregeln
+
+Beim Tic-Tac-Toe setzen 2 Spieler auf einem anfangs leeren 3x3-Feld abwechselnd
+ihre Symbole (X oder O) auf einen freien Platz. Wer mit seinem Symbol zuerst
+eine waagerechte, senkrechte oder diagonale Reihe bildet, der gewinnt.
+
+Beim Meta-Tic-Tac-Toe gibt es 3x3 Tic-Tac-Toe-Felder. Die Plaetze in jedem Feld
+werden gedanklich von 1 bis 9 durchnummeriert und die Felder in gleicher
+Weise. Der erste Spieler sucht sich ein Feld aus und setzt sein Symbol auf
+einen Platz. Die Platznummer bestimmt, in welchem Feld der Gegner als naechstes
+sein Symbol setzen muss.
+
+Wird ein Feld gewonnen oder ist es vollstaendig gefuellt, kann es nicht weiter
+bespielt werden. Falls durch einen Zug die Nummer eines Felds bestimmt wird,
+das bereits gewonnen wurde, kann sich der Spieler unter den noch spielbaren
+Feldern eins auswaehlen.
+
+Das Spiel endet, wenn ein Spieler 3 Felder waagerecht, senkrecht oder diagonal
+gewonnen hat. Dieser Spieler gewinnt. Ist kein Zug mehr moeglich, gilt das Spiel
+als unentschieden.
+
+---------------------
+
+Beim Tic-Tac-Toe setzen zwei Spieler auf
+einem leeren 3×3-Feld abwechselnd X oder
+O auf freie Felder. Wer zuerst 3 gleiche
+Symbole waagerecht, senkrecht oder
+diagonal in einer Reihe hat, gewinnt.
+
+Beim Super-Tic-Tac-Toe gibt es ein
+3×3-Raster aus Tic-Tac-Toe-Feldern.
+Plaetze in jedem Feld und die Felder
+selbst werden gedanklich von 1 bis 9
+durchnummeriert. Der erste Spieler
+waehlt ein Feld und setzt sein Symbol
+auf einen Platz. Die Platznummer
+bestimmt, in welchem Feld der Gegner als
+Naechstes setzen muss.
+
+Ein Feld, das gewonnen oder vollstaendig
+gefuellt ist, darf nicht weiter bespielt
+werden. Fuehrt ein Zug zu der Nummer
+eines bereits gewonnenen oder vollen
+Feldes, darf der Spieler eines der noch
+spielbaren Felder frei waehlen.
+
+Das Spiel endet, wenn ein Spieler drei
+Felder waagerecht, senkrecht oder
+diagonal gewonnen hat. Dann gewinnt
+dieser Spieler. Sind keine Zuege mehr
+moeglich, endet das Spiel unentschieden.
