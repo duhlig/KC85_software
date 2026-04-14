@@ -348,6 +348,8 @@ PROGRAM superttt;
    startbild;
    titelzeile;
    WinAk(1);
+   GOTOXY(0,31); SETC(0,2);
+   WRITE('github.com/duhlig/KC85_software/supert*');
    GOTOXY(4,29);
    SETC(6,2); WRITE('A');
    SETC(2,2); WRITE('bbruch   ');

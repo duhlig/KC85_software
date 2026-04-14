@@ -15,7 +15,7 @@
 ** Z49151,32767 (Speicherbegrenzung wg. SETSYS)
 ** G,,SUPERTTT
 ** T --> J zum Speichern
-*** Endadresse+1 als _EA1_ merken!
+*** Endadresse+1 als _EA1_ merken! 47BC
 
 * Teil 2 auf dem KC übersetzen
 ** RESET
@@ -26,11 +26,11 @@
 ** Z49151,32767 (Speicherbegrenzung wg. SETSYS)
 ** G,,STTT_GT2
 ** T --> J zum Speichern
-*** Endadresse _EA2_ merken!
+*** Endadresse+1 als _EA2_ merken! 6958
 
 * "Linken"
 ** Lade-Offset für Teil 2 berechnen:
-   `_OF2_ := _EA1_ - Runtime-Ende (in KC-Pascal 5.2: 192F)`
+   `_OF2_ := _EA1_ - Runtime-Ende (in KC-Pascal 5.2: 192F)` 2E8D
 ** (USB-Modul oder Diskette einschalten)
 ** LOAD/FLOAD/uload _OF2_ -> STTT_GT2
 ** LOAD/FLOAD/uload -> SUPERTTT
