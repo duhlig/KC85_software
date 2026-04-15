@@ -433,9 +433,9 @@ CAOS_UOT1:
 	pop af	
 	ret	
 sub_04e6h:
-	ld a,(l178fh)
+	ld a,(rtPar2)
 	ld h,a	
-	ld a,(l178dh)
+	ld a,(rtPar1)
 	ld l,a
 	IRM_ON
 	ld (CAOS_CURSO),hl
@@ -443,10 +443,10 @@ IRMoff_ret:
 	IRM_OFF
 	ret	
 sub_0502h:
-	ld a,(l178fh)
+	ld a,(rtPar2)
 	and 007h
 	ld l,a	
-	ld a,(l178dh)
+	ld a,(rtPar1)
 	and 01fh
 	rlca	
 	rlca	
@@ -460,9 +460,9 @@ sub_0502h:
 	ret	
 sub_0527h:
 	IRM_ON
-	ld hl,(l178dh)
+	ld hl,(rtPar1)
 	ld (CAOS_HOR),hl
-	ld a,(l178fh)
+	ld a,(rtPar2)
 	ld (CAOS_VERT),a
 	ld a,(CAOS_COLOR)
 	and 0f8h
@@ -479,18 +479,18 @@ sub_0553h:
 	ld l,a	
 	ld h,000h
 	jr z,l0588h
-	ld (l1791h),hl
+	ld (rtPar3),hl
 	IRM_ON
-	ld hl,(l178dh)
+	ld hl,(rtPar1)
 	ld (CAOS_HOR),hl
-	ld a,(l178fh)
+	ld a,(rtPar2)
 	ld (CAOS_VERT),a
-	ld a,(l1791h)
+	ld a,(rtPar3)
 	and 0f8h
 	ld (CAOS_FARB),a
 	IRM_OFF
 	call sub_054bh
-	ld hl,(l1791h)
+	ld hl,(rtPar3)
 l0588h:
 	ld a,l	
 	and 0f8h
@@ -504,13 +504,13 @@ sub_0590h:
 	ld l,a	
 	ld h,000h
 	jr z,l05c5h
-	ld (l1791h),hl
+	ld (rtPar3),hl
 	IRM_ON
-	ld hl,(l178dh)
+	ld hl,(rtPar1)
 	ld (CAOS_HOR),hl
-	ld a,(l178fh)
+	ld a,(rtPar2)
 	ld (CAOS_VERT),a
-	ld a,(l1791h)
+	ld a,(rtPar3)
 	and 0f8h
 	ld (CAOS_FARB),a
 	IRM_OFF
@@ -522,9 +522,9 @@ l05c5h:
 	ret	
 sub_05c7h:
 	IRM_ON
-	ld hl,(l178dh)
+	ld hl,(rtPar1)
 	ld (CAOS_HOR),hl
-	ld a,(l178fh)
+	ld a,(rtPar2)
 	ld (CAOS_VERT),a
 	IRM_OFF
 	push de	
@@ -534,13 +534,13 @@ sub_05c7h:
 	ret	
 sub_05ebh:
 	IRM_ON
-	ld hl,(l178dh)
+	ld hl,(rtPar1)
 	ld (CAOS_ARG1),hl
-	ld hl,(l178fh)
+	ld hl,(rtPar2)
 	ld (CAOS_ARG2),hl
-	ld hl,(l1791h)
+	ld hl,(rtPar3)
 	ld (CAOS_ARG3),hl
-	ld hl,(l1793h)
+	ld hl,(rtPar4)
 	ld (CAOS_ARG4_9),hl
 	ld a,(CAOS_COLOR)
 	and 0f8h
@@ -553,11 +553,11 @@ sub_05ebh:
 	ret	
 sub_0623h:
 	IRM_ON
-	ld hl,(l178dh)
+	ld hl,(rtPar1)
 	ld (CAOS_ARG1),hl
-	ld hl,(l178fh)
+	ld hl,(rtPar2)
 	ld (CAOS_ARG2),hl
-	ld hl,(l1791h)
+	ld hl,(rtPar3)
 	ld (CAOS_ARG3),hl
 	ld a,(CAOS_COLOR)
 	and 0f8h
@@ -568,13 +568,13 @@ sub_0623h:
 	call CCaos
 	pop de	
 	ret	
-sub_0655h:
+setsys:
 	IRM_ON
-	ld a,(l178dh)
+	ld a,(rtPar1)
 	ld (hl),a
 	IRM_OFF
 	ret	
-sub_066ah:
+getsys:
 	IRM_ON
 	ld l,(hl)	
 	ld h,000h
@@ -3369,13 +3369,13 @@ retAddr__:
 	defw 00000h
 FreeMem__:				; Hier wird bei Programmstart ein Wert hinterlegt, der bei CloseCompi ausgerechnet wird. (-51-binEndAddr)
 	defw 00000h
-l178dh:
+rtPar1:				; 4 Worte zur Parameteruebergabe innerhalb der Runtime
 	defw 00000h
-l178fh:
+rtPar2:
 	defw 00000h
-l1791h:
+rtPar3:
 	defw 00000h
-l1793h:
+rtPar4:
 	defw 00000h
 l1795h:
 	defw 00000h
@@ -3426,7 +3426,7 @@ RL_GETSYS:
 	defb 009h
 	defb 001h
 	defb 000h
-	defw PaGetsys
+	defw CSq_getsys
 	defb 002h
 RL_PLOT:
 	defw RL_GETSYS
@@ -3718,7 +3718,7 @@ RL_POKE:
 	defw RL_PEEK
 	defb "POK",'E'+0x80
 	defb 006h
-	defw l3844h
+	defw Poke
 RL_RELEASE:
 	defw RL_POKE
 	defb "RELEAS",'E'+0x80
@@ -5543,17 +5543,17 @@ ReadCompOpt:
 	ld a,(de)	
 	inc de	
 	ld hl,compOptTab
-	ld b,006h
+	ld b,006h		; Laenge der compOptTab
 RCO_CheckChr:
 	cp (hl)	
 	inc hl	
 	jr z,RCO_ChkPluMin
 	inc hl	
 	djnz RCO_CheckChr
-	cp 050h
+	cp 050h			; "P"? --> P ohne + oder -
 	scf	
 	ret nz	
-	ld a,010h
+	ld a,010h		; keine Ausgabe sondern Umschaltung des printFlag
 	call OutChr
 	jr RCO_ChkNextOpt
 RCO_ChkPluMin:
@@ -5571,7 +5571,7 @@ RCO_SetOpts:
 RCO_ChkNextOpt:
 	ld a,(de)	
 	inc de	
-	cp 02ch
+	cp 02ch			; ","?
 	jr z,ReadCompOpt
 RCO_End:
 	or a	
@@ -7196,14 +7196,14 @@ l3838h:
 l383eh:
 	ld hl,l38b4h
 	jp CodeLdBC_0n_from_0x2b8b
-l3844h:
+Poke:
 	call NextChkOpBra_GetLex
 	call sub_3f10h
 	call ChkComma_GetLex
 	call sub_3f3fh
 	call ChkCloBra_GetLex
 	dec b	
-	jr z,l387dh
+	jr z,PokeErr
 	dec b	
 	jr nz,l385fh
 	ld (Merker1),bc
@@ -7225,8 +7225,8 @@ l3865h:
 	call StoreDE
 	ld hl,CSq_PopDELdir
 	jp WCode
-l387dh:
-	ld e,034h
+PokeErr:
+	ld e,034h		; Error: "Sets koennen nicht gePOKEd werden"
 	jp CompileErr
 l3882h:
 	ld c,001h
@@ -11156,22 +11156,22 @@ l5136h:
 	jp WCodeOverLastByte
 CSq_l513fh:
 	defb 00ah
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_04e6h
 PaSetsys:
 	call sub_5114h
-	ld hl,CSq_l5153h
+	ld hl,CSq_setsys
 	jp WCodeOverLastByte
-CSq_l5153h:
+CSq_setsys:
 	defb 007h
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	pop hl	
-	call sub_0655h
-PaGetsys:
-	inc b	
-	call sub_066ah
+	call setsys
+CSq_getsys:
+	defb 004h
+	call getsys
 	push hl	
 l5160h:
 	call sub_5114h
@@ -11179,9 +11179,9 @@ l5160h:
 	jp WCodeOverLastByte
 CSq_l5169h:
 	defb 00ah
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_0502h
 l5174h:
 	call sub_5114h
@@ -11189,22 +11189,22 @@ l5174h:
 	jp WCodeOverLastByte
 CSq_l517dh:
 	defb 00ah
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_0527h
 l5188h:
 	dec bc	
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_0590h
 	push af	
 l5194h:
 	dec bc	
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_0553h
 	push hl	
 l51a0h:
@@ -11213,9 +11213,9 @@ l51a0h:
 	jp WCodeOverLastByte
 CSq_l51a9h:
 	defb 00ah
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_05c7h
 l51b4h:
 	call sub_5124h
@@ -11223,13 +11223,13 @@ l51b4h:
 	jp WCodeOverLastByte
 CSq_l51bdh:
 	defb 012h
-	ld (l1793h),hl
+	ld (rtPar4),hl
 	pop hl	
-	ld (l1791h),hl
+	ld (rtPar3),hl
 	pop hl	
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_05ebh
 l51d0h:
 	call sub_511ch
@@ -11237,11 +11237,11 @@ l51d0h:
 	jp WCodeOverLastByte
 CSq_l51d9h:
 	defb 00eh
-	ld (l1791h),hl
+	ld (rtPar3),hl
 	pop hl	
-	ld (l178fh),hl
+	ld (rtPar2),hl
 	pop hl	
-	ld (l178dh),hl
+	ld (rtPar1),hl
 	call sub_0623h
 l51e8h:
 	inc b	
