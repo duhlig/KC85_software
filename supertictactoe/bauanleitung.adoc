@@ -10,32 +10,34 @@
 
 * Teil 1 auf dem KC übersetzen
 ** (USB-Modul oder Diskette einschalten)
-** LOAD/FLOAD/uload -> PASCAL52
-** PASE
-** Z49151,32767 (Speicherbegrenzung wg. SETSYS)
-** G,,SUPERTTT
-** T --> J zum Speichern
-*** Endadresse+1 als _EA1_ merken! 47BC
+** `LOAD/FLOAD/uload` -> PASCAL52
+** `PASE`
+** `Z49151,32767` (Speicherbegrenzung wg. SETSYS)
+** `G,,SUPERTTT`
+** `T` -> J zum Speichern
+*** Endadresse+1 als _EA1_ merken! 4782
 
 * Teil 2 auf dem KC übersetzen
 ** RESET
 ** (USB-Modul oder Diskette einschalten)
-** LOAD/FLOAD/uload -> PASCAL52
-** MO 2D24 --> _EA1_ eintragen
-** PASE
-** Z49151,32767 (Speicherbegrenzung wg. SETSYS)
-** G,,STTT_GT2
-** T --> J zum Speichern
-*** Endadresse+1 als _EA2_ merken! 6958
+** `LOAD/FLOAD/uload` -> PASCAL52
+** `MO 2D24` --> _EA1_ eintragen
+** `PASE`
+** `Z49151,32767` (Speicherbegrenzung wg. SETSYS)
+** `G,,STTT_GT2`
+** `T` -> J zum Speichern
+*** Endadresse+1 als _EA2_ merken! 691E
 
 * "Linken"
-** Lade-Offset für Teil 2 berechnen:
-   `_OF2_ := _EA1_ - Runtime-Ende (in KC-Pascal 5.2: 192F)` 2E8D
+** RESET
 ** (USB-Modul oder Diskette einschalten)
-** LOAD/FLOAD/uload _OF2_ -> STTT_GT2
-** LOAD/FLOAD/uload -> SUPERTTT
-** LOAD/FLOAD/uload -> PASLINK
-** PASLINK
+** Lade-Offset für Teil 2 berechnen: +
+   `_OF2_ := _EA1_ - _Runtime-Ende_` (in KC-Pascal 5.2: 192F) 2E53
+** (USB-Modul oder Diskette einschalten)
+** `LOAD/FLOAD/uload` _OF2_ -> STTT_GT2
+** `LOAD/FLOAD/uload` -> SUPERTTT
+** `LOAD/FLOAD/uload` -> PASLINK
+** `PASLINK`
 *** _EA2_ eingeben
 *** Ergebnis kontrollieren
-** KCC-Datei speichern (SAVE/FSAVE/usave 0280 _EA2_) -> SUPERTTT
+** KCC-Datei speichern (`SAVE/FSAVE/usave 0280 _EA2_`) -> SUPERTTT

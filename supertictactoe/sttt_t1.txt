@@ -7,6 +7,7 @@ PROGRAM superttt;
   x0=10; y0=6; abstand=2;
   (* Einheit: Zeichen *)
   sfh=4; (*Spielfeldhintergrundfarbe*)
+  ffh=5; (*Fragefenster-Hintergr.*)
   ARGC=#B780;
   WININ=#3C; WINAK=#3D;
   BLSU=148;
@@ -23,7 +24,7 @@ PROGRAM superttt;
     (*Text-X/Y f. Platz 1,
       Adr. 0 f. Rahmen*)
   END;
-  Thf=(hell,dunkel,aktiv,inaktiv,hO,hX,dL);
+(*  Thf=(hell,dunkel,aktiv,inaktiv,hO,hX,dL);*)
   Tstr8=ARRAY[1..8] OF CHAR;
   Tstr16=ARRAY[1..16] OF CHAR;
   Tstr64=ARRAY[1..64] OF CHAR;
@@ -113,16 +114,13 @@ PROGRAM superttt;
   END;
  END;
  
- PROCEDURE farbe(s:TSta; h:Thf);
+ PROCEDURE farbe(s:TSta);
  VAR hf:INTEGER;
  BEGIN
-  CASE h OF
-   aktiv: hf:=sfh
-  ELSE hf:=1;
   CASE s OF
-   L: SETC(0,hf);
-   O: SETC(5,hf);
-   X: SETC(6,hf)
+   L: SETC(0,sfh);
+   O: SETC(5,sfh);
+   X: SETC(6,sfh)
   END;
  END;
 
@@ -221,7 +219,7 @@ PROGRAM superttt;
    A:=a*2;
    xt:=superst[F].tx;
    yt:=superst[F].ty;
-   WinAk(1); farbe(L,aktiv);
+   WinAk(1); farbe(L);
    IF sttt[F,1]=L THEN pn(1,xt  ,yt);
    IF sttt[F,2]=L THEN pn(2,xt+a,yt);
    IF sttt[F,3]=L THEN pn(3,xt+A,yt);
@@ -251,7 +249,7 @@ PROGRAM superttt;
   sttt[f,p]:=s;
   WinAk(1);
   gotoFP(f,p);
-  farbe(s,aktiv);
+  farbe(s);
   WrSta(s);
  END;
  
@@ -287,7 +285,7 @@ PROGRAM superttt;
    LINEPLOT(gx0,g,gx1,g);
    g:=g-gPAbst;
   UNTIL g<gy1;
-  GOTOXY(24,26);farbe(L,aktiv);
+  GOTOXY(24,26);farbe(L);
   WRITE('Abbruch mit "A"');
  END;
 
@@ -375,7 +373,7 @@ PROGRAM superttt;
 
  PROCEDURE frageFenst;
  BEGIN
-  WinAk(2); SETC(5,5); PAGE;
+  WinAk(2); SETC(5,ffh); PAGE;
   GOTOXY(0,1);
  END;
 
@@ -385,7 +383,7 @@ PROGRAM superttt;
   IF (c='A') OR (c='a') THEN BEGIN
    frAbbruch:=TRUE;
    frageFenst;
-   SETC(6,5);
+   SETC(6,ffh);
    WRITE(' Abbruch? (J/n) ');
    tj:=READKBD;
    abbruch:=(tj='J') OR (tj='j');
@@ -458,7 +456,7 @@ PROGRAM superttt;
    x:=(superst[imFeld].tx+abstand)*8+3;
    y:=255-(superst[imFeld].ty+abstand)*8-3;
    r:=abstand*8+1;
-   farbe(amZug,aktiv);
+   farbe(amZug);
    CIRCLE(x,y,r);
    CIRCLE(x,y,r+1);
    CIRCLE(x,y,r+2);
@@ -473,7 +471,7 @@ PROGRAM superttt;
    x2:=x1+(abstand*2+1)*8-1;
    y1:=256-superst[imFeld].ty*8;
    y2:=y1-(abstand*2+1)*8+1;
-   farbe(amZug,aktiv);
+   farbe(amZug);
    LINEPLOT(x1,y1,x2,y2);
    LINEPLOT(x2,y1,x1,y2);
    LINEPLOT(x1+1,y1,x2,y2+1);
@@ -562,8 +560,8 @@ PROGRAM superttt;
   frageFenst;
   WRITE(' ');
   IF gew THEN BEGIN
-   SETC(6,5); WrSta(amZug);
-   SETC(5,5); WRITELN(' hat gewonnen. Gratulation!');
+   SETC(6,ffh); WrSta(amZug);
+   SETC(5,ffh); WRITELN(' hat gewonnen. Gratulation!');
   END
   ELSE
    WRITELN('Unentschieden!');

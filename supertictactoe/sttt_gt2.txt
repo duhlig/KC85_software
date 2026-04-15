@@ -6,6 +6,7 @@ PROGRAM superttt;
   x0=10; y0=6; abstand=2;
   (* Einheit: Zeichen *)
   sfh=4; (*Spielfeldhintergrundfarbe*)
+  ffh=5; (*Fragefenster-Hintergr.*)
   ARGC=#B780;
   WININ=#3C; WINAK=#3D;
   BLSU=148;
@@ -22,7 +23,7 @@ PROGRAM superttt;
     (*Text-X/Y f. Platz 1,
       Adr. 0 f. Rahmen*)
   END;
-  Thf=(hell,dunkel,aktiv,inaktiv,hO,hX,dL);
+(*  Thf=(hell,dunkel,aktiv,inaktiv,hO,hX,dL);*)
   Tstr8=ARRAY[1..8] OF CHAR;
   Tstr16=ARRAY[1..16] OF CHAR;
   Tstr64=ARRAY[1..64] OF CHAR;
