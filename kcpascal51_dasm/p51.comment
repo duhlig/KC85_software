@@ -59,7 +59,7 @@ GetLexem:
       01bh: SET
       01ch: ARRAY
       01dh: FORWARD
-      013h: RECORD
+      01eh: RECORD
       01fh: TYPE
       020h: IN
       021h: LABEL
@@ -77,16 +77,45 @@ GetLexem:
       0ach: ","
       0adh: "-"
       0aeh: "." oder Quelltextende
+      0bah: ":"
       0bbh: ";"
       0dbh: "["
       0ddh: "]"
+      0deh: "^"
 
 SearchInSymTab__:
   Parameter:
     HL: erstes Listenelement
+    (curIdentifier)
   Return:
     C-Flag=1: gefunden
     HL: wenn gefunden, dann Adr. hinter dem gefundenen Namen
+    
+GetIdentInfoInABC:
+  Parameter:
+    (curIdentifier)
+  Return:
+    A: Ident-Typ (wenn nicht gefunden, dann 0)
+    BC:
+    HL: Adr. hinter Symtab-Kopf (weitere Parameter)
+    
+    A   Bedeutung        BC                    (HL)
+    --- ---------------- --------------------- --------------------- ------
+    01h Const            Typ                   Wert
+    02h glob. Var./In-Par.
+    03h Type (simple)    Typcode               Min (Word)            Max (Word)  Len (Word)
+        Type (String)    02xxh (xx = Stringlänge) Arraylänge / ?? (0000) / Arraxylä.
+    04h
+    05h
+    06h Prc              Adr. Pars. + Codegen.
+    07h Fnc (Bsp SIZE,SUCC)   Adr. Pars. + Codegen.
+    08h Prc (Bsp USER,HALT,PAGE)   ?0                    Adr. Pars. + Codegen.   +?
+    09h Fnc              Return-Typ            Adr. Pars. + Codegen.   +?
+    0ah VAR-Param.
+    0bh Fnc -> Real	 Adr. Pars. + Codegen.
+    0ch Fnc (IN: Re/Int) Adr. Pars. + Codegen.
+    0dh Fnc (IN: Re/Int) Adr. ??               Adr ??
+    0fh Feldname
     
 Save:
   Parameter:
@@ -123,7 +152,7 @@ IX:
     bit_0: Comp-Opt. L, + -> 1, - -> 0
     bit_1: Comp-Opt. O
     bit_2: Comp-Opt. C
-    bit_3: Comp-Opt. S
+    bit_3: Comp-Opt. S (Stack-Test durchführen?)
     bit_4: Comp-Opt. I
     bit_5: Comp-Opt. A
     bit_6: EOL im Line Buffer gelesen
