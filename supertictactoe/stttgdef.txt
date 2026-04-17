@@ -9,9 +9,9 @@ PROGRAM superttt;
   ffh=5; (*Fragefenster-Hintergr.*)
   ARGC=#B780;
   WININ=#3C; WINAK=#3D;
-  BLSU=148;
-  BLTTT=336;
-  BLBI=2544;
+  BLSU=110;
+  BLTTT=250;
+  BLBI=1908;
   
  TYPE
   TSta=(L,O,U,X);
