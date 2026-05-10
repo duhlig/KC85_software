@@ -693,9 +693,9 @@ caos_sp:
 	defw RL_SETSYS
 curSrcLineNum:
 	defw 00028h
-l070eh:
+realM2HL:				; Hier wird die Haelfte eines REALs geparkt.
 	defw 00000h
-l0710h:
+l0710h:				; Hier wird PasPrgStart abgelegt und sonst nicht zugegriffen?!
 	defw 00000h
 printFlag:
 	defb 000h
@@ -710,11 +710,11 @@ ResetPrintFlag:
 	xor a	
 	ld (printFlag),a
 	jp DoNopRET
-OutChr:
+OutChr:				; Param: A=Zeichen
 	push bc	
 	push af	
 	ld c,a	
-	cp 010h
+	cp 010h			; Sonderbehandlung: Print ein/aus
 	jr nz,OCChkNL
 	ld a,(printFlag)
 	xor 001h
@@ -943,7 +943,7 @@ PrSpace:
 	ld a,020h
 JOutChr:
 	jp OutChr
-OutNStr:
+OutNStr:			; Param: HL=adr, B=Laenge
 	ld a,(hl)	
 	inc hl	
 	call OutChr
@@ -964,7 +964,7 @@ OutZStr:
 	ret z	
 	call OutChr
 	jr OutZStr
-PrHex:
+PrHex:				; Param: DE=Wert, HL=Laenge
 	dec l	
 	ld a,e	
 	jr z,Pr1Hex
@@ -1008,16 +1008,16 @@ TTrue_start:
 PrRAM:
 	ld de,T_RAM
 	jr PrErr2
-l08e4h:
+ErrNumExpected2:
 	pop bc	
 ErrNumExpected:
 	pop bc	
 	ld de,TNumExpected
 	jr PrErr2
-l08ebh:
+PrENumTooBig2:
 	pop bc	
 	pop bc	
-l08edh:
+PrENumTooBig:
 	ld de,TNumTooBig
 	jr PrErr2
 ErrOverflow:
@@ -1219,9 +1219,9 @@ l0a49h:
 	or a	
 	ret p	
 	jr NegHL
-CurrCharIsNum:
+CurrCharIsNum:			; Return: A = Zeichen, CY=1 wenn Ziffer
 	call GetCurIBufChr
-IsNum:				; Return: CY=1 wenn Ziffer
+IsNum:				; Return: A = Zeichen, CY=1 wenn Ziffer
 	cp 030h
 	ccf	
 	ret nc	
@@ -1406,7 +1406,7 @@ l0b51h:
 	inc c	
 	dec e	
 	ret	
-MulBy10_HL_DE:
+MulBy10_DE_HL:			; (DE,HL) *= 10 (32bit unsigned Int)
 	add hl,hl	
 	rl e
 	rl d
@@ -1425,65 +1425,65 @@ MulBy10_HL_DE:
 	adc hl,bc
 	ex de,hl	
 	ret	
-sub_0b76h:
+ReadNum:			; Zahl (INT?) aus Input Buffer lesen
 	call IsNum
-	jp nc,l08e4h
-	ld hl,00000h
+	jp nc,ErrNumExpected2
+	ld hl,00000h		; (DE,HL) mit 0 initialisieren
 	ld d,h	
 	ld e,l	
-	ld b,007h
+	ld b,007h		; max. 7 signifikante Ziffern
 	push bc	
-	jr l0b8ah
-l0b86h:
+	jr RdN_FirstNum
+RdN_NxtNum:
 	push bc	
-	call MulBy10_HL_DE
-l0b8ah:
+	call MulBy10_DE_HL	; (DE,HL) *= 10 (32bit unsigned Int)
+RdN_FirstNum:
 	sub 030h
 	ld c,a	
-	ld b,d	
+	ld b,d			; D ist hier noch 0
 	add hl,bc	
-	jr nc,l0b92h
+	jr nc,RdN_ChkNxChr
 	inc de	
-l0b92h:
-	call CurrCharIsNum
+RdN_ChkNxChr:
+	call CurrCharIsNum	; Return: A = Zeichen, CY=1 wenn Ziffer
 	pop bc	
-	dec b	
+	dec b			; B = Anzahl restlicher signif. Ziffern
+	ret nc			; keine Ziffer gelesen? dann Ende
+	call EditIBuf__		; Zeiger im IBuf weiterruecken
+	jr nz,RdN_NxtNum        ; Laufvariable B auswerten, 
+RdN_Skip:			; Restliche Ziffern schlucken
+	inc d			; nur Exponent erhöhen
+	call CurrCharIsNum	; Return: A = Zeichen, CY=1 wenn Ziffer
 	ret nc	
-	call EditIBuf__
-	jr nz,l0b86h
-l0b9dh:
-	inc d	
-	call CurrCharIsNum
-	ret nc	
-	call EditIBuf__
-	jr l0b9dh
-l0ba7h:
+	call EditIBuf__		; Zeiger im IBuf weiterruecken
+	jr RdN_Skip
+SkipSpcNL:
 	call JReadEditIBuf__
 	cp 020h
-	jr z,l0ba7h
+	jr z,SkipSpcNL
 	cp 00dh
 	ret nz	
-	jr l0ba7h
-sub_0bb3h:
-	call l0ba7h
-	cp 02dh
-	jr z,l0bcch
-	cp 02bh
-sub_0bbch:
-	call z,JReadEditIBuf__
-	call sub_0b76h
+	jr SkipSpcNL
+ReadInt:
+	call SkipSpcNL
+	cp 02dh			; '-'?
+	jr z,RdI_Neg
+	cp 02bh			; '+'?
+RdI_Pos:
+	call z,JReadEditIBuf__	; "+" ueberspringen
+	call ReadNum
 	ld a,d	
-	or e	
-	jr nz,l0bc9h
-	bit 7,h
+	or e			; Ueberlauf nach DE?
+	jr nz,RdI_Err
+	bit 7,h			; Ueberlauf in H?
 	ret z	
-l0bc9h:
-	jp l08edh
-l0bcch:
-	call sub_0bbch
+RdI_Err:
+	jp PrENumTooBig
+RdI_Neg:
+	call RdI_Pos		; HL = Zahl, DE = 0
 	ex de,hl	
 	or a	
-	sbc hl,de
+	sbc hl,de		; HL := -HL
 	ret	
 l0bd4h:
 	call GetCurIBufChr
@@ -1495,7 +1495,7 @@ l0bd4h:
 	djnz l0bd4h
 	ret	
 l0be3h:
-	xor a	
+	xor a			; Endemarke
 l0be4h:
 	ld (hl),a	
 	inc hl	
@@ -1649,158 +1649,158 @@ sub_0c87h:
 	inc hl	
 	ld (hl),d	
 	ret	
-l0c9bh:
-	pop af	
-l0c9ch:
-	pop bc	
-	pop de	
+RAd_Erg2:
+	pop af			; Stackbereinigung
+RAd_Erg2_2:
+	pop bc			; Returnadr.
+	pop de			; Erg.: re. Operand
 	pop hl	
 	push bc	
 	ret	
-sub_0ca1h:
-	bit 6,h
-	jr z,l0c9ch
+RealAdd:			; (HLDE) += (SP+2..5)
+	bit 6,h			; 1. Operand =0.0E0?
+	jr z,RAd_Erg2_2		; Ende, Erg.: 2. Operand
 	ld iy,00000h
 	add iy,sp
 	ld a,h	
 	ld b,(iy+005h)
-	bit 6,b
-	jr z,l0cf7h
-	xor b	
-	push af	
-	push de	
-	ld a,d	
-	ld d,b	
-	ld b,e	
-	ld e,(iy+004h)
-	sub (iy+003h)
-	jp pe,l0cfch
-	jp m,l0d1ah
-	ld c,(iy+002h)
-	jr z,l0d29h
-l0ccah:
+	bit 6,b			; 2. Operand = 0?
+	jr z,RAd_Erg1_2		; ja -> Erg. = 1. Operand
+	xor b			; unterschiedliche Vorzeichen?
+	push af			; und beiseite legen
+	push de			; Exp. 1 beiseite legen
+	ld a,d			; A = Exp. 1
+	ld d,b			; D = Mant. 2, ob. Byte
+	ld b,e			; B = Mant. 1, unt. Byte
+	ld e,(iy+004h)		; E = ?Mant. 2, mit. Byte?
+	sub (iy+003h)		; A := Exp1 - Exp2
+	jp pe,RAd_SetRes	; Abstand zu groß -> rechnen nicht nötig
+	jp m,RAd_SwpO
+	ld c,(iy+002h)		; Operand 2, Mantisse Teil 2 holen
+	jr z,RAd_Compute		; gleiche Exponenten
+RAd_ShMt2:
 	push hl	
-	res 7,d
+	res 7,d			; Vorzeichenbit ausblenden
 	res 7,h
-l0ccfh:
+RAd_ShMt2_1:			; Mant. d. 2. Operands in Position bringen
 	srl d
 	rr e
 	rr c
 	dec a	
-	jr nz,l0ccfh
-	ld a,b	
-	bit 7,(iy-001h)
-	jr nz,l0d01h
-l0cdfh:
+	jr nz,RAd_ShMt2_1
+	ld a,b			; A = Mant. 1. Operand
+	bit 7,(iy-001h)		; unterschiedliche Vorzeichen?
+	jr nz,RAd_Sub
+RAd_Add:
 	add a,c	
 	adc hl,de
-	pop bc	
-	pop de	
-	jp po,l0cf0h
-	srl h
+	pop bc			; B: Vorzeichenbit, Rest uninteressant
+	pop de			; D: Exponent, Rest uninteressant
+	jp po,RAd_ResSetSign
+	srl h			; korrigierbarer Ueberlauf: Mant. schieben...
 	rr l
 	rra	
-	inc d	
-	jp pe,l0d11h
-l0cf0h:
+	inc d			; ... und Exp. erhoehen
+	jp pe,Real_End_ErrOV	; Exponent uebergelaufen?
+RAd_ResSetSign:
 	ld e,a	
 	ld a,b	
 	and 080h
 	or h	
 	ld h,a	
-l0cf6h:
-	pop af	
-l0cf7h:
+RAd_Erg1:
+	pop af			; Stackbereinigung
+RAd_Erg1_2:			; Erg.: li. Operand
 	pop bc	
-	pop af	
+	pop af			; Stackbereinigung
 	pop af	
 	push bc	
 	ret	
-l0cfch:
+RAd_SetRes:
 	pop de	
-	jr nc,l0c9bh
-	jr l0cf6h
-l0d01h:
+	jr nc,RAd_Erg2		; Erg.: re. Operand
+	jr RAd_Erg1
+RAd_Sub:
 	sub c	
 	sbc hl,de
-l0d04h:
-	pop bc	
-l0d05h:
-	pop de	
-l0d06h:
+RAd_NormS:
+	pop bc			; B = Vorzeichen
+RAd_Norm:
+	pop de			; D = Exponent
+RAd_ShRes:			; Mantisse schieben und Exponent verkleinern
 	bit 6,h
-	jr nz,l0cf0h
+	jr nz,RAd_ResSetSign
 	add a,a	
 	adc hl,hl
 	dec d	
-	jp po,l0d06h
-l0d11h:
+	jp po,RAd_ShRes		; P/V=1 wenn D vorher 80H war
+Real_End_ErrOV:
 	ld sp,iy
-	pop bc	
+	pop bc			; Return-Adr. f. Fehlermeldung holen
 	pop hl	
 	pop hl	
-	push bc	
+	push bc			; Return-Adr. f. Fehlermeldung ablegen
 	jp ErrOverflow
-l0d1ah:
-	ld c,b	
-	ld b,(iy+003h)
+RAd_SwpO:
+	ld c,b			; C = Mant. 1, unt. Byte	
+	ld b,(iy+003h)		; Exponent 2 holen
 	ld (iy-003h),b
-	ld b,(iy+002h)
+	ld b,(iy+002h)		; Mantisse 2, unt. Byte holen
 	ex de,hl	
-	neg
-	jr l0ccah
-l0d29h:
-	ld a,b	
-	push hl	
-	res 7,h
+	neg			; Exp-Diff. -> positiv
+	jr RAd_ShMt2
+RAd_Compute:
+	ld a,b			; A = Mant. 1, unt. Byte
+	push hl			; Vorzeichen f. evtl. Negation
+	res 7,h			; Vorzeichen leeren
 	res 7,d
-	bit 7,(iy-001h)
-	jr z,l0cdfh
+	bit 7,(iy-001h)		; unterschiedliche Vorzeichen?
+	jr z,RAd_Add		; nein, dann Addition
 	sub c	
 	sbc hl,de
-	jr nz,l0d3dh
+	jr nz,RAd_ChkNeg
 	or a	
-	jr z,l0d4dh
-l0d3dh:
-	jr nc,l0d04h
-	ld de,00000h
+	jr z,RAd_Res0		; Subtraktion ergibt 0
+RAd_ChkNeg:
+	jr nc,RAd_NormS
+	ld de,00000h		; Vorbereitung für Negation der Mantisse
 	ex de,hl	
-	ld c,a	
-	pop af	
-	cpl	
-	ld b,a	
+	ld c,a			; C = Erg., unt. Byte
+	pop af			; Vorzeichen holen
+	cpl			; negieren
+	ld b,a			; B = Vorzeichen
 	xor a	
 	sub c	
 	sbc hl,de
-	jr l0d05h
-l0d4dh:
-	ld d,h	
-	ld e,h	
+	jr RAd_Norm
+RAd_Res0:
+	ld d,h			; D := 0
+	ld e,h			; E := 0
 	pop af	
 	pop af	
-	jr l0cf6h
-RealSqrt__:
+	jr RAd_Erg1
+RealSquare:
 	pop bc	
 	push hl	
 	push de	
 	push bc	
-RealMul__:
+RealMul:			; (HLDE) *= (SP+2..5)
 	ld iy,00000h
 	add iy,sp
-	ld a,040h
-	and h	
+	ld a,040h		; Maske f. oberstes Bit der Mantisse (0-Indikator)
+	and h			; 1. Operand = 0?
 	ld b,(iy+005h)
-	and b	
-	jr z,RealRes0__
+	and b			; 2. Operand = 0?
+	jr z,RealRes0		; ja -> Erg. 0.0E0
 	ld a,h	
 	xor b	
-	and 080h
-	ld b,a	
-	ld a,(iy+003h)
-	add a,d	
-	ld c,a	
-	jp pe,l0d11h
-	push bc	
+	and 080h		; Vorzeichen des Ergebnisses
+	ld b,a			; B = Vorzeichen
+	ld a,(iy+003h)		; A = Exponent 2. Operand
+	add a,d			; A = Ergebnis-Exponent
+	ld c,a			; C = Ergebnis-Exponent
+	jp pe,Real_End_ErrOV
+	push bc			; Vorzeichen und Exponent sichern
 	res 7,h
 	ld c,e	
 	xor a	
@@ -1848,7 +1848,7 @@ l0da4h:
 	jr l0dbch
 l0db8h:
 	inc d	
-	jp pe,l0d11h
+	jp pe,Real_End_ErrOV
 l0dbch:
 	ld a,b	
 	or h	
@@ -1858,7 +1858,7 @@ l0dbch:
 	pop af	
 	push bc	
 	ret	
-RealRes0__:
+RealRes0:
 	pop hl	
 	pop de	
 	ex (sp),hl	
@@ -1866,141 +1866,141 @@ RealRes0__:
 	ld e,h	
 	ld d,l	
 	ret	
-RealDiv__:
+RealDiv:			; (HLDE) = (SP+2..5) / (HLDE)
 	bit 6,h
 	jp z,ErrDivBy0
 	ld iy,00000h
 	add iy,sp
 	ld b,(iy+005h)
 	bit 6,b
-	jp z,RealRes0__
-	ld a,(iy+003h)
+	jp z,RealRes0		; Erg. 0.0E0
+	ld a,(iy+003h)		; Exponent des Dividenten
 	sub d	
-	jp pe,l0d11h
-	push af	
+	jp pe,Real_End_ErrOV
+	push af			; neuer Exponent auf den Stack
 	ld d,b	
-	ld c,e	
-	ld e,(iy+004h)
+	ld c,e		        ; C := unt. Teil d. Manti. d. Divisors
+	ld e,(iy+004h)		; DE := ob. Teil d. Manti. d. Dividenten
 	ld a,d	
 	xor h	
-	and 080h
+	and 080h		; A := Vorzeichen des Ergebnisses
 	res 7,d
 	res 7,h
-	push af	
-	ex de,hl	
-	ld a,(iy+002h)
+	push af			; Vorzeichen auf den Stack
+	ex de,hl		; HL=Divident, DE=Divisor
+	ld a,(iy+002h)		; A := unt. Teil d. Manti. d. Dividenten
 	ld b,008h
-l0dfch:
+RDv24b:				; Teil 1: (IY-4) := (HL,A) : (DE,C) (8 bit)
 	sub c	
 	sbc hl,de
-	jr nc,l0e04h
+	jr nc,RDv24b0		; keine Korrektur nötig
 	add a,c	
 	adc hl,de
-l0e04h:
-	rl (iy-004h)
+RDv24b0:
+	rl (iy-004h)		; Ergebnis, Teil 1, negiert. landet "neben" dem Vorzeichen
 	add a,a	
 	adc hl,hl
-	djnz l0dfch
+	djnz RDv24b
 	ld b,008h
-l0e0fh:
+RDv16b:				; Teil 2: A := HL - DE
 	sbc hl,de
-	jr nc,l0e14h
+	jr nc,RDv16b0		; keine Korrektur nötig
 	add hl,de	
-l0e14h:
-	rla	
+RDv16b0:
+	rla			; Ergebnis, Teil 2, negiert
 	add hl,hl	
-	djnz l0e0fh
-	cpl	
-	ld l,a	
+	djnz RDv16b
+	cpl			; Korrektur der abgespeicherten Carry-Bits
+	ld l,a			; Ergebnis, Teil 2, jetzt in L
 	ld a,h	
 	ld b,008h
-l0e1dh:
+RDv8b:				; Teil 3: E := A - D
 	sub d	
-	jr nc,l0e21h
+	jr nc,RDv8b0		; keine Korrektur nötig
 	add a,d	
-l0e21h:
-	rl e
+RDv8b0:
+	rl e			; Ergebnis, Teil 3, negiert
 	add a,a	
-	djnz l0e1dh
-	pop bc	
+	djnz RDv8b
+	pop bc			; B=Vorzeichen, C= 1. Ergebnisteil, negiert
 	ld a,c	
-	cpl	
+	cpl			; Teil 1: Korrektur der abgespeicherten Carry-Bits
 	ld h,a	
 	ld a,e	
-	pop de	
-	cpl	
-	bit 7,h
-	jr nz,l0e3eh
-	dec d	
-	jp pe,l0d11h
-l0e35h:
-	ld e,a	
+	pop de	    		; D = Exponent, E = egal
+	cpl			; Teil 3: Korrektur der abgespeicherten Carry-Bits
+	bit 7,h			; korrigierbarer Überlauf?
+	jr nz,RDvCorM
+	dec d			; Exponent korrigieren
+	jp pe,Real_End_ErrOV
+RDvEnd:
+	ld e,a			; Ergebnis, Teil 3
 	ld a,h	
-	or b	
-	ld h,a	
-	pop bc	
-	pop af	
-	pop af	
+	or b			; Vorzeichen einarbeiten
+	ld h,a			; Ergebnis, Teil 1
+	pop bc			; Return-Adresse merken
+	pop af			; Divisor entsorgen
+	pop af			; dto.
 	push bc	
 	ret	
-l0e3eh:
+RDvCorM:				; Vorzeichenbit freimachen
 	srl h
 	rr l
 	rra	
-	jr l0e35h
-sub_0e45h:
-	ld a,080h
+	jr RDvEnd
+IntToReal:			; (HL,DE)_real := (HL)_int
+	ld a,080h		; Vorzeichen testen
 	and h	
-	jp z,l0e52h
-	ex de,hl	
+	jp z,ITR_pos
+	ex de,hl		; negative Zahl -> Zweierkomplement entfernen
 	ld hl,00000h
-	sbc hl,de
+	sbc hl,de		; HL := -HL
 	or a	
-l0e52h:
+ITR_pos:
 	ld de,00000h
-	adc hl,de
-	ret z	
-	ld d,00eh
-l0e5ah:
+	adc hl,de		; "sinnlose" Addition um auf 0 zu pruefen
+	ret z			; --> (HL,DE) enthaelt Real-0
+	ld d,00eh		; MAXINT waere 2^15-1
+ITR_ShNorm:
 	bit 6,h
-	jp nz,l0e64h
+	jp nz,ITR_isNorm
 	add hl,hl	
 	dec d	
-	jp l0e5ah
-l0e64h:
-	ld e,000h
-	or h	
-	ld h,a	
+	jp ITR_ShNorm
+ITR_isNorm:
+	ld e,000h		; unteres Mantissenbyte ist hier immer 0
+	or h			; Vorzeichen wiederherstellen
+	ld h,a
 	ret	
-Trunc__:
+Trunc:				; HL (Int.) := trunc((HL,DE) (Real))
 	bit 6,h
 	ret z	
 	ld a,080h
 	and h	
-	ld c,a	
+	ld c,a			; C = Vorzeichen
 	res 7,h
-	ld a,00eh
+	ld a,00eh		; Exponent pruefen: Zahl <=> 2^14?
 	sub d	
-	jr z,l0e81h
-	jp m,l0e8bh
+	jr z,TruncCutMant	; Schieben nicht noetig, einfach 3. Byte der Mant. weglassen
+	jp m,TruncResInval	; Ergebnis zu gross f. Integer
 	ld b,a	
-l0e7bh:
+TruncShMant:
 	srl h
 	rr l
-	djnz l0e7bh
-l0e81h:
-	inc c	
-	ret p	
-	ex de,hl	
+	djnz TruncShMant
+TruncCutMant:
+	inc c			; C enthaelt das Vorzeichen
+	ret p			; Erg. positiv, keine Korr. noetig
+	ex de,hl		; Zweierkomplement bilden
 	ld hl,00000h
 	or a	
 	sbc hl,de
 	ret	
-l0e8bh:
+TruncResInval:
 	ld hl,00000h
 	ret	
-sub_0e8fh:
-	ld hl,(l1795h)
+Random:
+	ld hl,(RandomState)
 	ld a,048h
 	and h	
 	jp po,l0e99h
@@ -2016,68 +2016,68 @@ l0e99h:
 l0ea7h:
 	ld a,h	
 	xor l	
-	ld (l1795h),hl
+	ld (RandomState),hl
 	ld l,a	
 	ld h,000h
 	ret	
-Round__:
+Round:
 	push hl	
 	push de	
 	ld de,0ff00h
-	ld hl,04000h
-	call sub_0ca1h
-Entier__:
-	bit 6,h
+	ld hl,04000h		; (HL,DE) = 0.5
+	call RealAdd		; (HLDE) += (SP+0..3)
+Entier:
+	bit 6,h			; = 0.0E0?
 	ret z	
 	ld a,080h
 	and h	
-	ld c,a	
+	ld c,a			; C = Vorzeichen
 	res 7,h
-	ld a,d	
-	or a	
-	jp m,l0ef1h
-	ld a,00eh
-	sub d	
+	ld a,d			; A = Exponent
+	or a			; "untersuchen"
+	jp m,Ent_Near0		; Zahl war zw. -1.49999 und +0.49999
+	ld a,00eh		; MAXINT=2^15-1 --> Exp. darf max. 14 sein
+	sub d			; Exponent zu gross?
 	jp c,ErrOverflow
-	ld b,a	
+	ld b,a			; Diff. 14-Exp ist Schiebelaenge
 	xor a	
-	cp e	
-	jp z,l0ed6h
-	inc a	
-l0ed6h:
+	cp e			; signifikante Stellen im unt. Mant.-Byte?
+	jp z,Ent_LowSignif	; nein -> Merker A bleibt 0
+	inc a			; ja -> Merker A setzen
+Ent_LowSignif:
 	dec b	
 	inc b	
-	jp z,l0ee3h
-l0edbh:
+	jp z,Ent_NoSh		; Exp. war 14 -> Schieben nicht noetig
+Ent_ShToInt:			; Mantisse so schieben, dass Int-Zahl entsteht
 	srl h
 	rr l
-	adc a,000h
-	djnz l0edbh
-l0ee3h:
-	inc c	
-	ret p	
-	or a	
-	jp z,l0eeah
-	inc hl	
-l0eeah:
+	adc a,000h		; Merker A setzen, falls "1" herausgeschoben wird
+	djnz Ent_ShToInt
+Ent_NoSh:
+	inc c			; Vorzeichentest: war 0 (pos.) oder 80h (neg.)
+	ret p			; pos. Zahl: keine weitere Korrektur
+	or a			; neg. Zahl: wurden 1er herausgeschoben?
+	jp z,Ent_2Compl		; nein -> nichts zu korrigieren
+	inc hl			; korrekte Rundung
+Ent_2Compl:			; neg. Zahl -> Zweierkomplement bilden
 	ex de,hl	
 	ld hl,00000h
 	sbc hl,de
 	ret	
-l0ef1h:
-	inc c	
+Ent_Near0:
+	inc c			; C ist vorher 0 (positive Zahl) oder 80h (negative)
 	ld hl,00000h
-	ret p	
-	dec hl	
+	ret p			; Zahl war zw. -0.5 und +0.49999
+	dec hl			; Zahl war zw. -1.49999 und -0.50001 --> HL = -1
 	ret	
-sub_0ef8h:
-	ld hl,04000h
+Real10PowA:			; (HL,DE) := 10^A
+	ld hl,04000h		; Start mit (HL,DE) = 1.0E0
 	ld d,l	
 	ld e,l	
-	ld iy,realTab1__
-l0f01h:
+	ld iy,realTab10PowA
+R10PA_ChkBit:
 	srl a
-	jr nc,l0f1ch
+	jr nc,R10PA_NoMul
 	push af	
 	push iy
 	push hl	
@@ -2085,260 +2085,268 @@ l0f01h:
 	ld h,(iy+000h)
 	ld l,(iy+001h)
 	ld e,(iy+002h)
-	ld d,(iy+003h)
-	call RealMul__
+	ld d,(iy+003h)		;
+	call RealMul		; (HLDE) *= (SP+0..3)
 	pop iy
 	pop af	
-l0f1ch:
+R10PA_NoMul:
 	ret z	
 	ld bc,00004h
 	add iy,bc
-	jr l0f01h
-realTab1__:
-	defw 00050h
-	defw 00300h
-	defw 00064h
+	jr R10PA_ChkBit
+realTab10PowA:
+	;; Achtung! andere Byte-Reihenfolge: H-L-E-D
+	defw 00050h		; 10^1 ;; H: 50h, L: 00h
+	defw 00300h		;      ;; E: 00h, D: 03h
+	defw 00064h		; 10^2
 	defw 00600h
-	defw 0204eh
+	defw 0204eh		; 10^4
 	defw 00d00h
-	defw 05e5fh
+	defw 05e5fh		; 10^8
 	defw 01a10h
-	defw 00d47h
+	defw 00d47h		; 10^16
 	defw 035e4h
-	defw 0e24eh
+	defw 0e24eh		; 10^32
 	defw 06ad4h
-sub_0f3ch:
+Div10byHLDE:			; (HL,DE) = 10.0 / (HL,DE)
 	ld a,d	
 	cp 003h
-	ret c	
+	ret c			; Zahl < 10 (eigtl. < 8) -> nichts tun
 	push hl	
 	push de	
-	ld bc,05000h
-	jr nz,l0f4ch
+	ld bc,05000h		; Mantisse fuer 10
+	jr nz,Div10_Div		; Zahl > 16 -> keine Pruefung der Mantisse noetig
 	or a	
 	sbc hl,bc
-	jr c,l0f5ch
-l0f4ch:
+	jr c,Div10_NoDiv	; Zahl < 10 --> Ende
+Div10_Div:
 	ld h,b	
 	ld l,c	
-l0f4eh:
 	ld de,00300h
-	call RealDiv__
-	ld a,(l1797h)
-	inc a	
-	ld (l1797h),a
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE), hier: Zahl/10.0
+	ld a,(realM0L)
+	inc a			; Anzahl Vorkommastellen hochzaehlen
+	ld (realM0L),a
 	ret	
-l0f5ch:
-	pop de	
+Div10_NoDiv:			; nicht dividieren
+	pop de			; Divisor vom Stack nehmen
 	pop hl	
 	ret	
-l0f5fh:
+PrR_invalMN2:			; s. PrR_invalMN, mit Stackbereinigung
 	pop af	
-l0f60h:
-	pop af	
-	ld a,(l17a5h)
-	ld hl,(l1799h)
-	ld de,(l179bh)
-	jp l106fh
-sub_0f6eh:
-	ld a,e	
-	ld (l17a5h),a
-	ld a,l	
-	ld (l1798h),a
+PrR_invalMN:			; WRITE-Param. m und n passen nicht -> wiss. Darst.
+	pop af			; gemerktes Vorzeichen loeschen
+	ld a,(realPrGlaen)	; Gesamtlaenge (Param. m) eintragen
+	ld hl,(realM1HL)	; Zahlparameter wiederherstellen
+	ld de,(realM1DE)
+	jp PrR_EngPar__
+PrR_Fix__:		        ; WRITE REAL :m:n
+	ld a,e			; Param. fuer Gesamtlaenge ("m" im Handbuch)
+	ld (realPrGlaen),a
+	ld a,l			; Param. fuer Nachkommastellen ("n" im Handbuch)
+	ld (realM0H),a
 	or a	
-	ld a,0ffh
+	ld a,0ffh		; ?min. 1 Stelle vor dem Dezimalpunkt?
 	jr z,l0f80h
-	jp m,l0f80h
+	jp m,l0f80h		; ungueltigen Wert ignorieren
 	sub l	
-	dec a	
+	dec a			; eine Stelle f. Dezimalpunkt einrechnen
 l0f80h:
-	add a,e	
-	pop hl	
-	pop de	
-	ex (sp),hl	
-	ld (l1799h),hl
-	ld (l179bh),de
-	rlc h
-	push af	
+	add a,e		        ; A = Anzahl Vorkommastellen
+	pop hl			; Return-Adr.
+	pop de			; Realzahl Teil 2
+	ex (sp),hl		; Realzahl Teil 1 mit Return-Adr. tauschen
+	ld (realM1HL),hl
+	ld (realM1DE),de
+	rlc h			; Vorzeichen ins Carry-Flag schieben
+	push af			; Anz. Vorkommastellen und Vorzeichen auf den Stack
 	rrc h
 	jp p,l0f96h
 	res 7,h
-	dec a	
+	dec a			; 1 Vorkommastelle weniger wg. "-"
 l0f96h:
 	or a	
-	jp m,l0f60h
-	ld (l1797h),a
+	jp m,PrR_invalMN	; WRITE-Param. m und n passen nicht -> wiss. Darst.
+	ld (realM0L),a
 	push hl	
 	push de	
-	ld hl,04000h
+	ld hl,04000h		; 0.5 auf den Stack schreiben: Mantisse Teil 1...
 	push hl	
-	ld h,0ffh
+	ld h,0ffh		; ... und Teil 2 sowie Exponent
 	push hl	
-	ld a,(l1798h)
-	call sub_0ef8h
-	call RealDiv__
-	call sub_0ca1h
-	ld (l070eh),hl
-	ld (l179fh),de
-	pop af	
-	ld a,0ffh
+	ld a,(realM0H)
+	call Real10PowA		; (HL,DE) := 10^A
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE); hier: 0.5/10^A
+	call RealAdd		; (HLDE) += (SP+0..3); Zahl kann durch Abschneiden gerundet werden
+	ld (realM2HL),hl
+	ld (realM2DE),de
+	pop af			; Vorzeichen (Carry-Flag) holen
+	ld a,0ffh		; Ausgabezähler mit 1 Vorkommastelle initialisieren
 	push af	
-	ld a,(l1797h)
+	ld a,(realM0L)
 	ld c,a	
-	ld a,(l1798h)
+	ld a,(realM0H)
 	add a,c	
 	dec a	
-	ld (l1798h),a
+	ld (realM0H),a	; A = Anz. signifikanter Stellen
 	ld a,c	
-l0fcah:
+PrR_BefDecPoi:
 	push hl	
 	push de	
-	call sub_0ef8h
-	call RealDiv__
-	call sub_1045h
-	ld a,d	
-	push af	
+	call Real10PowA		; (HL,DE) := 10^A
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call PrR_GetNxtNum
+	ld a,d			; A = D = unt. Haelfte Int-Anteil
+	push af			; Flags sichern
 	cp 00ah
-	jr nc,l0f5fh
-	pop af	
-	jp m,l1038h
+	jr nc,PrR_invalMN2	; Zahl passt nicht in Anz. der Vorkommastellen
+	                        ; -> in wiss. Darst. ausgeben
+	pop af			; Flags von PrR_GetNxtNum wiederherstellen
+	jp m,PrR_FixSingle	; neg. Vorz. und Vorkommazif. ausgeben und Ende
 	or a	
-	jr nz,l0ff7h
-	ld a,(l1797h)
+	jr nz,PrR_FixFirstNum	; erste signifikante Ziffer ausgeben
+	ld a,(realM0L)
 	sub b	
-	jr z,l0ff7h
-	ld d,a	
-	call PrSpace
+	jr z,PrR_FixFirstNum	; einzelne Vorkommanull ausgeben
+	ld d,a			; PrSpace "macht A kaputt" -> in D sichern
+	call PrSpace		; fuehrende Leerzeichen statt 0 ausgeben
 	ld a,d	
 	dec a	
-	ld hl,(l070eh)
-	ld de,(l179fh)
-	jr l0fcah
-l0ff7h:
-	call sub_103dh
-l0ffah:
+	ld hl,(realM2HL)
+	ld de,(realM2DE)
+	jr PrR_BefDecPoi	; naechste Stelle pruefen
+PrR_FixFirstNum:
+	call PrR_FixSgn		; neg. Vorzeichen ausgeben
+PrR_FixNxtNum:
 	ld a,030h
 	add a,d	
 	call OutChr
-	ld a,(l1797h)
+	ld a,(realM0L)
 	cp b	
-	jr nz,l100bh
-	ld a,02eh
+	jr nz,PrR_NotAtDecPoi
+	ld a,02eh		; '.'
 	call OutChr
-l100bh:
-	ld a,d	
-	ld hl,(l17a1h)
-	ld de,(l17a3h)
+PrR_NotAtDecPoi:
+	ld a,d			; A = ausgegebene Ziffer
+	ld hl,(realM3HL)
+	ld de,(realM3DE)
 	neg
-	jr z,l1022h
+	jr z,PrR_Sh10		; 0 ausgegeben -> Rest-Zahl nicht korrigieren
 	push hl	
 	push de	
-	ld l,a	
+	ld l,a			; ausgegebene Ziffer vom Rest der Zahl abziehen
 	ld h,0ffh
-	call sub_0e45h
-	call sub_0ca1h
-l1022h:
-	ld bc,05000h
+	call IntToReal		; (HL,DE)_real := (HL)_int
+	call RealAdd		; (HLDE) += (SP+0..3)
+PrR_Sh10:			; Rest-Zahl um eine Zehnerstelle nach links schieben
+	ld bc,05000h		; 10.0 auf den Stack, Teil 1...
 	push bc	
-	ld b,003h
+	ld b,003h		; ...Teil 2
 	push bc	
-	call RealMul__
-	call sub_1045h
-	jr nc,l0ffah
-l1031h:
+	call RealMul		; (HLDE) *= (SP+0..3); hier: *10
+	call PrR_GetNxtNum
+	jr nc,PrR_FixNxtNum
+PrR_LastNum:			; (Vorkomma-)Ziffer ausgeben und Ende
 	ld a,030h
 	add a,d	
 	pop bc	
 	jp OutChr
-l1038h:
-	call sub_103dh
-	jr l1031h
-sub_103dh:
+PrR_FixSingle:
+	call PrR_FixSgn		; neg. Vorzeichen ausgeben
+	jr PrR_LastNum		; Vorkommaziffer ausgeben
+PrR_FixSgn:			; neg. Vorzeichen ausgeben
 	bit 0,c
 	ret z	
-	ld a,02dh
+	ld a,02dh		; '-'
 	jp OutChr
-sub_1045h:
-	ld (l17a1h),hl
-	ld (l17a3h),de
-	call Trunc__
+PrR_GetNxtNum:			; Erg.: D = unt. Haelfte Integer-Anteil,
+	                        ; hier: meist naechste auszugebende Ziffer
+	                        ; B = Zaehler bereits ausgegebener Stellen
+				; Flags: Vgl. Nkst. mit bereits ausgegeb. Stellen
+	ld (realM3HL),hl
+	ld (realM3DE),de
+	call Trunc		; HL (Int.) := trunc((HL,DE) (Real))
 	ld d,l	
-	pop hl	
+	pop hl			; Return-Adr. beiseite legen
 	pop bc	
 	inc b	
 	push bc	
-	ld a,(l1798h)
+	ld a,(realM0H)
 	cp b	
-	push hl	
+	push hl			; Return-Adr. wiederherstellen
 	ret	
-l105ah:
-	ld hl,realStrPart
+PrR_0E0:
+	ld hl,realStrPart	; Vorkomma-Null ausgeben
 	call OutZStr
-	ld a,(l1798h)
+	ld a,(realM0H)
 	inc a	
 	ld b,a	
-	ld a,030h
-l1067h:
+	ld a,'0';030h
+PrR_FNN:	                ; führende Nachkommanullen
 	call OutChr
-	djnz l1067h
-	jp OutZStr
-l106fh:
-	sub 008h
-	jp p,l1076h
-l1074h:
+	djnz PrR_FNN
+	jp OutZStr		; Exponent E+00 ausgeben
+PrR_EngPar__:
+	sub 008h		; min. Laenge in wiss. Darstellung
+	jp p,PrR_EngChkLen
+PrR_EngDef:			; WRITE REAL default format
+	;; Parameter: DE=(Exp,Mant2), HL=(Sign,Mant1)
 	ld a,004h
-l1076h:
-	ld (l1798h),a
+PrR_EngChkLen:
+	ld (realM0H),a
 	sub 005h
-	jr c,l1083h
+	jr c,PrR_EngChk0
 	inc a	
 	call PrNSpaceA
-	jr l1074h
-l1083h:
-	bit 6,h
-	jr z,l105ah
+	jr PrR_EngDef
+PrR_EngChk0:
+	bit 6,h			; Erkennungsmerkmal für 0
+	jr z,PrR_0E0
 	bit 7,h
-	jr z,l1091h
+	jr z,PrR_Pos
 	res 7,h
-	ld a,02dh
-	jr l1093h
-l1091h:
-	ld a,020h
-l1093h:
+	ld a,'-';02dh		; '-'
+	jr PrR_Sign
+PrR_Pos:
+	ld a,' '
+PrR_Sign:				; Vorzeichen (- oder leer) ausgeben
 	call OutChr
-	ld a,d	
+	;; Umrechnung von Binaer- in Dezimalexponent
+	;; Exp_10 := trunc(Exp_2 * 77 / 256)
+	ld a,d			; D(*) (s.u.)
 	or a	
 	push hl	
 	push de	
-	ld de,0004dh
+	ld de,0004dh		; = 77 dez.
 	ld h,d	
 	ld l,d	
-	jp m,l1138h
-l10a2h:
+	jp m,l1138h		; negativer Exponent
+PrR_E10NxBit:
 	srl a
-	jr nc,l10ach
+	jr nc,PrR_E10NoAdd
 	add hl,de	
-l10a7h:
+PrR_E10Sh:
 	ex de,hl	
 	add hl,hl	
 	ex de,hl	
-	jr l10a2h
-l10ach:
-	jr nz,l10a7h
-	ld a,h	
-	ld (l1797h),a
-	call sub_0ef8h
-	call RealDiv__
-	call sub_0f3ch
+	jr PrR_E10NxBit
+PrR_E10NoAdd:
+	jr nz,PrR_E10Sh		; Ergebnis: HL = D(*) * 77
+	ld a,h			; A = trunc(D(*) * 77 / 256) = Exponent dezimal
+	ld (realM0L),a
+	call Real10PowA		; (HL,DE) := 10^A
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call Div10byHLDE	; (HL,DE) = 10.0 / (HL,DE)
+	;; Zwischenergebnis: (HL,DE) := (HL,DE) / 10^(A-1)
 	push hl	
 	push de	
 l10bdh:
-	ld a,(l1798h)
+	ld a,(realM0H)
 	add a,a	
 	add a,a	
 	ld e,a	
 	ld d,000h
-	ld hl,xxTab1__
+	ld hl,realTab005
 	add hl,de	
 	ld e,(hl)	
 	inc hl	
@@ -2348,8 +2356,8 @@ l10bdh:
 	inc hl	
 	ld h,(hl)	
 	ld l,c	
-	call sub_0ca1h
-	call sub_0f3ch
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call Div10byHLDE	; (HL,DE) = 10.0 / (HL,DE)
 	ld b,d	
 	inc b	
 	inc b	
@@ -2367,49 +2375,49 @@ l10e0h:
 	add a,d	
 	call OutChr
 	ld d,000h
-	ld a,02eh
+	ld a,02eh		; '.'
 	call OutChr
-	ld a,(l1798h)
+	ld a,(realM0H)
 	inc a	
 	ld b,a	
 l10f9h:
 	push bc	
-	call MulBy10_HL_DE
+	call MulBy10_DE_HL	; (DE,HL) *= 10 (32bit unsigned Int)
 	ld a,030h
 	add a,d	
 	call OutChr
 	ld d,000h
 	pop bc	
 	djnz l10f9h
-	ld a,045h
+	ld a,045h		; 'E'
 	call OutChr
-	ld a,(l1797h)
+	ld a,(realM0L)	; Exp_dez holen
 	or a	
-	jp p,l111bh
+	jp p,PrR_ExpPos
 	neg
 	ld c,a	
-	ld a,02dh
-	jr l111eh
-l111bh:
+	ld a,02dh		; '-'
+	jr PrR_PrExpSgn
+PrR_ExpPos:
 	ld c,a	
-	ld a,02bh
-l111eh:
+	ld a,02bh		; '+'
+PrR_PrExpSgn:
 	call OutChr
 	ld a,c	
-	ld b,00ah
-	ld c,030h
-l1126h:
-	sub b	
-	jr c,l112ch
+	ld b,00ah		; 10
+	ld c,030h		; '0', Vorbelegung Zehnerstelle
+PrR_PrE10:
+	sub b			; Exponent dezimal zweistellig?
+	jr c,PrR_PrExpNr
 	inc c	
-	jr l1126h
-l112ch:
+	jr PrR_PrE10
+PrR_PrExpNr:
 	add a,b	
-	add a,030h
+	add a,030h		; +'0', ASCII-Code der Einerstelle
 	ld b,a	
-	ld a,c	
+	ld a,c			; Zehnerstelle
 	call OutChr
-	ld a,b	
+	ld a,b			; Einerstelle
 	jp OutChr
 l1138h:
 	cpl	
@@ -2426,221 +2434,212 @@ l1143h:
 	jr nz,l113eh
 	ld a,h	
 	cpl	
-	ld (l1797h),a
+	ld (realM0L),a
 	neg
-	call sub_0ef8h
-	call RealMul__
+	call Real10PowA		; (HL,DE) := 10^A
+	call RealMul		; (HLDE) *= (SP+0..3)
 	push hl	
 	push de	
 	ld a,d	
 	or a	
 	jp p,l10bdh
-	ld hl,05000h
+	ld hl,05000h		; (HL,DE) = 10.0E0
 	ld de,00300h
-	call RealMul__
+	call RealMul		; (HLDE) *= (SP+0..3)
 	push hl	
 	push de	
-	ld hl,l1797h
+	ld hl,realM0L
 	dec (hl)	
 	jp l10bdh
-xxTab1__:
-
-; BLOCK 'xxTab1__' (start 0x116b end 0x1188)
-xxTab1___start:
-	defb 066h
-	defb 0fbh
-	defb 066h
-	defb 066h
-	defb 085h
-	defb 0f8h
-	defb 0ebh
-	defb 051h
-	defb 036h
-	defb 0f5h
-	defb 085h
-	defb 041h
-	defb 08bh
-	defb 0f1h
-	defb 0dbh
-	defb 068h
-	defb 0d6h
-	defb 0eeh
-	defb 0e2h
-	defb 053h
+realTab005:
+	;; Achtung! Bytefolge: E-D-L-H
+	defw 0fb66h		; 0.05
+	defw 06666h
+	defw 0f885h		; 0.005
+	defw 051ebh
+	defw 0f536h		; 0.0005
+	defw 04185h
+	defw 0f18bh		; 0.00005
+	defw 068dbh
+	defw 0eed6h		; 0.000005
+	defw 053e2h
 realStrPart:
 	defb " 0.",000h
         defb "E+00",000h
-Sqrt__:
+Sqrt:				; Heron-Verfahren
 	ld a,h	
-	or a	
+	or a			; Vorzeichen pruefen
 	jp m,ErrMath
-	ret z	
-	ld (l179bh),de
-	ld (l1799h),hl
-	sra d
-	ld b,004h
-l1199h:
+	ret z			; SQRT(0) = 0
+	ld (realM1DE),de
+	ld (realM1HL),hl
+	sra d			; Startpunkt f Naeherungsverfahren:
+	                        ; wenn Zahl >= 0 dann Zahl/2^(E2/2) sonst Zahl*2^(E2/2)
+	ld b,004h		; 4 Iterationen
+SqrtLoop:
 	push bc	
 	push hl	
 	push de	
-	ld bc,(l1799h)
+	ld bc,(realM1HL)
 	push bc	
-	ld bc,(l179bh)
+	ld bc,(realM1DE)
 	push bc	
-	call RealDiv__
-	call sub_0ca1h
-	dec d	
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	dec d			; (HLDE) /= 2
+	;; Zusammenfassung (N1 = alte Naeherung, N2 = neue, Z = Ausgangswert)
+	;; N2 := (Z/N1 + N1) / 2
 	pop bc	
-	djnz l1199h
+	djnz SqrtLoop
 	ret	
-sub_11b1h:
-	call l0ba7h
-	cp 02dh
-	jr z,l11c1h
-	cp 02bh
+ReadReal:
+	call SkipSpcNL
+	cp 02dh			; '-'?
+	jr z,RdR_Neg
+	cp 02bh			; '+'?
 	call z,JReadEditIBuf__
-	call sub_11cch
+	call RdR_Pos
 	ret	
-l11c1h:
+RdR_Neg:
 	call JReadEditIBuf__
-	call sub_11cch
-	ld a,080h
-	xor h	
+	call RdR_Pos
+	ld a,080h		; neg. Vorzeichen...
+	xor h			; ...einbauen
 	ld h,a	
 	ret	
-sub_11cch:
-	call sub_0b76h
-	cp 02eh
-	jp nz,l1221h
-	call EditIBuf__
+RdR_Pos:
+	call ReadNum		; D = Exp., (E,HL) = Mant.
+	cp 02eh			; '.'
+	jp nz,RdR_ChkExpE	; keine Ziffer und kein Punkt? Vielleicht ein E?
+	call EditIBuf__		; IBuf-Zeiger weiterruecken
 	call JReadEditIBuf__
-	call IsNum
+	call IsNum		; erste Nachkommastelle pruefen
 	jp nc,ErrNumExpected
-	dec b	
-	inc b	
-	ld c,d	
-	jr z,l11fdh
-l11e5h:
+	dec b			; wurde in ReadNum mit 7 initialisiert und...
+	inc b			; mit jeder Ziffer runtergezaehlt
+	ld c,d			; C = bisher ermittelter Exponent
+	jr z,RdR_SkipFrac	; max. Genauigkeit bereits erreicht -> Rest ignor.
+RdR_NxFrac:
 	push bc	
-	call MulBy10_HL_DE
+	call MulBy10_DE_HL	; (DE,HL) *= 10 (32bit unsigned Int)
 	sub 030h
 	ld c,a	
-	ld b,d	
+	ld b,d			; D ist hier noch 0
 	add hl,bc	
-	jr nc,l11f1h
-	inc e	
-l11f1h:
+	jr nc,RdR_KorrExp
+	inc e			; Uebertrag aus HL weitertragen
+RdR_KorrExp:
 	pop bc	
-	dec c	
-	call CurrCharIsNum
-	jr nc,l1207h
+	dec c		        ; Exponent fuer spaetere Rechnung korrigieren
+	call CurrCharIsNum	; Return: A = Zeichen, CY=1 wenn Ziffer
+	jr nc,RdR_FChkExpE
 	call EditIBuf__
-	djnz l11e5h
-l11fdh:
-	call CurrCharIsNum
-	jr nc,l1207h
+	djnz RdR_NxFrac
+RdR_SkipFrac:
+	call CurrCharIsNum	; Return: A = Zeichen, CY=1 wenn Ziffer
+	jr nc,RdR_FChkExpE
 	call EditIBuf__
-	jr l11fdh
-l1207h:
-	ld d,c	
-	cp 045h
-	jr nz,l1225h
-l120ch:
+	jr RdR_SkipFrac
+RdR_FChkExpE:
+	ld d,c			; D = Zwischenstand des Exp.
+	cp 045h			; 'E'?
+	jr nz,RdR_PrepNorm	; nein -> Normalisierung vorbereiten
+RdR_RdExp:
 	push de	
 	call EditIBuf__
 	call JReadEditIBuf__
-	cp 02dh
-	jr nz,l1228h
+	cp 02dh			; '-'?
+	jr nz,RdR_PosExp
 	call JReadEditIBuf__
-	call sub_1290h
-	pop af	
+	call RdR_NumToExp	; Ergebnis in B
+	pop af			; A = bisher berechneter Exponent
 	sub b	
 	jr NumToFloat__
-l1221h:
-	cp 045h
-	jr z,l120ch
-l1225h:
+RdR_ChkExpE:
+	cp 045h			; 'E'?
+	jr z,RdR_RdExp
+RdR_PrepNorm:
 	ld a,d	
 	jr NumToFloat__
-l1228h:
-	cp 02bh
+RdR_PosExp:
+	cp 02bh			; '+'?
 	call z,JReadEditIBuf__
-	call sub_1290h
-	pop af	
+	call RdR_NumToExp	; Ergebnis in B
+	pop af			; A = bisher berechneter Exponent
 	add a,b	
 NumToFloat__:
-	ld d,016h
-	ld c,a	
-	bit 7,e
-	jp nz,l1283h
+	ld d,016h		; Exponent mit 22 vorbelegen (22 Binärstellen)
+	ld c,a			; C = Zwischenstand Exponent
+	bit 7,e			; grosse Zahl
+	jp nz,BinRoundEHL	; --> Bit 23 f. Vorzeichen freimachen
 	xor a	
-	cp e	
+	cp e			; E = 0?
 	jr nz,NToF_CorrExp
-	cp l	
+	cp l			; L = 0?
 	jr nz,NToF_CorrNum
-	cp h	
+	cp h			; H = 0?
 	jr nz,NToF_CorrNum
-	ld d,000h
+	ld d,000h		; (E,HL) = 0 -> 0.0E0 zurueckgeben
 	ret	
 NToF_CorrExp:
-	bit 6,e
+	bit 6,e			; perfekt, keine weitere Normalisierung
 	jr nz,NToF_Convert__
-NToF_CorrNum:
-	add hl,hl	
+NToF_CorrNum:			; Normalisierung:
+	add hl,hl		; 1. (E,HL) nach links schieben
 	rl e
-	dec d	
-	jr NToF_CorrExp
+	dec d			; 2. Exponent korrigieren
+	jr NToF_CorrExp		; 3. nochmal pruefen
 NToF_Convert__:
-	ld b,e	
-	ld e,l	
+	ld b,e			; (E,HL)(eignete sich f. Int) -> ...
+	ld e,l
 	ld l,h	
-	ld h,b	
-	ld a,c	
+	ld h,b			; (HL,E)(Real-Mantisse)	
+	ld a,c			; A = Zwischenstand Exponent
 	or a	
 	ret z	
 	push hl	
 	push de	
-	jp m,l1264h
-	call sub_0ef8h
-	call RealMul__
+	jp m,RdR_CorrNExp
+	call Real10PowA		; (HL,DE) := 10^A
+	call RealMul		; (HLDE) *= (SP+0..3)
 	ret	
-l1264h:
+RdR_CorrNExp:
 	neg
-	cp 020h
-	jr nc,l1271h
-	call sub_0ef8h
-l126dh:
-	call RealDiv__
+	cp 020h			; neg. Exp > 32?
+	jr nc,RdR_CorrBigNExp	; ja -> schrittweise korrigieren
+	call Real10PowA		; (HL,DE) := 10^A
+RdR_CorrSmallEx:
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
 	ret	
-l1271h:
-	sub 020h
-	call sub_0ef8h
-	call RealDiv__
-	push hl	
+RdR_CorrBigNExp:
+	sub 020h		; erstmal mit einem um 32 verringerten Exp. rechnen
+	call Real10PowA		; (HL,DE) := 10^A
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	push hl			; Zwischenergebnis wird naechster Divident
 	push de	
-	ld hl,l4ee2h		; #### muesste falsch sein: kein Label, sondern Zahl ###
-	ld de,06ad4h
-	jr l126dh
-l1283h:
-	inc hl	
-	jr nz,l1287h
-	inc e	
-l1287h:
-	srl e
-	rr h
-	rr l
-	inc d	
+	ld hl,04ee2h		; (HL,DE) = 10^32
+	ld de,06ad4h		; wird naechster Divisor
+	jr RdR_CorrSmallEx
+BinRoundEHL:			; binaeres Runden: +1 und dann :2
+	inc hl			; +1, Teil 1
+	jr nz,BREHL_noHCy
+	inc e			; +1, Teil 2
+BREHL_noHCy:
+	srl e			; :2
+	rr h			; dto.
+	rr l			; dto.
+	inc d			; Exponent korrigieren
 	jr NToF_Convert__
-sub_1290h:
+RdR_NumToExp:			; Exponent lesen, Ergebnis in B
 	call IsNum
-	jr nc,l12b1h
+	jr nc,RdR_ErrExp
 	sub 030h
 	ld b,a	
-	call CurrCharIsNum
-	ret nc	
+	call CurrCharIsNum	; Return: A = Zeichen, CY=1 wenn Ziffer
+	ret nc			; einstelliger Exponent: passt so.
 	call EditIBuf__
 	sub 030h
-	ld c,a	
+	ld c,a			; Wir rechnen: B := 10*B + A
 	ld a,b	
 	add a,a	
 	ld b,a	
@@ -2648,11 +2647,11 @@ sub_1290h:
 	add a,a	
 	add a,b	
 	add a,c	
-	ld b,a	
-	call CurrCharIsNum
-	jp c,l08ebh
+	ld b,a		        ; ...geschafft
+	call CurrCharIsNum	; Return: A = Zeichen, CY=1 wenn Ziffer
+	jp c,PrENumTooBig2	; Exp. darf max. zweistellig sein
 	ret	
-l12b1h:
+RdR_ErrExp:
 	pop bc	
 	pop bc	
 	pop bc	
@@ -2660,70 +2659,70 @@ l12b1h:
 	jp PrErr2
 tExpErw:
 	defb "Exponent erwartet",000h
-Frac__:
+Frac:				; Param. in/out: (HL,DE)
 	ld a,h	
-	or a	
-	ret z	
-	jp m,l12f2h
-sub_12d2h:
-	bit 7,d
-	ret nz	
-	ld b,d	
-	inc b	
-	ld a,e	
-l12d8h:
+	or a			; 0.0E0?
+	ret z			; ja -> nichts weiter zu tun
+	jp m,Frac_Neg
+Frac_Pos:
+	bit 7,d			; Exp. < 0?
+	ret nz			; ja -> nichts weiter zu tun
+	ld b,d			; Exponent als Zaehlvariable
+	inc b			; Korr. f. DJNZ
+	ld a,e			; so laesst sich besser rechnen
+Frac_ShlToExp0:			; links schieben bis der Exponent unter 0 geht
 	add a,a	
 	adc hl,hl
-	djnz l12d8h
-	ld d,0ffh
-	res 7,h
-	ld e,a	
-l12e2h:
-	bit 6,h
-	ret nz	
+	djnz Frac_ShlToExp0
+	ld d,0ffh		; Exponent an neuen Stand anpassen
+	res 7,h			; Vorzeichenbit freimachen
+	ld e,a			; unt. Mantissenbyte wiederherstellen
+Frac_Norm:
+	bit 6,h			; Muss weiter normalisiert werden?
+	ret nz			; nein, Ergebnis gefunden
 	dec d	
 	sla e
 	adc hl,hl
-	jr nz,l12e2h
+	jr nz,Frac_Norm		; Teil 1 der Pruefung auf 0.0
 	inc e	
 	dec e	
-	jr nz,l12e2h
-	ld d,e	
+	jr nz,Frac_Norm		; Teil 2 der Pruefung auf 0.0
+	ld d,e			; Ergebnis: 0.0
 	ret	
-l12f2h:
-	res 7,h
-	call sub_12d2h
-	bit 6,h
-	ret z	
-	set 7,h
+Frac_Neg:			; Definition: FRAC(-n) := 1.0 - FRAC(n)
+	res 7,h			; Vorzeichen drehen
+	call Frac_Pos
+	bit 6,h			; Nachkommaanteil 0
+	ret z			; -> Ergebnis 0.0E0
+	set 7,h			; Vorzeichen zurueckdrehen
 	push hl	
 	push de	
-	ld hl,04000h
+	ld hl,04000h		; (HL,DE) = 1.0
 	ld d,l	
 	ld e,l	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ret	
 Exp__:
 	push hl	
 	push de	
-	ld hl,05c55h
+	ld hl,05c55h		; (HLDE) = ld(e) ~ 1.442695
 	ld de,0001eh
-	call RealMul__
+	call RealMul		; (HLDE) *= (SP+0..3)
 	push hl	
 	push de	
-	call Entier__
-	ld (l1797h),hl
+	call Entier
+	ld (realM0L),hl		; realM0L = L, realM0H = H
 	pop de	
 	pop hl	
-	call Frac__
-	bit 6,h
-	jr z,l1394h
-	call sub_1720h
+	call Frac
+	bit 6,h			; Nachkommaanteil = 0.0?
+	jr z,Exp_Ld1p0		; ja
+	call RealAdd_0p5	; (HLDE) += 0.5
 	exx	
-	or a	
+	or a			; Wo kommt A her?
 	jp m,l138fh
-	jp z,l1398h
-	ld hl,l139fh
+	jp z,Exp_LdSqrt2
+	ld hl,Exp_Tab1
 l1331h:
 	ld b,(hl)	
 	inc hl	
@@ -2732,7 +2731,7 @@ l1331h:
 	ld b,0feh
 	push bc	
 	exx	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	exx	
 	ld c,(hl)	
 	inc hl	
@@ -2762,60 +2761,60 @@ l1331h:
 	push bc	
 	ld bc,004dch
 	push bc	
-	call RealDiv__
-	call sub_0ca1h
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-l1373h:
-	ld a,(l1798h)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+l1373h:				; Pruefung: -128 < Par*ld(e) < 128
+	ld a,(realM0H)
+	or a			; H-Anteil von Par * ld(e)
+	jr z,l1386h		; Par * ld(e) < 128 -> weiter pruefen
+	inc a			; Par * ld(e) > -128?
+	jp nz,ErrOverflow	; nein
+	ld a,(realM0L)		; Prüf. Teil 2 für neg. Par.
 	or a	
-	jr z,l1386h
-	inc a	
-	jp nz,ErrOverflow
-	ld a,(l1797h)
-	or a	
-	jp p,ErrOverflow
+	jp p,ErrOverflow	; Par * ld(e) < -128? dann Fehler
 	ld d,a	
 	ret	
 l1386h:
-	ld a,(l1797h)
+	ld a,(realM0L)
 	or a	
 	jp m,ErrOverflow
 	ld d,a	
 	ret	
 l138fh:
-	ld hl,l13a6h
+	ld hl,Exp_Tab2
 	jr l1331h
-l1394h:
-	ld h,040h
+Exp_Ld1p0:
+	ld h,040h		; (HLDE) = 1.0
 	jr l1373h
-l1398h:
-	ld hl,05a82h
+Exp_LdSqrt2:
+	ld hl,05a82h		; (HLDE) = sqrt(2), aber ohne D
 	ld e,04fh
 	jr l1373h
-l139fh:
-	ret nz	
-	and d	
-	ld l,e	
-	ld a,a	
-	halt	
-	ld (hl),h	
-	adc a,h	
-l13a6h:
-	ld b,b	
-	dec de	
-	ld c,h	
-	rst 30h	
-	ld e,d	
-	ld d,d	
-	ld (de),a	
+Exp_Tab1:
+	ret nz			; C0 (c0 00 fe 00) = -0.25
+	and d			; A2 (6b a2 00 7f) = 1.68179297
+	ld l,e			; 6B
+	ld a,a			; 7F
+	halt			; 76 (74 76 04 8c) = 29.1157684
+	ld (hl),h		; 74
+	adc a,h			; 8C
+Exp_Tab2:
+	ld b,b			; 40 (40 00 fe 00) = 0.25
+	dec de			; 1B (4c 1b 00 f7) = 1.18920684
+	ld c,h			; 4C
+	rst 30h			; F7
+	ld e,d			; 5A (52 5a 04 12) = 20.5879593
+	ld d,d			; 52
+	ld (de),a		; 12
 Ln__:
 	ld a,h	
 	dec a	
 	jp m,ErrMath
 	ld a,d	
-	ld (l1797h),a
+	ld (realM0L),a
 	ld d,000h
 	ld bc,04073h
 	push bc	
@@ -2849,31 +2848,31 @@ Ln__:
 	push bc	
 	ld bc,0fe7ch
 	push bc	
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
 	push hl	
 	push de	
-	ld a,(l1797h)
+	ld a,(realM0L)
 	ld l,a	
 	ld h,000h
 	or a	
 	jp p,l141ch
 	dec h	
 l141ch:
-	call sub_0e45h
+	call IntToReal		; (HL,DE)_real := (HL)_int
 	ld bc,058b9h
 	push bc	
 	ld bc,0ff0ch
 	push bc	
-	call RealMul__
-	call sub_0ca1h
+	call RealMul		; (HLDE) *= (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ret	
 l142eh:
 	ld hl,04000h
@@ -2917,7 +2916,7 @@ l1466h:
 	xor b	
 	cpl	
 	and 080h
-	ld (l1797h),a
+	ld (realM0L),a
 	ld a,d	
 	cp 0feh
 	call z,sub_156ah
@@ -2941,7 +2940,7 @@ l147eh:
 	ld b,0fdh
 	push bc	
 	set 7,h
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 l1494h:
 	ex af,af'	
 	exx	
@@ -2950,11 +2949,11 @@ l1494h:
 	ld de,xxTab__
 	add hl,de	
 	ld a,(hl)	
-	ld (l1798h),a
+	ld (realM0H),a
 	exx	
-	ld (l1799h),de
-	ld (l179bh),hl
-	call RealSqrt__
+	ld (realM1HL),de
+	ld (realM1DE),hl
+	call RealSquare
 	push hl	
 	push de	
 	ld bc,07a3bh
@@ -2969,49 +2968,49 @@ l1494h:
 	push bc	
 	ld bc,000b2h
 	push bc	
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	ld (l17a1h),de
-	ld (l17a3h),hl
-	call RealDiv__
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	ld (realM3HL),de
+	ld (realM3DE),hl
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
 	ld c,h	
 	ld a,h	
 	xor 080h
 	ld h,a	
-	ld (l070eh),de
-	ld (l179fh),hl
+	ld (realM2HL),de
+	ld (realM2DE),hl
 	ld h,c	
 	push hl	
 	push de	
-	ld de,(l17a1h)
-	ld hl,(l17a3h)
-	call sub_0ca1h
-	ld (l17a5h),de
+	ld de,(realM3HL)
+	ld hl,(realM3DE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	ld (realPrGlaen),de
 	ld (l17a7h),hl
-	ld a,(l1798h)
+	ld a,(realM0H)
 	srl a
 	jr c,l1529h
 	or a	
 	jr nz,l1514h
-	ld de,(l1799h)
-	ld hl,(l179bh)
+	ld de,(realM1HL)
+	ld hl,(realM1DE)
 	inc d	
 l150bh:
 	call sub_155dh
 l150eh:
-	ld a,(l1797h)
+	ld a,(realM0L)
 	or h	
 	ld h,a	
 	ret	
 l1514h:
-	ld de,(l17a1h)
-	ld hl,(l17a3h)
+	ld de,(realM3HL)
+	ld hl,(realM3DE)
 	push hl	
 	push de	
-	ld de,(l070eh)
-	ld hl,(l179fh)
-	call sub_0ca1h
+	ld de,(realM2HL)
+	ld hl,(realM2DE)
+	call RealAdd		; (HLDE) += (SP+0..3)
 	jr l150bh
 l1529h:
 	ld hl,05a82h
@@ -3025,8 +3024,8 @@ l1529h:
 l1537h:
 	push hl	
 	push de	
-	ld de,(l070eh)
-	ld hl,(l179fh)
+	ld de,(realM2HL)
+	ld hl,(realM2DE)
 	jr nz,l1546h
 	ld a,h	
 	xor 080h
@@ -3034,20 +3033,20 @@ l1537h:
 l1546h:
 	push hl	
 	push de	
-	ld hl,(l179bh)
-	ld de,(l1799h)
-	call sub_0ca1h
-	call RealMul__
+	ld hl,(realM1DE)
+	ld de,(realM1HL)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealMul		; (HLDE) *= (SP+0..3)
 	call sub_155dh
 l1558h:
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	jr l150eh
 sub_155dh:
 	push hl	
 	push de	
 	ld hl,(l17a7h)
-	ld de,(l17a5h)
-	call RealDiv__
+	ld de,(realPrGlaen)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
 	ret	
 sub_156ah:
 	ld a,e	
@@ -3077,8 +3076,8 @@ sub_1581h:
 	push bc	
 	ld bc,0fdc0h
 	push bc	
-	call RealMul__
-	call Frac__
+	call RealMul		; (HLDE) *= (SP+0..3)
+	call Frac
 	pop af	
 	ex af,af'	
 	ld a,d	
@@ -3109,13 +3108,13 @@ Arctan__:
 	ret z	
 	ld a,h	
 	and 080h
-	ld (l1797h),a
+	ld (realM0L),a
 	res 7,h
 	ld a,d	
 	or a	
 	jp m,l15cdh
 	ld a,002h
-	ld (l1799h),a
+	ld (realM1HL),a
 	exx	
 	ld hl,049e6h
 	ld de,0ff9dh
@@ -3131,11 +3130,11 @@ l15cdh:
 	cp 0f3h
 	jp c,l150eh
 	xor a	
-	ld (l1799h),a
+	ld (realM1HL),a
 	jr l15fdh
 l15dch:
 	ld a,001h
-	ld (l1799h),a
+	ld (realM1HL),a
 	exx	
 	ld hl,06ed9h
 	ld de,000ebh
@@ -3149,9 +3148,9 @@ l15f0h:
 	push hl	
 	push de	
 	exx	
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
 l15fdh:
 	push hl	
 	push de	
@@ -3159,7 +3158,7 @@ l15fdh:
 	push bc	
 	ld b,c	
 	push bc	
-	call RealSqrt__
+	call RealSquare
 	push hl	
 	push de	
 	ld bc,06000h
@@ -3186,16 +3185,16 @@ l15fdh:
 	push bc	
 	ld bc,0fc00h
 	push bc	
-	call RealMul__
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	call RealDiv__
-	ld a,(l1799h)
+	call RealMul		; (HLDE) *= (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	ld a,(realM1HL)
 	or a	
 	jr z,l1666h
 	push hl	
@@ -3214,7 +3213,7 @@ l15fdh:
 	inc hl	
 	ld h,(hl)	
 	ld l,c	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 l1666h:
 	jp l150eh
 xxTab3__:
@@ -3234,20 +3233,20 @@ Tan__:
 	cp 0f8h
 	ret m	
 	ld a,h	
-	ld (l1797h),a
+	ld (realM0L),a
 	res 7,h
 	ld bc,0517ch
 	push bc	
 	ld bc,0fec1h
 	push bc	
-	call RealMul__
-	call Frac__
-	call sub_1720h
-	ld a,(l1797h)
+	call RealMul		; (HLDE) *= (SP+0..3)
+	call Frac
+	call RealAdd_0p5	; (HLDE) += 0.5
+	ld a,(realM0L)
 	xor h	
 	xor 080h
 	and 080h
-	ld (l1797h),a
+	ld (realM0L),a
 	res 7,h
 	ld a,d	
 	add a,003h
@@ -3275,7 +3274,7 @@ l16b7h:
 	ld b,(hl)	
 	push bc	
 	exx	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	push hl	
 	push de	
 	ld bc,04305h
@@ -3290,11 +3289,11 @@ l16b7h:
 	push bc	
 	ld bc,0fe77h
 	push bc	
-	call RealSqrt__
-	call sub_0ca1h
-	call RealDiv__
-	call sub_0ca1h
-	call RealMul__
+	call RealSquare
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealMul		; (HLDE) *= (SP+0..3)
 	exx	
 	sla e
 	sla e
@@ -3320,27 +3319,27 @@ l16b7h:
 	push bc	
 	push de	
 	exx	
-	call sub_0ca1h
-	call RealDiv__
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
 	exx	
 	set 7,b
 	push bc	
 	push de	
 	exx	
 	jp l1558h
-sub_1720h:
+RealAdd_0p5:			; (HLDE) += 0.5
 	ld bc,0c000h
 	push bc	
 	ld b,0ffh
 	push bc	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ret	
 l172bh:
-	call sub_1720h
+	call RealAdd_0p5	; (HLDE) += 0.5
 	res 7,h
 	push hl	
 	push de	
-	call RealSqrt__
+	call RealSquare
 	ld bc,06487h
 	push bc	
 	ld bc,001eeh
@@ -3355,11 +3354,11 @@ l172bh:
 	push bc	
 	ld bc,005f2h
 	push bc	
-	call RealMul__
-	call sub_0ca1h
-	call RealMul__
-	call sub_0ca1h
-	call RealMul__
+	call RealMul		; (HLDE) *= (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealMul		; (HLDE) *= (SP+0..3)
+	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealMul		; (HLDE) *= (SP+0..3)
 	jp l150eh
 l1761h:
 	defs 8
@@ -3367,7 +3366,7 @@ l1769h:
 	defs 32
 retAddr__:
 	defw 00000h
-FreeMem__:				; Hier wird bei Programmstart ein Wert hinterlegt, der bei CloseCompi ausgerechnet wird. (-51-binEndAddr)
+FreeMem__:			; Hier wird bei Programmstart ein Wert hinterlegt, der bei CloseCompi ausgerechnet wird. (-51-binEndAddr)
 	defw 00000h
 rtPar1:				; 4 Worte zur Parameteruebergabe innerhalb der Runtime
 	defw 00000h
@@ -3377,24 +3376,24 @@ rtPar3:
 	defw 00000h
 rtPar4:
 	defw 00000h
-l1795h:
+RandomState:
 	defw 00000h
-l1797h:
+realM0L:
 	defb 000h
-l1798h:
+realM0H:
 	defb 000h
-l1799h:
+realM1HL:
 	defw 00000h
-l179bh:
+realM1DE:
 	defw 00000h
 	defw 00000h
-l179fh:
+realM2DE:
 	defw 00000h
-l17a1h:
+realM3HL:
 	defw 00000h
-l17a3h:
+realM3DE:
 	defw 00000h
-l17a5h:
+realPrGlaen:
 	defw 00000h
 l17a7h:
 	defw 00000h
@@ -3480,15 +3479,15 @@ RL_PI:
 	defb 001h
 	defb 002h
 	defb 000h
-	defb 0ech
-	defb 001h
-	defb 087h
-	defb 064h
+	defb 0ech		; -> Reg. E
+	defb 001h		; -> Reg. D = Exponent 2^1
+	defb 087h		; -> Reg. L
+	defb 064h		; -> Reg. H, bit 7 = 0 = Vorzeichen
 RL_FRAC:
 	defw RL_PI
 	defb "FRA",'C'+0x80
 	defb 00bh
-	defw Frac__
+	defw Frac
 RL_READKBD:
 	defw RL_FRAC
 	defb "READKB",'D'+0x80
@@ -3597,13 +3596,13 @@ RL_INP:
 	defb 009h
 	defb 003h
 	defb 000h
-	defw l52ach
+	defw CSq_Inp
 	defb 002h
 RL_OUT:
 	defw RL_INP
 	defb "OU",'T'+0x80
 	defb 006h
-	defw l5290h
+	defw PrcOut
 RL_SIZE:
 	defw RL_OUT
 	defb "SIZ",'E'+0x80
@@ -3623,14 +3622,14 @@ RL_ENTIER:
 	defw RL_INLINE
 	defb "ENTIE",'R'+0x80
 	defb 00ch
-	defw Entier__
+	defw Entier
 RL_USER:
 	defw RL_ENTIER
 	defb "USE",'R'+0x80
 	defb 008h
 	defb 000h
 	defb 000h
-	defw l52bch
+	defw CSq_User
 	defb 002h
 RL_RANDOM:
 	defw RL_USER
@@ -3638,7 +3637,7 @@ RL_RANDOM:
 	defb 009h
 	defb 001h
 	defb 000h
-	defw l52c5h
+	defw CSq_Random
 	defb 001h
 RL_KEYPRESSED:
 	defw RL_RANDOM
@@ -3646,7 +3645,7 @@ RL_KEYPRESSED:
 	defb 009h
 	defb 004h
 	defb 000h
-	defw l52b2h
+	defw CSq_Keypressed
 	defb 001h
 RL_HALT:
 	defw RL_KEYPRESSED
@@ -3654,7 +3653,7 @@ RL_HALT:
 	defb 008h
 	defb 000h
 	defb 000h
-	defw l52cah
+	defw CSq_Halt
 	defb 001h
 RL_EOLN:
 	defw RL_HALT
@@ -3662,7 +3661,7 @@ RL_EOLN:
 	defb 009h
 	defb 004h
 	defb 000h
-	defw l52d1h
+	defw CSq_Eoln
 	defb 001h
 RL_PAGE:
 	defw RL_EOLN
@@ -3670,23 +3669,23 @@ RL_PAGE:
 	defb 008h
 	defb 000h
 	defb 000h
-	defw l52d6h
+	defw CSq_Page
 	defb 001h
 RL_SQRT:
 	defw RL_PAGE
 	defb "SQR",'T'+0x80
 	defb 00bh
-	defw Sqrt__
+	defw Sqrt
 RL_ROUND:
 	defw RL_SQRT
 	defb "ROUN",'D'+0x80
 	defb 00ch
-	defw Round__
+	defw Round
 RL_TRUNC:
 	defw RL_ROUND
 	defb "TRUN",'C'+0x80
 	defb 00ch
-	defw Trunc__
+	defw Trunc
 RL_MAXINT:
 	defw RL_TRUNC
 	defb "MAXIN",'T'+0x80
@@ -3750,7 +3749,7 @@ RL_CHR:
 	defb 009h
 	defb 003h
 	defb 000h
-	defw l52ceh
+	defw CSq_Chr
 	defb 002h
 RL_ODD:
 	defw RL_CHR
@@ -3758,20 +3757,20 @@ RL_ODD:
 	defb 009h
 	defb 004h
 	defb 000h
-	defw l52c0h
+	defw CSq_Odd
 	defb 002h
 RL_ABS:
 	defw RL_ODD
 	defb "AB",'S'+0x80
 	defb 00dh
-	defw l52e3h
-	defw l52eeh
+	defw CSq_IntAbs
+	defw CSq_RealAbs
 RL_SQR:
 	defw RL_ABS
 	defb "SQ",'R'+0x80
 	defb 00dh
-	defw l52dch
-	defw l52e8h
+	defw CSq_IntSquare
+	defw CSq_RealSquare
 RL_FALSE:
 	defw RL_SQR
 	defb "FALS",'E'+0x80
@@ -4052,7 +4051,7 @@ sub_24abh:
 	ld (iBufCurChrAddr),hl
 	call IsNum
 	jr nc,l24c7h
-	call sub_0b76h
+	call ReadNum
 l24b8h:
 	ld a,d	
 	or e	
@@ -5372,12 +5371,12 @@ GetFloat:
 	ld hl,00000h
 	ld d,h	
 	ld e,l	
-	ld b,007h
+	ld b,007h		; max. Anzahl signifikanter Stellen
 	push bc	
 	jr AddNumToResult
 NextNumPos:
 	push bc	
-	call MulBy10_HL_DE
+	call MulBy10_DE_HL	; (DE,HL) *= 10 (32bit unsigned Int)
 AddNumToResult:
 	sub 030h
 	ld c,a	
@@ -5386,19 +5385,19 @@ AddNumToResult:
 	jr nc,NoNumOverflow
 	inc de	
 NoNumOverflow:
-	call GetCIsNum
-	pop bc	
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
+	pop bc			; Anzahl restlicher Stellen
 	dec b	
-	jr nc,ChkDecPt
-	jr nz,NextNumPos
+	jr nc,ChkDecPt		; CY stammt von GetCIsNum
+	jr nz,NextNumPos	; Z stammt von dec b
 TooManyDigits:
-	inc d	
-	call GetCIsNum
+	inc d		        ; nur noch Exponent (Basis 10) hochzählen
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
 	jr c,TooManyDigits
 ChkDecPt:
 	cp 02eh			; "."?
 	jr nz,ChkExponent	; nein, dann noch auf Exponent testen
-	call GetCIsNum		; CY=1 wenn Ziffer
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
 	jr nc,l2cech		; keine Ziffer --> ???
 	dec b	
 	inc b	
@@ -5406,7 +5405,7 @@ ChkDecPt:
 	jr z,TooManyFractDigits
 NextFractPos:
 	push bc	
-	call MulBy10_HL_DE
+	call MulBy10_DE_HL	; (DE,HL) *= 10 (32bit unsigned Int)
 	sub 030h
 AddFractToResult:
 	ld c,a	
@@ -5417,11 +5416,11 @@ AddFractToResult:
 NoFractOverflow:
 	pop bc	
 	dec c	
-	call GetCIsNum
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
 	jr nc,ChkExpF
 	djnz NextFractPos
 TooManyFractDigits:
-	call GetCIsNum
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
 	jr c,TooManyFractDigits
 ChkExpF:
 	ld d,c	
@@ -5444,7 +5443,7 @@ FractEnds:
 PosExp:
 	cp 02bh			; "+"?
 	call z,GetSrcChr
-	call Get2C_Dec
+	call Get2C_Dec		; return: B = gelesener Exponent
 	pop af	
 	add a,b	
 GetFloatEnds:
@@ -5458,7 +5457,7 @@ Get2C_Dec:
 	jr nc,l2d83h
 	sub 030h
 	ld b,a	
-	call GetCIsNum
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
 	jr nc,OneDigit
 	sub 030h
 	ld c,a	
@@ -5470,7 +5469,7 @@ Get2C_Dec:
 	add a,b	
 	add a,c	
 	ld b,a	
-	call GetCIsNum
+	call GetCIsNum		; Return: A = Zeichen, CY=1 wenn Ziffer
 	jp c,CoErNumTooBigA
 OneDigit:
 	ld (lastChrRead__),a
@@ -5624,7 +5623,7 @@ l2ea7h:
 	ld hl,TOk
 	call OutZStr
 	call GetKey
-	cp 04ah
+	cp 04ah			; 'J'?
 	jp nz,Reset
 	ld hl,PasPrgStart
 	ld (l0710h),hl
@@ -5763,7 +5762,7 @@ IsNum_ToNum:
 	ret c	
 	sub 030h
 	ret	
-GetCIsNum:			; Return: CY=1 wenn Ziffer
+GetCIsNum:			; Return: A = Zeichen, CY=1 wenn Ziffer
 	call GetSrcChr
 	jp IsNum
 LxSrcEnd__:
@@ -6545,7 +6544,7 @@ PCVIdent:
 	jr z,PCVConstId
 	cp 008h			; oder eine Fnc?
 	jr nz,PCValErr		; nein?
-	ld hl,l52ceh		; doch! War es CHR?
+	ld hl,CSq_Chr		; doch! War es CHR?
 	sbc hl,de
 	jr nz,PCValErr		; andere Fnc als CHR sind bei CONST-Def. nicht erlaubt
 	call NextChkOpBra_GetLex
@@ -6896,7 +6895,7 @@ l3652h:
 	ld a,080h
 	xor h	
 	ld h,a	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ld a,080h
 	and h	
 	rlca	
@@ -6913,7 +6912,7 @@ l365fh:
 l366ah:
 	ex (sp),hl	
 	push bc	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ld a,080h
 	and h	
 	rlca	
@@ -6931,7 +6930,7 @@ l367fh:
 	ex (sp),hl	
 l3680h:
 	defb 0c5h
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ld a,080h
 	and h	
 	rlca	
@@ -6942,7 +6941,7 @@ l368bh:
 	ld a,080h
 	xor h	
 	ld h,a	
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	ld a,080h
 	and h	
 	rlca	
@@ -7276,7 +7275,7 @@ l38a9h:
 	ld (hl),b	
 l38b4h:
 	dec bc	
-	ld de,(l1798h)
+	ld de,(realM0H)
 	ld hl,00000h
 	add hl,sp	
 	ldir
@@ -8023,7 +8022,7 @@ l3d57h:
 	jp GetLexem
 CoWRITELN:
 	call GetLexem
-	cp 0a8h
+	cp 0a8h			; "("?
 	jr nz,WrlnNoParam
 	call GetLexem
 	call CoWRITE2
@@ -8046,17 +8045,17 @@ CoWRITE2:
 	dec c	
 	jp z,l3dd6h
 l3d9ah:
-	ld e,013h
+	ld e,013h		; Error: "Dieser Ausdrucktyp kann nicht geschrieben werden."
 	call CompileErr
-	jr l3dedh
+	jr CoWrNxPar
 l3da1h:
 	cp 0bah			; Lexem-Code für ":"?
 	ld hl,CSq_PrInt
-	jr nz,l3dc9h
+	jr nz,CoWr_WPar
 	call sub_3f0dh
 	ld hl,CSq_l3e48h
 	cp 0bah			; Lexem-Code für ":"?
-	jr nz,l3dc9h
+	jr nz,CoWr_WPar
 	call GetLexem
 	or a	
 	ld e,043h
@@ -8066,19 +8065,19 @@ l3da1h:
 	call nz,CompileErr
 	call GetLexem
 	ld hl,CSq_l3e4eh
-l3dc9h:
+CoWr_WPar:
 	call WCodeOverLastByte
-	jr l3dedh
+	jr CoWrNxPar
 l3dceh:
 	ld de,CSq_l3e6ch
 	ld hl,CSq_l3e73h
 	jr l3ddch
 l3dd6h:
 	ld de,CSq_l3e5eh
-	ld hl,CSq_l3e68h
+	ld hl,CSq_PrBool
 l3ddch:
 	cp 0bah			; Lexem-Code für ":"?
-	jr nz,l3dc9h
+	jr nz,CoWr_WPar
 	push hl	
 	push de	
 	call sub_3f0dh
@@ -8087,8 +8086,8 @@ l3ddch:
 	pop hl	
 l3deah:
 	call WCode
-l3dedh:
-	cp 0ach
+CoWrNxPar:
+	cp 0ach			; ','?
 	jp nz,ChkCloBra_GetLex
 	call GetLexem
 	jr CoWRITE2
@@ -8097,15 +8096,15 @@ l3df7h:
 	jr nz,l3e0dh
 	call sub_3f0dh
 	cp 0bah			; Lexem-Code für ":"?
-	ld hl,CSq_l3e77h
-	jr nz,l3dc9h
+	ld hl,CSq_PrR_EngPar
+	jr nz,CoWr_WPar
 	call sub_3f0dh
-	ld hl,CSq_l3e82h
-	jr l3dc9h
+	ld hl,CSq_PrR_Fix
+	jr CoWr_WPar
 l3e0dh:
-	ld hl,CSq_l3e7eh
+	ld hl,CSq_PrR_EngDef
 	call l33beh
-	jr l3dedh
+	jr CoWrNxPar
 l3e15h:
 	dec b	
 	dec b	
@@ -8162,7 +8161,7 @@ CSq_l3e5eh:
 	sub b	
 	call PrFillSpc
 	pop af	
-CSq_l3e68h:
+CSq_PrBool:
 	defb 003h
 	call PrBool
 CSq_l3e6ch:
@@ -8173,19 +8172,19 @@ CSq_l3e6ch:
 CSq_l3e73h:
 	defb 003h
 	call OutChr
-CSq_l3e77h:
+CSq_PrR_EngPar:
 	defb 006h
-	ld a,l	
+	ld a,l			; WRITE-Param. m: Gesamtlaenge
 	pop de	
 	pop hl	
-	call l106fh
-CSq_l3e7eh:
+	call PrR_EngPar__
+CSq_PrR_EngDef:
 	defb 003h
-	call l1074h
-CSq_l3e82h:
+	call PrR_EngDef
+CSq_PrR_Fix:
 	defb 004h
 	pop de	
-	call sub_0f6eh
+	call PrR_Fix__
 sub_3e87h:
 	or a	
 	ld e,01ah
@@ -8211,7 +8210,7 @@ l3e98h:
 	dec a	
 	jr z,l3eceh
 l3each:
-	ld e,01dh
+	ld e,01dh		; Error: "Dieser Variablentyp kann nicht gelesen werden"
 	call CompileErr
 l3eb1h:
 	pop hl	
@@ -8225,15 +8224,15 @@ sub_3ebch:
 	call GetLexem
 	jr l3e98h
 l3ec1h:
-	ld hl,CSq_l3ef9h
+	ld hl,CSq_ReadInt
 l3ec4h:
 	call WCode
 	jr l3eb1h
 l3ec9h:
-	ld hl,l3f07h
+	ld hl,CSq_ReadReal
 	jr l3ec4h
 l3eceh:
-	ld hl,l3efeh
+	ld hl,CSq_l3efeh
 	jr l3ec4h
 l3ed3h:
 	dec b	
@@ -8257,20 +8256,20 @@ l3eefh:
 CSq_l3ef5h:
 	defb 003h
 	call l0aa2h
-CSq_l3ef9h:
+CSq_ReadInt:
 	defb 004h
-	call sub_0bb3h
+	call ReadInt
 	push hl	
-l3efeh:
-	inc b	
+CSq_l3efeh:
+	defb 0004h
 	call JReadEditIBuf__
 	push af	
 CSq_l3f03h:
 	defb 003h
 	call l0bd4h
-l3f07h:
-	dec b	
-	call sub_11b1h
+CSq_ReadReal:
+	defb 005h
+	call ReadReal
 	push hl	
 	push de	
 sub_3f0dh:
@@ -8310,7 +8309,7 @@ sub_3f31h:
 sub_3f3fh:
 	res 0,(ix+001h)
 l3f43h:
-	call ParseSimEx2
+	call ParseSimEx
 	cp 020h
 	jp z,l3febh
 	cp 077h
@@ -8322,7 +8321,7 @@ l3f43h:
 	ld h,000h
 	push hl	
 	push bc	
-	call PasrseSimEx1
+	call GtLx_ParSimEx
 	ld e,a	
 	ld a,b	
 	or a	
@@ -8340,7 +8339,7 @@ l3f43h:
 	exx	
 	bit 0,c
 	jr z,l3f78h
-	ld hl,CSq_l4184h
+	ld hl,CSq_IntToReal
 	call WCodeOverLastByte
 l3f78h:
 	ld bc,TabCSq-000beh
@@ -8423,7 +8422,7 @@ l3ff7h:
 	ld hl,CSq_l4026h
 	call WCode
 	push bc	
-	call PasrseSimEx1
+	call GtLx_ParSimEx
 	pop de	
 	call ChkType
 	ld hl,CSq_l402ah
@@ -8449,10 +8448,10 @@ l4022h:
 	ret	
 CSq_l4026h:
 	defb 003h
-	ld (l1798h),a
+	ld (realM0H),a
 CSq_l402ah:
 	defb 00ch
-	ld a,(l1798h)
+	ld a,(realM0H)
 	call sub_0be9h
 	and (hl)	
 	neg
@@ -8492,17 +8491,17 @@ FoundMinus__:
 	ld hl,l4150h
 	call l33beh
 	jr l4089h
-PasrseSimEx1:
+GtLx_ParSimEx:
 	call GetLexem
-ParseSimEx2:
-	cp 0adh
+ParseSimEx:
+	cp 0adh			; '-'?
 	jp z,FoundMinus__
-	cp 0abh
-	jr nz,l4086h
+	cp 0abh			; '+'?
+	jr nz,PSE_ChkTerm
 	call GetTerm
 	call PCVChkNum
 	jr l4089h
-l4086h:
+PSE_ChkTerm:
 	call ChkTerm
 l4089h:
 	cp 0abh
@@ -8649,20 +8648,20 @@ CSq_l4173h:
 	ld h,a	
 CSq_l4178h:
 	defb 005h
-	call sub_0e45h
+	call IntToReal		; (HL,DE)_real := (HL)_int
 	push hl	
 	push de	
 CSq_l417eh:
 	defb 005h
 	ex (sp),hl	
 	push de	
-	call sub_0e45h
-CSq_l4184h:
+	call IntToReal		; (HL,DE)_real := (HL)_int
+CSq_IntToReal:
 	defb 003h
-	call sub_0e45h
+	call IntToReal		; (HL,DE)_real := (HL)_int
 CSq_l4188h:
 	defb 005h
-	call sub_0ca1h
+	call RealAdd		; (HLDE) += (SP+0..3)
 	push hl	
 	push de	
 sub_418eh:
@@ -8726,13 +8725,13 @@ ChkTerm:
 ChkTermOp:
 	cp 0aah
 	jr z,l424ah
-	cp 002h
+	cp 002h			; 'DIV'?
 	jr z,l41fch
-	cp 009h
+	cp 009h			; 'MOD'?
 	jr z,l41fch
 	cp 0afh
 	jr z,l422bh
-	cp 008h
+	cp 008h			; 'AND'?
 	ret nz	
 	call ChkTypeBool
 	call GetFactor
@@ -8774,7 +8773,7 @@ l422bh:
 l423ch:
 	call GetFactor
 	call PCVChkNum
-	ld hl,l42f1h
+	ld hl,CSq_RealDiv
 	call l33beh
 	jr ChkTermOp
 l424ah:
@@ -8797,7 +8796,7 @@ l424ah:
 	ld hl,CSq_l417eh
 	call WCode
 l426bh:
-	ld hl,CSq_l42f7h
+	ld hl,CSq_RealMul
 	call WCode
 l4271h:
 	jp ChkTermOp
@@ -8887,14 +8886,14 @@ CSq_l42edh:
 	pop bc	
 	and b	
 	push af	
-l42f1h:
+CSq_RealDiv:
 	dec b	
-	call RealDiv__
+	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
 	push hl	
 	push de	
-CSq_l42f7h:
+CSq_RealMul:
 	defb 005h
-	call RealMul__
+	call RealMul		; (HLDE) *= (SP+0..3)
 	push hl	
 	push de	
 l42fdh:
@@ -9496,10 +9495,10 @@ CSq_PrepCaPrc_NoLVar__:
 	inc sp	
 CSq_SaveHL:
 	defb 003h
-	ld (l1798h),hl
+	ld (realM0H),hl
 CSq_RestHL:
 	defb 003h
-	ld hl,(l1798h)
+	ld hl,(realM0H)
 sub_46bfh:
 	call ChkScalar
 	inc b	
@@ -10788,7 +10787,6 @@ l4ed8h:
 	cp 002h
 	jp z,l4f74h
 	call GetLexem
-l4ee2h:
 	ld c,(hl)	
 	inc hl	
 	ld b,(hl)	
@@ -11381,77 +11379,77 @@ l5287h:
 	ld bc,00001h
 	call ChkCloBra_GetLex
 	jp l45a0h
-l5290h:
+PrcOut:
 	call NextChkOpBra_GetLex
 	call sub_3f10h
 	call ChkComma_GetLex
 	ld bc,00003h
 	call sub_3f13h
 	call ChkCloBra_GetLex
-	ld hl,CSq_l52a8h
+	ld hl,CSq_Out
 	jp WCodeOverLastByte
-CSq_l52a8h:
+CSq_Out:
 	defb 003h
 	pop bc	
 	out (c),a
-l52ach:
-	dec b	
+CSq_Inp:
+	defb 05h
 	ld c,l	
-l52aeh:
 	ld b,h	
 	in a,(c)
 	push af	
-l52b2h:
-	add hl,bc	
+CSq_Keypressed:
+	defb 09h
 	call KbdStat
 	or a	
-	jr z,l52bbh
+	jr z,KeyprFalse
 	ld a,001h
-l52bbh:
+KeyprFalse:
 	push af	
-l52bch:
-	inc bc	
+CSq_User:
+	defb 03h
 	call jp_hl
-l52c0h:
-	inc b	
+CSq_Odd:
+	defb 04h
 	ld a,l	
 	and 001h
 	push af	
-l52c5h:
-	inc b	
-	call sub_0e8fh
+CSq_Random:
+	defb 04h
+	call Random
 	push hl	
-l52cah:
-	inc bc	
+CSq_Halt:
+	defb 03h
 	call PrHalt
-l52ceh:
-	ld (bc),a	
+CSq_Chr:
+	defb 02h
 	ld a,l	
 	push af	
-l52d1h:
-	inc b	
+CSq_Eoln:
+	defb 04h
 	call IsEOL
 	push af	
-l52d6h:
-	dec b	
+CSq_Page:
+	defb 05h
 	ld a,00ch
 	call OutChr
-l52dch:
-	ld b,05dh
+CSq_IntSquare:
+	defb 06h
+	ld e,l
 	ld d,h	
 	call Mul16x8sgn
 	push hl	
-l52e3h:
-	inc b	
+CSq_IntAbs:
+	defb 04h	
 	call AbsHL
 	push hl	
-l52e8h:
-	dec b	
-	call RealSqrt__
+CSq_RealSquare:
+	defb 05h
+	call RealSquare
 	push hl	
 	push de	
-l52eeh:
-	inc b	
+CSq_RealAbs:
+	defb 04h
 	res 7,h
 	push hl	
 	push de	
