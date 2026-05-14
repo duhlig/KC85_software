@@ -2703,37 +2703,45 @@ Frac_Neg:			; Definition: FRAC(-n) := 1.0 - FRAC(n)
 	call RealAdd		; (HLDE) += (SP+0..3)
 	ret	
 Exp__:
+	;; Naeherung nach einer abgewandelten Pade-Form
 	push hl	
-	push de	
-	ld hl,05c55h		; (HLDE) = ld(e) ~ 1.442695
+	push de
+	;; Rueckfuehrung von e^x auf 2^z: z=x/ln(2)=x*ld(e)
+	ld hl,05c55h		; (HLDE) = ld(e) = 1/ln(2) ~ 1.442695
 	ld de,0001eh
 	call RealMul		; (HLDE) *= (SP+0..3)
 	push hl	
-	push de	
+	push de
+	;; k=Entier(z) fuer spaetere Verschiebung des Ergebnisses
 	call Entier
 	ld (realM0L),hl		; realM0L = L, realM0H = H
 	pop de	
-	pop hl	
-	call Frac
+	pop hl
+	;; r=z-Entier(z) zur naeherungsweisen Berechnung
+	call Frac		; Param. in/out: (HL,DE)
 	bit 6,h			; Nachkommaanteil = 0.0?
-	jr z,Exp_Ld1p0		; ja
-	call RealAdd_0p5	; (HLDE) += 0.5
+	jr z,Exp_Ld1p0		; ja -> keine Naeherung noetig, nur Verschiebung von 1
+	;; Die Naeherung hat eine Stuetzstelle bei 0.25, deshalb Verschiebung
+	;; q=r-0.5
+	call RealSub_0p5	; (HLDE) -= 0.5
 	exx	
-	or a			; Wo kommt A her?
-	jp m,l138fh
-	jp z,Exp_LdSqrt2
+	or a			; A = H (also Vorz. und 0-Erkennung)
+	jp m,Exp_LdTab2
+	jp z,Exp_LdSqrt2	; Sonderfall ohne Naeherung: 2^0.5 direkt eintragen
 	ld hl,Exp_Tab1
-l1331h:
-	ld b,(hl)	
+Exp_Frac:
+	;; 2^0.25*E + A*E / (B/(q+D) + C + (q+D))
+	;; wenn q>0, dann E=2^0.5, sonst E=1
+	ld b,(hl)		; Koeff. D: (1) -0.25 // (2) 0.25
 	inc hl	
 	ld c,000h
 	push bc	
 	ld b,0feh
 	push bc	
 	exx	
-	call RealAdd		; (HLDE) += (SP+0..3)
+	call RealAdd		; q+D: (HLDE) += (SP+0..3)
 	exx	
-	ld c,(hl)	
+	ld c,(hl)		; 2^0.25*E: (1) 2^0.75 // (2) 2^0.25
 	inc hl	
 	ld b,(hl)	
 	inc hl	
@@ -2742,7 +2750,7 @@ l1331h:
 	inc hl	
 	ld b,000h
 	push bc	
-	ld c,(hl)	
+	ld c,(hl)		; Koeff. A*E: (1) 29.12 // (2) 20.59
 	inc hl	
 	ld b,(hl)	
 	inc hl	
@@ -2751,64 +2759,64 @@ l1331h:
 	ld b,004h
 	push bc	
 	exx	
-	push hl	
+	push hl			; q+D
 	push de	
-	ld bc,0c53fh
+	ld bc,0c53fh		; Koeff. C: -8.65617 ~ 6/ln(2)
 	push bc	
 	ld bc,003d6h
 	push bc	
-	ld bc,063e7h
+	ld bc,063e7h		; Koeff. B: 24.87389 !~ 12/(ln(2))^2 = 24.97643
 	push bc	
 	ld bc,004dch
 	push bc	
-	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
-	call RealAdd		; (HLDE) += (SP+0..3)
-	call RealAdd		; (HLDE) += (SP+0..3)
-	call RealDiv		; (HLDE) := (SP+0..3)/(HLDE)
-	call RealAdd		; (HLDE) += (SP+0..3)
-l1373h:				; Pruefung: -128 < Par*ld(e) < 128
+	call RealDiv		; B/(q+D): (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; +C: (HLDE) += (SP+0..3)
+	call RealAdd		; +(q+D): (HLDE) += (SP+0..3)
+	call RealDiv		; (A*E)/...: (HLDE) := (SP+0..3)/(HLDE)
+	call RealAdd		; 2^0.25*E: (HLDE) += (SP+0..3)
+Exp_ChkRes1:			; Pruefung: -128 < Par*ld(e) < 128
 	ld a,(realM0H)
 	or a			; H-Anteil von Par * ld(e)
-	jr z,l1386h		; Par * ld(e) < 128 -> weiter pruefen
+	jr z,Exp_ChkRes2	; Par * ld(e) < 128 -> weiter pruefen
 	inc a			; Par * ld(e) > -128?
 	jp nz,ErrOverflow	; nein
-	ld a,(realM0L)		; Prüf. Teil 2 für neg. Par.
+	ld a,(realM0L)		; Pruef. Teil 2 für neg. Par.
 	or a	
 	jp p,ErrOverflow	; Par * ld(e) < -128? dann Fehler
 	ld d,a	
 	ret	
-l1386h:
+Exp_ChkRes2:
 	ld a,(realM0L)
 	or a	
 	jp m,ErrOverflow
 	ld d,a	
 	ret	
-l138fh:
+Exp_LdTab2:
 	ld hl,Exp_Tab2
-	jr l1331h
+	jr Exp_Frac
 Exp_Ld1p0:
 	ld h,040h		; (HLDE) = 1.0
-	jr l1373h
+	jr Exp_ChkRes1
 Exp_LdSqrt2:
 	ld hl,05a82h		; (HLDE) = sqrt(2), aber ohne D
 	ld e,04fh
-	jr l1373h
-Exp_Tab1:
-	ret nz			; C0 (c0 00 fe 00) = -0.25
-	and d			; A2 (6b a2 00 7f) = 1.68179297
-	ld l,e			; 6B
-	ld a,a			; 7F
-	halt			; 76 (74 76 04 8c) = 29.1157684
-	ld (hl),h		; 74
-	adc a,h			; 8C
-Exp_Tab2:
-	ld b,b			; 40 (40 00 fe 00) = 0.25
-	dec de			; 1B (4c 1b 00 f7) = 1.18920684
-	ld c,h			; 4C
-	rst 30h			; F7
-	ld e,d			; 5A (52 5a 04 12) = 20.5879593
-	ld d,d			; 52
-	ld (de),a		; 12
+	jr Exp_ChkRes1
+Exp_Tab1:	  		; Koeff. E = 2^0.25
+	defb 0C0h		; (c0 00 fe 00) = -0.25
+	defb 0A2h		; (6b a2 00 7f) = 1.681793 ~ 2^0.75 = 2^0.25 * E
+	defb 06Bh
+	defb 07Fh
+	defb 076h		; (74 76 04 8c) = 29.1157684 ~ E * A (s.u.)
+	defb 074h
+	defb 08Ch
+Exp_Tab2:			; Koeff. E = 1
+	defb 040h		; (40 00 fe 00) = 0.25
+	defb 01Bh		; (4c 1b 00 f7) = 1.189207 ~ 2^0.25
+	defb 04Ch
+	defb 0F7h
+	defb 05Ah		; (52 5a 04 12) = 20.5879593 ~ 2^0.25 * 12/ln(2) // Koeff. A
+	defb 052h
+	defb 012h
 Ln__:
 	ld a,h	
 	dec a	
@@ -3241,7 +3249,7 @@ Tan__:
 	push bc	
 	call RealMul		; (HLDE) *= (SP+0..3)
 	call Frac
-	call RealAdd_0p5	; (HLDE) += 0.5
+	call RealSub_0p5	; (HLDE) -= 0.5
 	ld a,(realM0L)
 	xor h	
 	xor 080h
@@ -3327,7 +3335,7 @@ l16b7h:
 	push de	
 	exx	
 	jp l1558h
-RealAdd_0p5:			; (HLDE) += 0.5
+RealSub_0p5:			; (HLDE) -= 0.5 und wahrsch. A = H (also Vorz. und 0-Erkennung)
 	ld bc,0c000h
 	push bc	
 	ld b,0ffh
@@ -3335,7 +3343,7 @@ RealAdd_0p5:			; (HLDE) += 0.5
 	call RealAdd		; (HLDE) += (SP+0..3)
 	ret	
 l172bh:
-	call RealAdd_0p5	; (HLDE) += 0.5
+	call RealSub_0p5	; (HLDE) -= 0.5
 	res 7,h
 	push hl	
 	push de	
